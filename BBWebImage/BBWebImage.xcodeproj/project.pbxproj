@@ -10,6 +10,14 @@
 		4A53310A21657DC500C68080 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A53310021657DC500C68080 /* BBWebImage.framework */; };
 		4A53310F21657DC500C68080 /* BBWebImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53310E21657DC500C68080 /* BBWebImageTests.swift */; };
 		4A53311121657DC500C68080 /* BBWebImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A53310321657DC500C68080 /* BBWebImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4A5331492165828300C68080 /* BBWebImageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331482165828300C68080 /* BBWebImageManager.swift */; };
+		4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331482165828300C68080 /* BBWebImageManager.swift */; };
+		4A53315021658F9F00C68080 /* BBImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53314F21658F9F00C68080 /* BBImageCache.swift */; };
+		4A53315121658F9F00C68080 /* BBImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53314F21658F9F00C68080 /* BBImageCache.swift */; };
+		4A5331532165902A00C68080 /* BBImageDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331522165902A00C68080 /* BBImageDownloader.swift */; };
+		4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331522165902A00C68080 /* BBImageDownloader.swift */; };
+		4A5331572165943100C68080 /* BBImageDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331562165943100C68080 /* BBImageDownloadOperation.swift */; };
+		4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331562165943100C68080 /* BBImageDownloadOperation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +37,10 @@
 		4A53310921657DC500C68080 /* BBWebImageTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BBWebImageTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A53310E21657DC500C68080 /* BBWebImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageTests.swift; sourceTree = "<group>"; };
 		4A53311021657DC500C68080 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A5331482165828300C68080 /* BBWebImageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageManager.swift; sourceTree = "<group>"; };
+		4A53314F21658F9F00C68080 /* BBImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCache.swift; sourceTree = "<group>"; };
+		4A5331522165902A00C68080 /* BBImageDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloader.swift; sourceTree = "<group>"; };
+		4A5331562165943100C68080 /* BBImageDownloadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloadOperation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +83,7 @@
 		4A53310221657DC500C68080 /* BBWebImage */ = {
 			isa = PBXGroup;
 			children = (
+				4A5331412165820E00C68080 /* Core */,
 				4A53310321657DC500C68080 /* BBWebImage.h */,
 				4A53310421657DC500C68080 /* Info.plist */,
 			);
@@ -84,6 +97,17 @@
 				4A53311021657DC500C68080 /* Info.plist */,
 			);
 			path = BBWebImageTests;
+			sourceTree = "<group>";
+		};
+		4A5331412165820E00C68080 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4A5331482165828300C68080 /* BBWebImageManager.swift */,
+				4A53314F21658F9F00C68080 /* BBImageCache.swift */,
+				4A5331522165902A00C68080 /* BBImageDownloader.swift */,
+				4A5331562165943100C68080 /* BBImageDownloadOperation.swift */,
+			);
+			path = Core;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -148,6 +172,7 @@
 				TargetAttributes = {
 					4A5330FF21657DC500C68080 = {
 						CreatedOnToolsVersion = 10.0;
+						LastSwiftMigration = 1000;
 					};
 					4A53310821657DC500C68080 = {
 						CreatedOnToolsVersion = 10.0;
@@ -194,6 +219,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A5331532165902A00C68080 /* BBImageDownloader.swift in Sources */,
+				4A5331572165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
+				4A53315021658F9F00C68080 /* BBImageCache.swift in Sources */,
+				4A5331492165828300C68080 /* BBWebImageManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +230,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */,
+				4A53315121658F9F00C68080 /* BBImageCache.swift in Sources */,
+				4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */,
+				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4A53310F21657DC500C68080 /* BBWebImageTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -341,6 +374,7 @@
 		4A53311521657DC500C68080 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -357,6 +391,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = Kaibo.BBWebImage;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -365,6 +400,7 @@
 		4A53311621657DC500C68080 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -389,6 +425,7 @@
 		4A53311821657DC500C68080 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = BBWebImageTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -406,6 +443,7 @@
 		4A53311921657DC500C68080 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = BBWebImageTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

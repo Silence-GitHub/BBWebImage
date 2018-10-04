@@ -12,6 +12,7 @@
 		4A53312C21657ECD00C68080 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312A21657ECD00C68080 /* Main.storyboard */; };
 		4A53312E21657ECE00C68080 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312D21657ECE00C68080 /* Assets.xcassets */; };
 		4A53313121657ECE00C68080 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312F21657ECE00C68080 /* LaunchScreen.storyboard */; };
+		4A53314D216584E900C68080 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A53314C216584E900C68080 /* BBWebImage.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		4A53312D21657ECE00C68080 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A53313021657ECE00C68080 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4A53313221657ECE00C68080 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A53314C216584E900C68080 /* BBWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BBWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A53314D216584E900C68080 /* BBWebImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +43,7 @@
 			children = (
 				4A53312521657ECD00C68080 /* BBWebImageDemo */,
 				4A53312421657ECD00C68080 /* Products */,
+				4A53314B216584E900C68080 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +66,14 @@
 				4A53313221657ECE00C68080 /* Info.plist */,
 			);
 			path = BBWebImageDemo;
+			sourceTree = "<group>";
+		};
+		4A53314B216584E900C68080 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4A53314C216584E900C68080 /* BBWebImage.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
