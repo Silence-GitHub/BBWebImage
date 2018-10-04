@@ -18,6 +18,8 @@
 		4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331522165902A00C68080 /* BBImageDownloader.swift */; };
 		4A5331572165943100C68080 /* BBImageDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331562165943100C68080 /* BBImageDownloadOperation.swift */; };
 		4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5331562165943100C68080 /* BBImageDownloadOperation.swift */; };
+		4A53315B2165BC8500C68080 /* BBImageCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53315A2165BC8500C68080 /* BBImageCoder.swift */; };
+		4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53315A2165BC8500C68080 /* BBImageCoder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +43,7 @@
 		4A53314F21658F9F00C68080 /* BBImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCache.swift; sourceTree = "<group>"; };
 		4A5331522165902A00C68080 /* BBImageDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloader.swift; sourceTree = "<group>"; };
 		4A5331562165943100C68080 /* BBImageDownloadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloadOperation.swift; sourceTree = "<group>"; };
+		4A53315A2165BC8500C68080 /* BBImageCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCoder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +109,7 @@
 				4A53314F21658F9F00C68080 /* BBImageCache.swift */,
 				4A5331522165902A00C68080 /* BBImageDownloader.swift */,
 				4A5331562165943100C68080 /* BBImageDownloadOperation.swift */,
+				4A53315A2165BC8500C68080 /* BBImageCoder.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -220,6 +224,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A5331532165902A00C68080 /* BBImageDownloader.swift in Sources */,
+				4A53315B2165BC8500C68080 /* BBImageCoder.swift in Sources */,
 				4A5331572165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4A53315021658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A5331492165828300C68080 /* BBWebImageManager.swift in Sources */,
@@ -235,6 +240,7 @@
 				4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */,
 				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4A53310F21657DC500C68080 /* BBWebImageTests.swift in Sources */,
+				4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
