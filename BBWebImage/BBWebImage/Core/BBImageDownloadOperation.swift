@@ -20,29 +20,95 @@ class BBMergeRequestImageDownloadOperation: Operation {
     private let request: URLRequest
     private let session: URLSession
     private var tasks: [BBImageDownloadTask]
-    private let lock: DispatchSemaphore
+    private var dataTask: URLSessionTask?
+    private let taskLock: DispatchSemaphore
+    private let stateLock: DispatchSemaphore
     private var imageData: Data?
+    
+    private var _executing: Bool
+    override var isExecuting: Bool {
+        get { return _executing }
+        set {
+            self.willChangeValue(forKey: "isExecuting")
+            _executing = newValue
+            self.willChangeValue(forKey: "isExecuting")
+        }
+    }
+    
+    private var _finished: Bool
+    override var isFinished: Bool {
+        get { return _finished }
+        set {
+            self.willChangeValue(forKey: "isFinished")
+            _finished = newValue
+            self.didChangeValue(forKey: "isFinished")
+        }
+    }
+    
+    override var isAsynchronous: Bool { return true }
     
     required init(request: URLRequest, session: URLSession) {
         self.request = request
         self.session = session
         tasks = []
-        lock = DispatchSemaphore(value: 1)
+        taskLock = DispatchSemaphore(value: 1)
+        stateLock = DispatchSemaphore(value: 1)
+        _executing = false
+        _finished = false
+    }
+    
+    override func start() {
+        stateLock.wait()
+        if isCancelled {
+            stateLock.signal()
+            // Completion call back will not be called when task is canceled
+            return
+        }
+        dataTask = session.dataTask(with: request)
+        isExecuting = true
+        stateLock.signal()
+        
+        if let currentDataTask = dataTask {
+            currentDataTask.resume()
+        } else {
+            complete(withData: nil, error: NSError(domain: NSURLErrorDomain, code: NSURLErrorUnknown, userInfo: [NSLocalizedDescriptionKey : "Data task can not be initialized"]))
+            stateLock.wait()
+            done()
+            stateLock.signal()
+        }
+    }
+    
+    override func cancel() {
+        stateLock.wait()
+        defer { stateLock.signal() }
+        if isFinished { return }
+        super.cancel()
+        dataTask?.cancel()
+        done()
+    }
+    
+    private func done() {
+        taskLock.wait()
+        tasks.removeAll()
+        taskLock.signal()
+        dataTask = nil
+        if _executing { isExecuting = false }
+        if !_finished { isFinished = true }
     }
 }
 
 extension BBMergeRequestImageDownloadOperation: BBImageDownloadOperation {
     var taskCount: Int {
-        lock.wait()
+        taskLock.wait()
         let count = tasks.count
-        lock.signal()
+        taskLock.signal()
         return count
     }
     
     func add(task: BBImageDownloadTask) {
-        lock.wait()
+        taskLock.wait()
         tasks.append(task)
-        lock.signal()
+        taskLock.signal()
     }
 }
 
@@ -61,10 +127,10 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
     }
     
     private func complete(withData data: Data?, error: Error?) {
-        lock.wait()
+        taskLock.wait()
         let currentTasks = tasks
         tasks.removeAll()
-        lock.signal()
+        taskLock.signal()
         for task in currentTasks {
             task.completion(data, error)
         }
