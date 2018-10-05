@@ -8,6 +8,8 @@
 
 import UIKit
 
+let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
+
 public class BBWebImageManager {
 
 }

@@ -45,13 +45,16 @@ class BBImageDefaultDownloadTask: BBImageDownloadTask {
     func cancel() { cancelled = false }
 }
 
-class BBMergeRequestImageDownloader: BBImageDownloader {
+class BBMergeRequestImageDownloader {
     var donwloadTimeout: TimeInterval
     private var urlOperations: [URL : BBMergeRequestImageDownloadOperation]
     private let operationLock: DispatchSemaphore
     private let downloadQueue: OperationQueue
-    private let sessionDelegate: BBImageDownloadSessionDelegate
-    private let session: URLSession
+    private let sessionConfiguration: URLSessionConfiguration
+    private lazy var sessionDelegate: BBImageDownloadSessionDelegate = { BBImageDownloadSessionDelegate(downloader: self) }()
+    private lazy var session: URLSession = {
+        URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil) // TODO: Create session delegate queue
+    }()
     
     init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
@@ -59,10 +62,18 @@ class BBMergeRequestImageDownloader: BBImageDownloader {
         operationLock = DispatchSemaphore(value: 1)
         downloadQueue = OperationQueue() // TODO: Set download queue qualityOfService
         downloadQueue.maxConcurrentOperationCount = 6
-        sessionDelegate = BBImageDownloadSessionDelegate()
-        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil) // TODO: Create session delegate queue
+        self.sessionConfiguration = sessionConfiguration
     }
     
+    func operation(for url: URL) -> BBMergeRequestImageDownloadOperation? {
+        operationLock.wait()
+        let operation = urlOperations[url]
+        operationLock.signal()
+        return operation
+    }
+}
+
+extension BBMergeRequestImageDownloader: BBImageDownloader {
     // Donwload
     func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
@@ -116,6 +127,26 @@ class BBMergeRequestImageDownloader: BBImageDownloader {
     }
 }
 
-class BBImageDownloadSessionDelegate: NSObject, URLSessionDelegate {
+class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
+    private weak var downloader: BBMergeRequestImageDownloader?
     
+    init(downloader: BBMergeRequestImageDownloader) {
+        self.downloader = downloader
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let url = task.originalRequest?.url,
+            let operation = downloader?.operation(for: url) {
+            operation.urlSession(session, task: task, didCompleteWithError: error)
+        }
+    }
+}
+
+extension BBImageDownloadSessionDelegate: URLSessionDataDelegate {
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        if let url = dataTask.originalRequest?.url,
+            let operation = downloader?.operation(for: url) {
+            operation.urlSession(session, dataTask: dataTask, didReceive: data)
+        }
+    }
 }
