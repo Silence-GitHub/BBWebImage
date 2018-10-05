@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol BBImageDownloadOperation {
+public protocol BBImageDownloadOperation {
     var taskCount: Int { get }
     
     init(request: URLRequest, session: URLSession)
@@ -61,7 +61,7 @@ class BBMergeRequestImageDownloadOperation: Operation {
         stateLock.wait()
         if isCancelled {
             stateLock.signal()
-            // Completion call back will not be called when task is canceled
+            // Completion call back will not be called when task is cancelled
             return
         }
         dataTask = session.dataTask(with: request)

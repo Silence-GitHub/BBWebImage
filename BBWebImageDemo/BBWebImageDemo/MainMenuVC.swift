@@ -23,12 +23,14 @@ class MainMenuVC: UIViewController {
         list = [("Test", test)]
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: UITableViewCell.description())
+        tableView.dataSource = self
+        tableView.delegate = self
     }
 }
 
 extension MainMenuVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return list.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -38,3 +40,9 @@ extension MainMenuVC: UITableViewDataSource {
     }
 }
 
+extension MainMenuVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        list[indexPath.row].1()
+    }
+}

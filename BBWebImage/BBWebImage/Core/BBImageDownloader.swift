@@ -75,6 +75,7 @@ public class BBMergeRequestImageDownloader {
 
 extension BBMergeRequestImageDownloader: BBImageDownloader {
     // Donwload
+    @discardableResult
     public func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
         operationLock.wait()
