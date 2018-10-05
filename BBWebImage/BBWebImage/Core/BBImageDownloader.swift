@@ -8,9 +8,9 @@
 
 import UIKit
 
-typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
+public typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
 
-protocol BBImageDownloadTask {
+public protocol BBImageDownloadTask {
     var url: URL { get }
     var isCancelled: Bool { get }
     var completion: BBImageDownloaderCompletion { get }
@@ -18,7 +18,7 @@ protocol BBImageDownloadTask {
     func cancel()
 }
 
-protocol BBImageDownloader {
+public protocol BBImageDownloader {
     // Donwload
     func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
@@ -28,25 +28,25 @@ protocol BBImageDownloader {
     func cancelAll()
 }
 
-class BBImageDefaultDownloadTask: BBImageDownloadTask {
-    var imageUrl: URL
-    var url: URL { return imageUrl }
-    var cancelled: Bool
-    var isCancelled: Bool { return cancelled }
-    var completionHandler: BBImageDownloaderCompletion
-    var completion: BBImageDownloaderCompletion { return completionHandler }
+private class BBImageDefaultDownloadTask: BBImageDownloadTask {
+    private var _url: URL
+    var url: URL { return _url }
+    private var _cancelled: Bool
+    var isCancelled: Bool { return _cancelled }
+    private var _completion: BBImageDownloaderCompletion
+    var completion: BBImageDownloaderCompletion { return _completion }
     
     init(url: URL, completion: @escaping BBImageDownloaderCompletion) {
-        imageUrl = url
-        cancelled = false
-        completionHandler = completion
+        _url = url
+        _cancelled = false
+        _completion = completion
     }
     
-    func cancel() { cancelled = false }
+    func cancel() { _cancelled = false }
 }
 
-class BBMergeRequestImageDownloader {
-    var donwloadTimeout: TimeInterval
+public class BBMergeRequestImageDownloader {
+    public var donwloadTimeout: TimeInterval
     private var urlOperations: [URL : BBMergeRequestImageDownloadOperation]
     private let operationLock: DispatchSemaphore
     private let downloadQueue: OperationQueue
@@ -56,7 +56,7 @@ class BBMergeRequestImageDownloader {
         URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil) // TODO: Create session delegate queue
     }()
     
-    init(sessionConfiguration: URLSessionConfiguration) {
+    public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
         urlOperations = [:]
         operationLock = DispatchSemaphore(value: 1)
@@ -65,7 +65,7 @@ class BBMergeRequestImageDownloader {
         self.sessionConfiguration = sessionConfiguration
     }
     
-    func operation(for url: URL) -> BBMergeRequestImageDownloadOperation? {
+    fileprivate func operation(for url: URL) -> BBMergeRequestImageDownloadOperation? {
         operationLock.wait()
         let operation = urlOperations[url]
         operationLock.signal()
@@ -75,7 +75,7 @@ class BBMergeRequestImageDownloader {
 
 extension BBMergeRequestImageDownloader: BBImageDownloader {
     // Donwload
-    func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
+    public func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
         operationLock.wait()
         var operation: BBMergeRequestImageDownloadOperation? = urlOperations[url]
@@ -98,7 +98,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
     }
     
     // Cancel
-    func cancel(task: BBImageDownloadTask) {
+    public func cancel(task: BBImageDownloadTask) {
         operationLock.wait()
         task.cancel()
         if let operation = urlOperations[task.url] {
@@ -110,7 +110,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         operationLock.signal()
     }
     
-    func cancel(url: URL) {
+    public func cancel(url: URL) {
         operationLock.wait()
         if let operation = urlOperations[url] {
             operation.cancel()
@@ -119,7 +119,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         operationLock.signal()
     }
     
-    func cancelAll() {
+    public func cancelAll() {
         operationLock.wait()
         downloadQueue.cancelAllOperations()
         urlOperations.removeAll()
@@ -127,7 +127,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
     }
 }
 
-class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
+private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
     private weak var downloader: BBMergeRequestImageDownloader?
     
     init(downloader: BBMergeRequestImageDownloader) {

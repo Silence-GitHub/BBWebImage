@@ -8,25 +8,29 @@
 
 import UIKit
 
-struct BBImageCacheType: OptionSet {
-    let rawValue: Int
+public struct BBImageCacheType: OptionSet {
+    public let rawValue: Int
     
-    static let none = BBImageCacheType(rawValue: 1 << 0)
-    static let memory = BBImageCacheType(rawValue: 1 << 1)
-    static let disk = BBImageCacheType(rawValue: 1 << 2)
+    public static let none = BBImageCacheType(rawValue: 1 << 0)
+    public static let memory = BBImageCacheType(rawValue: 1 << 1)
+    public static let disk = BBImageCacheType(rawValue: 1 << 2)
     
-    static let all: BBImageCacheType = [.memory, .disk]
+    public static let all: BBImageCacheType = [.memory, .disk]
     
-    var cached: Bool {
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+    
+    public var cached: Bool {
         return (self.rawValue & BBImageCacheType.memory.rawValue) != 0 || (self.rawValue & BBImageCacheType.disk.rawValue) != 0
     }
 }
 
-typealias BBImageCacheQueryCompletion = (UIImage?, BBImageCacheType) -> Void
-typealias BBImageCacheStoreCompletion = () -> Void
-typealias BBImageCacheRemoveCompletion = () -> Void
+public typealias BBImageCacheQueryCompletion = (UIImage?, BBImageCacheType) -> Void
+public typealias BBImageCacheStoreCompletion = () -> Void
+public typealias BBImageCacheRemoveCompletion = () -> Void
 
-protocol BBImageCache {
+public protocol BBImageCache {
     // Get image
     func image(forKey key: String, completion: @escaping BBImageCacheQueryCompletion)
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)
@@ -40,7 +44,7 @@ protocol BBImageCache {
     func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
 }
 
-extension BBImageCache {
+public extension BBImageCache {
     // Get image
     func image(forKey key: String, completion: @escaping BBImageCacheQueryCompletion) {
         self.image(forKey: key, cacheType: .all, completion: completion)
@@ -57,21 +61,21 @@ extension BBImageCache {
     }
 }
 
-class BBLRUImageCache: BBImageCache {
+public class BBLRUImageCache: BBImageCache {
     // Get image
-    func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion) {
+    public func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion) {
         #warning ("Get image")
         completion(nil, .none)
     }
     
     // Store image
-    func store(_ image: UIImage, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
+    public func store(_ image: UIImage, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
         #warning ("Store image")
         if let completion = completion { completion() }
     }
     
     // Remove image
-    func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?) {
+    public func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?) {
         #warning ("Remove image")
         if let completion = completion { completion() }
     }
