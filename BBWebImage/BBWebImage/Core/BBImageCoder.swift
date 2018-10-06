@@ -8,10 +8,44 @@
 
 import UIKit
 
-protocol BBImageCoder {
-    
+public protocol BBImageCoder {
+    func canDecode(imageData: Data) -> Bool
+    func decode(imageData: Data) -> UIImage?
 }
 
-class BBImageCoderManager: BBImageCoder {
+public class BBImageCoderManager {
+    public var coders: [BBImageCoder] {
+        willSet { coderLock.wait() }
+        didSet { coderLock.signal() }
+    }
+    private let coderLock: DispatchSemaphore
+    
+    init() {
+        coders = []
+        coderLock = DispatchSemaphore(value: 1)
+    }
+}
 
+extension BBImageCoderManager: BBImageCoder {
+    public func canDecode(imageData: Data) -> Bool {
+        coderLock.wait()
+        let currentCoders = coders
+        coderLock.signal()
+        for coder in currentCoders {
+            if coder.canDecode(imageData: imageData) { return true }
+        }
+        return false
+    }
+    
+    public func decode(imageData: Data) -> UIImage? {
+        coderLock.wait()
+        let currentCoders = coders
+        coderLock.signal()
+        for coder in currentCoders {
+            if coder.canDecode(imageData: imageData) {
+                return coder.decode(imageData: imageData)
+            }
+        }
+        return nil
+    }
 }
