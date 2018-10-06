@@ -16,12 +16,11 @@ class TestVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        donwloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
         let url = URL(string: "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/origin/1.jpg")!
-        donwloader.downloadImage(with: url) { (data: Data?, error: Error?) in
+        BBWebImageManager.shared.loadImage(with: url) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             print("Completion")
-            if let currentData = data {
-                print("Data count: \(currentData.count)")
+            if let currentImage = image {
+                print("Image: \(currentImage)")
             } else if let currentError = error {
                 print("Error: \(currentError)")
             }
