@@ -21,7 +21,7 @@ public class BBImageCoderManager {
     private let coderLock: DispatchSemaphore
     
     init() {
-        coders = []
+        coders = [BBWebImageImageIOCoder()]
         coderLock = DispatchSemaphore(value: 1)
     }
 }
@@ -41,10 +41,8 @@ extension BBImageCoderManager: BBImageCoder {
         coderLock.wait()
         let currentCoders = coders
         coderLock.signal()
-        for coder in currentCoders {
-            if coder.canDecode(imageData: imageData) {
-                return coder.decode(imageData: imageData)
-            }
+        for coder in currentCoders where coder.canDecode(imageData: imageData) {
+            return coder.decode(imageData: imageData)
         }
         return nil
     }
