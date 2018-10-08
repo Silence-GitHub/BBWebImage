@@ -124,6 +124,9 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
                 complete(withData: nil, error: noDataError)
             }
         }
+        stateLock.wait()
+        done()
+        stateLock.signal()
     }
     
     private func complete(withData data: Data?, error: Error?) {
