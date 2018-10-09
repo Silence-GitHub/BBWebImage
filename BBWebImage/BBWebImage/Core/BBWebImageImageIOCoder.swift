@@ -22,6 +22,7 @@ public class BBWebImageImageIOCoder: BBImageCoder {
     public func decode(imageData: Data) -> UIImage? {
         let image = UIImage(data: imageData)
         image?.bb_imageFormat = imageData.bb_imageFormat
+        image?.bb_originalImageData = imageData
         return image
     }
 }
