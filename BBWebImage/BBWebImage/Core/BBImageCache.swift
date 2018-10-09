@@ -26,7 +26,13 @@ public struct BBImageCacheType: OptionSet {
     }
 }
 
-public typealias BBImageCacheQueryCompletion = (UIImage?, BBImageCacheType) -> Void
+public enum BBImageCachQueryCompletionResult {
+    case none
+    case memory(image: UIImage)
+    case disk(data: Data)
+}
+
+public typealias BBImageCacheQueryCompletion = (BBImageCachQueryCompletionResult) -> Void
 public typealias BBImageCacheStoreCompletion = () -> Void
 public typealias BBImageCacheRemoveCompletion = () -> Void
 
@@ -65,7 +71,7 @@ public class BBLRUImageCache: BBImageCache {
     // Get image
     public func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion) {
         #warning ("Get image")
-        completion(nil, .none)
+        completion(.none)
     }
     
     // Store image
