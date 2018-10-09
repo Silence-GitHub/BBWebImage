@@ -29,20 +29,17 @@ public protocol BBImageDownloader {
 }
 
 private class BBImageDefaultDownloadTask: BBImageDownloadTask {
-    private var _url: URL
-    var url: URL { return _url }
-    private var _cancelled: Bool
-    var isCancelled: Bool { return _cancelled }
-    private var _completion: BBImageDownloaderCompletion
-    var completion: BBImageDownloaderCompletion { return _completion }
+    private(set) var url: URL
+    private(set) var isCancelled: Bool
+    private(set) var completion: BBImageDownloaderCompletion
     
     init(url: URL, completion: @escaping BBImageDownloaderCompletion) {
-        _url = url
-        _cancelled = false
-        _completion = completion
+        self.url = url
+        self.isCancelled = false
+        self.completion = completion
     }
     
-    func cancel() { _cancelled = false }
+    func cancel() { isCancelled = true }
 }
 
 public class BBMergeRequestImageDownloader {
