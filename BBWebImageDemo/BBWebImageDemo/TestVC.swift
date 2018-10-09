@@ -22,7 +22,18 @@ class TestVC: UIViewController {
         view.addSubview(imageView)
         
         let url = URL(string: "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/origin/1.jpg")!
-        BBWebImageManager.shared.loadImage(with: url) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
+        let editor = BBWebImageEditor(key: "Crop", edit: { (image: UIImage?, data: Data?) in
+            if let currentData = data,
+                let currentImage = UIImage(data: currentData) {
+                UIGraphicsBeginImageContext(CGSize(width: 100, height: 300))
+                currentImage.draw(at: .zero)
+                let editedImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                return editedImage
+            }
+            return nil
+        })
+        BBWebImageManager.shared.loadImage(with: url, editor: editor) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             print("Completion")
             if let currentImage = image {
                 print("Image: \(currentImage)")

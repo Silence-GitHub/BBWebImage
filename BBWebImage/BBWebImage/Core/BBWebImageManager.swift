@@ -12,8 +12,13 @@ public let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
 public typealias BBWebImageManagerCompletion = (UIImage?, Error?, BBImageCacheType) -> Void
 
 public struct BBWebImageEditor {
-    var key: String
-    var edit: (UIImage?, Data?) -> UIImage?
+    public var key: String
+    public var edit: (UIImage?, Data?) -> UIImage?
+    
+    public init(key: String, edit: @escaping (UIImage?, Data?) -> UIImage?) {
+        self.key = key
+        self.edit = edit
+    }
 }
 
 public class BBWebImageLoadTask {
