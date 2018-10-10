@@ -28,6 +28,10 @@
 		4A87E915216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */; };
 		4A87E917216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */; };
 		4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */; };
+		4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */; };
+		4AF3D1E9216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */; };
+		4AF3D1EB216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */; };
+		4AF3D1EC216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +60,8 @@
 		4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageImageIOCoder.swift; sourceTree = "<group>"; };
 		4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ImageFormat.swift"; sourceTree = "<group>"; };
 		4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
+		4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+WebCache.swift"; sourceTree = "<group>"; };
+		4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+WebCacheOperation.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,8 +138,10 @@
 			isa = PBXGroup;
 			children = (
 				4A87E907216BE4430073E53C /* Data+ImageFormat.swift */,
-				4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */,
 				4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */,
+				4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */,
+				4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */,
+				4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -247,8 +255,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
 				4A5331532165902A00C68080 /* BBImageDownloader.swift in Sources */,
 				4A53315B2165BC8500C68080 /* BBImageCoder.swift in Sources */,
+				4AF3D1EB216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */,
 				4A87E911216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
 				4A87E908216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
 				4A87E914216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */,
@@ -263,10 +273,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AF3D1EC216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */,
 				4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */,
 				4A53315121658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */,
 				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
+				4AF3D1E9216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
 				4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,
 				4A87E912216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
 				4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */,

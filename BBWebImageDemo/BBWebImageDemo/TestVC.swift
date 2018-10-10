@@ -16,6 +16,8 @@ class TestVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        view.backgroundColor = UIColor.lightGray
+        
         let imageView = UIImageView(frame: CGRect(x: 10, y: 100, width: view.frame.width - 20, height: view.frame.height - 200))
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -33,11 +35,10 @@ class TestVC: UIViewController {
             }
             return nil
         })
-        BBWebImageManager.shared.loadImage(with: url, editor: editor) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
+        imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             print("Completion")
             if let currentImage = image {
                 print("Image: \(currentImage)")
-                imageView.image = image
                 if let imageFormat = currentImage.bb_imageFormat {
                     print("Image format: \(imageFormat)")
                 } else {
