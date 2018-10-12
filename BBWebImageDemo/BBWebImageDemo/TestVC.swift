@@ -24,7 +24,12 @@ class TestVC: UIViewController {
         view.addSubview(imageView)
         
         let url = URL(string: "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/origin/1.jpg")!
-        let editor = BBWebImageEditor.editor(with: imageView.frame.size, contentMode: imageView.contentMode, corner: UIRectCorner(rawValue: 0), borderWidth: 0, borderColor: nil)
+        let editor = BBWebImageEditor.editorForScaleAspectFillContentMode(with: imageView.frame.size,
+                                                                          corner: [.topLeft, .bottomRight],
+                                                                          cornerRadius: 10,
+                                                                          borderWidth: 2,
+                                                                          borderColor: UIColor.yellow,
+                                                                          backgroundColor: UIColor.blue)
         imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             print("Completion")
             if let currentImage = image {
