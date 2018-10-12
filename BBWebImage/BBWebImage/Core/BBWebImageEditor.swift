@@ -53,66 +53,85 @@ public struct BBWebImageEditor {
                 context.fill(CGRect(x: 0, y: 0, width: width, height: height))
             }
             if cornerRadius > 0 && corner.isSubset(of: .allCorners) {
-                context.scaleBy(x: 1, y: -1)
-                context.translateBy(x: 0, y: CGFloat(-height))
-                
                 let topLeft = corner.isSuperset(of: .topLeft)
                 let topRight = corner.isSuperset(of: .topRight)
                 let bottomLeft = corner.isSuperset(of: .bottomLeft)
                 let bottomRight = corner.isSuperset(of: .bottomRight)
-                let path = UIBezierPath()
-                path.lineWidth = borderWidth
-                if topLeft {
-                    path.move(to: CGPoint(x: 0, y: cornerRadius))
-                    path.addArc(withCenter: CGPoint(x: cornerRadius, y: cornerRadius),
-                                radius: cornerRadius,
-                                startAngle: CGFloat.pi,
-                                endAngle: CGFloat.pi * 3 / 2,
-                                clockwise: true)
+                
+                func borderPath() -> UIBezierPath {
+                    let path = UIBezierPath()
+                    if topLeft {
+                        path.move(to: CGPoint(x: 0, y: cornerRadius))
+                        path.addArc(withCenter: CGPoint(x: cornerRadius, y: cornerRadius),
+                                    radius: cornerRadius,
+                                    startAngle: CGFloat.pi,
+                                    endAngle: CGFloat.pi * 3 / 2,
+                                    clockwise: true)
+                    }
+                    if topRight {
+                        path.addLine(to: CGPoint(x: CGFloat(width) - cornerRadius, y: 0))
+                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - cornerRadius, y: cornerRadius),
+                                    radius: cornerRadius,
+                                    startAngle: CGFloat.pi * 3 / 2,
+                                    endAngle: 0,
+                                    clockwise: true)
+                    } else {
+                        path.addLine(to: CGPoint(x: width, y: 0))
+                    }
+                    if bottomRight {
+                        path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height) - cornerRadius))
+                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - cornerRadius, y: CGFloat(height) - cornerRadius),
+                                    radius: cornerRadius,
+                                    startAngle: 0,
+                                    endAngle: CGFloat.pi / 2,
+                                    clockwise: true)
+                    } else {
+                        path.addLine(to: CGPoint(x: width, y: height))
+                    }
+                    if bottomLeft {
+                        path.addLine(to: CGPoint(x: cornerRadius, y: CGFloat(height)))
+                        path.addArc(withCenter: CGPoint(x: cornerRadius, y: CGFloat(height) - cornerRadius),
+                                    radius: cornerRadius,
+                                    startAngle: CGFloat.pi / 2,
+                                    endAngle: CGFloat.pi,
+                                    clockwise: true)
+                    } else {
+                        path.addLine(to: CGPoint(x: 0, y: height))
+                    }
+                    path.close()
+                    return path
                 }
-                if topRight {
-                    path.addLine(to: CGPoint(x: CGFloat(width) - cornerRadius, y: 0))
-                    path.addArc(withCenter: CGPoint(x: CGFloat(width) - cornerRadius, y: cornerRadius),
-                                radius: cornerRadius,
-                                startAngle: CGFloat.pi * 3 / 2,
-                                endAngle: 0,
-                                clockwise: true)
-                } else {
-                    path.addLine(to: CGPoint(x: width, y: 0))
-                }
-                if bottomRight {
-                    path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height) - cornerRadius))
-                    path.addArc(withCenter: CGPoint(x: CGFloat(width) - cornerRadius, y: CGFloat(height) - cornerRadius),
-                                radius: cornerRadius,
-                                startAngle: 0,
-                                endAngle: CGFloat.pi / 2,
-                                clockwise: true)
-                } else {
-                    path.addLine(to: CGPoint(x: width, y: height))
-                }
-                if bottomLeft {
-                    path.addLine(to: CGPoint(x: cornerRadius, y: CGFloat(height)))
-                    path.addArc(withCenter: CGPoint(x: cornerRadius, y: CGFloat(height) - cornerRadius),
-                                radius: cornerRadius,
-                                startAngle: CGFloat.pi / 2,
-                                endAngle: CGFloat.pi,
-                                clockwise: true)
-                } else {
-                    path.addLine(to: CGPoint(x: 0, y: height))
-                }
-                path.close()
-                borderColor?.setStroke()
-                context.addPath(path.cgPath)
-                if borderWidth > 0 { path.stroke() }
+                
+                context.scaleBy(x: 1, y: -1)
+                context.translateBy(x: 0, y: CGFloat(-height))
+                context.saveGState()
+                
+                let clipPath = borderPath()
+                context.addPath(clipPath.cgPath)
                 context.clip()
                 
                 context.scaleBy(x: 1, y: -1)
                 context.translateBy(x: 0, y: CGFloat(-height))
+                context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                context.restoreGState()
+                
+                if let strokeColor = borderColor?.cgColor,
+                    borderWidth > 0 {
+                    let strokePath = borderPath()
+                    context.addPath(strokePath.cgPath)
+                    context.setLineWidth(borderWidth)
+                    context.setStrokeColor(strokeColor)
+                    context.strokePath()
+                }
+            } else {
+                context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
             }
-            context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
             return context.makeImage().flatMap { UIImage(cgImage: $0) }
         }
-        let key = ""
+        let cornerKey = corner.intersection([.topLeft, .topRight, .bottomLeft, .bottomRight]).rawValue
+        let borderColorKey = borderColor?.cgColor.components ?? []
+        let backgroundColorKey = backgroundColor?.cgColor.components ?? []
+        let key = "size=\(displaySize),corner=\(cornerKey),cornerRadius=\(cornerRadius),borderWidth=\(borderWidth),borderColor=\(borderColorKey),backgroundColor=\(backgroundColorKey)"
         return BBWebImageEditor(key: key, edit: edit)
     }
 }
