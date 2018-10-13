@@ -58,20 +58,22 @@ public struct BBWebImageEditor {
                 let bottomLeft = corner.isSuperset(of: .bottomLeft)
                 let bottomRight = corner.isSuperset(of: .bottomRight)
                 
+                let ratio = CGFloat(souceImage.width) / displaySize.width
+                let currentCornerRadius = cornerRadius * ratio
                 func borderPath() -> UIBezierPath {
                     let path = UIBezierPath()
                     if topLeft {
-                        path.move(to: CGPoint(x: 0, y: cornerRadius))
-                        path.addArc(withCenter: CGPoint(x: cornerRadius, y: cornerRadius),
-                                    radius: cornerRadius,
+                        path.move(to: CGPoint(x: 0, y: currentCornerRadius))
+                        path.addArc(withCenter: CGPoint(x: currentCornerRadius, y: currentCornerRadius),
+                                    radius: currentCornerRadius,
                                     startAngle: CGFloat.pi,
                                     endAngle: CGFloat.pi * 3 / 2,
                                     clockwise: true)
                     }
                     if topRight {
-                        path.addLine(to: CGPoint(x: CGFloat(width) - cornerRadius, y: 0))
-                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - cornerRadius, y: cornerRadius),
-                                    radius: cornerRadius,
+                        path.addLine(to: CGPoint(x: CGFloat(width) - currentCornerRadius, y: 0))
+                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - currentCornerRadius, y: currentCornerRadius),
+                                    radius: currentCornerRadius,
                                     startAngle: CGFloat.pi * 3 / 2,
                                     endAngle: 0,
                                     clockwise: true)
@@ -79,9 +81,9 @@ public struct BBWebImageEditor {
                         path.addLine(to: CGPoint(x: width, y: 0))
                     }
                     if bottomRight {
-                        path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height) - cornerRadius))
-                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - cornerRadius, y: CGFloat(height) - cornerRadius),
-                                    radius: cornerRadius,
+                        path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height) - currentCornerRadius))
+                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - currentCornerRadius, y: CGFloat(height) - currentCornerRadius),
+                                    radius: currentCornerRadius,
                                     startAngle: 0,
                                     endAngle: CGFloat.pi / 2,
                                     clockwise: true)
@@ -89,9 +91,9 @@ public struct BBWebImageEditor {
                         path.addLine(to: CGPoint(x: width, y: height))
                     }
                     if bottomLeft {
-                        path.addLine(to: CGPoint(x: cornerRadius, y: CGFloat(height)))
-                        path.addArc(withCenter: CGPoint(x: cornerRadius, y: CGFloat(height) - cornerRadius),
-                                    radius: cornerRadius,
+                        path.addLine(to: CGPoint(x: currentCornerRadius, y: CGFloat(height)))
+                        path.addArc(withCenter: CGPoint(x: currentCornerRadius, y: CGFloat(height) - currentCornerRadius),
+                                    radius: currentCornerRadius,
                                     startAngle: CGFloat.pi / 2,
                                     endAngle: CGFloat.pi,
                                     clockwise: true)
@@ -119,7 +121,7 @@ public struct BBWebImageEditor {
                     borderWidth > 0 {
                     let strokePath = borderPath()
                     context.addPath(strokePath.cgPath)
-                    context.setLineWidth(borderWidth)
+                    context.setLineWidth(borderWidth * ratio)
                     context.setStrokeColor(strokeColor)
                     context.strokePath()
                 }
