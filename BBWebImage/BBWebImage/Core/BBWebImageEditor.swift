@@ -20,6 +20,7 @@ public struct BBWebImageEditor {
     }
     
     public static func editorForScaleAspectFillContentMode(with displaySize: CGSize,
+                                                           maxResolution: Int = 0,
                                                            corner: UIRectCorner = UIRectCorner(rawValue: 0),
                                                            cornerRadius: CGFloat = 0,
                                                            borderWidth: CGFloat = 0,
@@ -39,8 +40,10 @@ public struct BBWebImageEditor {
                 // No alpha
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
             }
-            let width = souceImage.width
-            let height = souceImage.height
+            let resolutionRatio = sqrt(CGFloat(souceImage.width * souceImage.height) / CGFloat(maxResolution))
+            let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
+            let width = shouldScaleDown ? Int(CGFloat(souceImage.width) / resolutionRatio) : souceImage.width
+            let height = shouldScaleDown ? Int(CGFloat(souceImage.height) / resolutionRatio) : souceImage.height
             guard let context = CGContext(data: nil,
                                           width: width,
                                           height: height,
@@ -53,73 +56,29 @@ public struct BBWebImageEditor {
                 context.fill(CGRect(x: 0, y: 0, width: width, height: height))
             }
             if cornerRadius > 0 && corner.isSubset(of: .allCorners) {
-                let topLeft = corner.isSuperset(of: .topLeft)
-                let topRight = corner.isSuperset(of: .topRight)
-                let bottomLeft = corner.isSuperset(of: .bottomLeft)
-                let bottomRight = corner.isSuperset(of: .bottomRight)
-                
-                let ratio = CGFloat(souceImage.width) / displaySize.width
+                let ratio = shouldScaleDown ? resolutionRatio : CGFloat(souceImage.width) / displaySize.width
                 let currentCornerRadius = cornerRadius * ratio
-                func borderPath() -> UIBezierPath {
-                    let path = UIBezierPath()
-                    if topLeft {
-                        path.move(to: CGPoint(x: 0, y: currentCornerRadius))
-                        path.addArc(withCenter: CGPoint(x: currentCornerRadius, y: currentCornerRadius),
-                                    radius: currentCornerRadius,
-                                    startAngle: CGFloat.pi,
-                                    endAngle: CGFloat.pi * 3 / 2,
-                                    clockwise: true)
-                    }
-                    if topRight {
-                        path.addLine(to: CGPoint(x: CGFloat(width) - currentCornerRadius, y: 0))
-                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - currentCornerRadius, y: currentCornerRadius),
-                                    radius: currentCornerRadius,
-                                    startAngle: CGFloat.pi * 3 / 2,
-                                    endAngle: 0,
-                                    clockwise: true)
-                    } else {
-                        path.addLine(to: CGPoint(x: width, y: 0))
-                    }
-                    if bottomRight {
-                        path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height) - currentCornerRadius))
-                        path.addArc(withCenter: CGPoint(x: CGFloat(width) - currentCornerRadius, y: CGFloat(height) - currentCornerRadius),
-                                    radius: currentCornerRadius,
-                                    startAngle: 0,
-                                    endAngle: CGFloat.pi / 2,
-                                    clockwise: true)
-                    } else {
-                        path.addLine(to: CGPoint(x: width, y: height))
-                    }
-                    if bottomLeft {
-                        path.addLine(to: CGPoint(x: currentCornerRadius, y: CGFloat(height)))
-                        path.addArc(withCenter: CGPoint(x: currentCornerRadius, y: CGFloat(height) - currentCornerRadius),
-                                    radius: currentCornerRadius,
-                                    startAngle: CGFloat.pi / 2,
-                                    endAngle: CGFloat.pi,
-                                    clockwise: true)
-                    } else {
-                        path.addLine(to: CGPoint(x: 0, y: height))
-                    }
-                    path.close()
-                    return path
-                }
                 
                 context.scaleBy(x: 1, y: -1)
                 context.translateBy(x: 0, y: CGFloat(-height))
                 context.saveGState()
                 
-                let clipPath = borderPath()
+                let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
                 context.addPath(clipPath.cgPath)
                 context.clip()
                 
                 context.scaleBy(x: 1, y: -1)
                 context.translateBy(x: 0, y: CGFloat(-height))
-                context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                if shouldScaleDown {
+                    drawForScaleDown(context, sourceImage: souceImage)
+                } else {
+                    context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                }
                 context.restoreGState()
                 
                 if let strokeColor = borderColor?.cgColor,
                     borderWidth > 0 {
-                    let strokePath = borderPath()
+                    let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
                     context.addPath(strokePath.cgPath)
                     context.setLineWidth(borderWidth * ratio)
                     context.setStrokeColor(strokeColor)
@@ -135,6 +94,82 @@ public struct BBWebImageEditor {
         let backgroundColorKey = backgroundColor?.cgColor.components ?? []
         let key = "size=\(displaySize),corner=\(cornerKey),cornerRadius=\(cornerRadius),borderWidth=\(borderWidth),borderColor=\(borderColorKey),backgroundColor=\(backgroundColorKey)".md5
         return BBWebImageEditor(key: key, edit: edit)
+    }
+    
+    private static func borderPath(with size: CGSize, corner: UIRectCorner, cornerRadius: CGFloat) -> UIBezierPath {
+        let path = UIBezierPath()
+        if corner.isSuperset(of: .topLeft) {
+            path.move(to: CGPoint(x: 0, y: cornerRadius))
+            path.addArc(withCenter: CGPoint(x: cornerRadius, y: cornerRadius),
+                        radius: cornerRadius,
+                        startAngle: CGFloat.pi,
+                        endAngle: CGFloat.pi * 3 / 2,
+                        clockwise: true)
+        }
+        if corner.isSuperset(of: .topRight) {
+            path.addLine(to: CGPoint(x: size.width - cornerRadius, y: 0))
+            path.addArc(withCenter: CGPoint(x: size.width - cornerRadius, y: cornerRadius),
+                        radius: cornerRadius,
+                        startAngle: CGFloat.pi * 3 / 2,
+                        endAngle: 0,
+                        clockwise: true)
+        } else {
+            path.addLine(to: CGPoint(x: size.width, y: 0))
+        }
+        if corner.isSuperset(of: .bottomRight) {
+            path.addLine(to: CGPoint(x: size.width, y: size.height - cornerRadius))
+            path.addArc(withCenter: CGPoint(x: size.width - cornerRadius, y: size.height - cornerRadius),
+                        radius: cornerRadius,
+                        startAngle: 0,
+                        endAngle: CGFloat.pi / 2,
+                        clockwise: true)
+        } else {
+            path.addLine(to: CGPoint(x: size.width, y: size.height))
+        }
+        if corner.isSuperset(of: .bottomLeft) {
+            path.addLine(to: CGPoint(x: cornerRadius, y: size.height))
+            path.addArc(withCenter: CGPoint(x: cornerRadius, y: size.height - cornerRadius),
+                        radius: cornerRadius,
+                        startAngle: CGFloat.pi / 2,
+                        endAngle: CGFloat.pi,
+                        clockwise: true)
+        } else {
+            path.addLine(to: CGPoint(x: 0, y: size.height))
+        }
+        path.close()
+        return path
+    }
+    
+    private static func drawForScaleDown(_ context: CGContext, sourceImage: CGImage) {
+        context.interpolationQuality = .high
+        
+        let sourceImageTileSizeMB = 20
+        let pixelsPerMB = 1024 * 1024 * 4
+        let tileTotalPixels = sourceImageTileSizeMB * pixelsPerMB
+        let imageScale = sqrt(CGFloat(context.width * context.height) / CGFloat(sourceImage.width * sourceImage.height))
+        var sourceTile = CGRect(x: 0, y: 0, width: sourceImage.width, height: tileTotalPixels / sourceImage.width)
+        var destTile = CGRect(x: 0, y: 0, width: CGFloat(context.width), height: sourceTile.height * imageScale)
+        let destSeemOverlap: CGFloat = 2
+        let sourceSeemOverlap = Int(destSeemOverlap / CGFloat(context.height) * CGFloat(sourceImage.height))
+        var iterations = Int(CGFloat(sourceImage.height) / sourceTile.height)
+        let remainder = sourceImage.height % Int(sourceTile.height)
+        if remainder != 0 { iterations += 1 }
+        let sourceTileHeightMinusOverlap = sourceTile.height
+        sourceTile.size.height += CGFloat(sourceSeemOverlap)
+        destTile.size.height += destSeemOverlap
+        for y in 0..<iterations {
+            sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap + CGFloat(sourceSeemOverlap)
+            destTile.origin.y = CGFloat(context.height) - (CGFloat(y + 1) * sourceTileHeightMinusOverlap * imageScale + destSeemOverlap)
+            if let sourceTileImage = sourceImage.cropping(to: sourceTile) {
+                if y == iterations - 1 && remainder != 0 {
+                    var dify = destTile.height
+                    destTile.size.height = CGFloat(sourceTileImage.height) * imageScale
+                    dify -= destTile.height
+                    destTile.origin.y += dify
+                }
+                context.draw(sourceTileImage, in: destTile)
+            }
+        }
     }
 }
 
