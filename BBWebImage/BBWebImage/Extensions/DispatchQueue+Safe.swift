@@ -16,4 +16,12 @@ extension DispatchQueue {
             async(execute: work)
         }
     }
+    
+    func safeSync(_ work: @escaping () -> Void) {
+        if label == String(cString: __dispatch_queue_get_label(nil), encoding: .utf8) {
+            work()
+        } else {
+            sync(execute: work)
+        }
+    }
 }

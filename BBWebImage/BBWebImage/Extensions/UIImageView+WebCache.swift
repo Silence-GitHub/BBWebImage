@@ -12,7 +12,7 @@ public extension UIImageView {
     func bb_setImage(with url: URL, placeholder: UIImage? = nil, editor: BBWebImageEditor? = nil, completion: BBWebImageManagerCompletion? = nil) {
         let webCacheOperation = bb_webCacheOperation
         webCacheOperation.task?.cancel()
-        image = placeholder
+        DispatchQueue.main.safeSync { self.image = placeholder }
         webCacheOperation.task = BBWebImageManager.shared.loadImage(with: url, editor: editor) { [weak self] (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             guard let self = self else { return }
             if let currentImage = image { self.image = currentImage }
