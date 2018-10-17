@@ -53,41 +53,38 @@ public struct BBWebImageEditor {
                                           bytesPerRow: 0,
                                           space: bb_shareColorSpace,
                                           bitmapInfo: bitmapInfo.rawValue) else { return nil }
+            context.scaleBy(x: 1, y: -1)
+            context.translateBy(x: 0, y: CGFloat(-height))
+            context.saveGState()
+            
+            let ratio = CGFloat(width) / displaySize.width
+            let currentCornerRadius = cornerRadius * ratio
+            
             if let fillColor = backgroundColor?.cgColor {
                 context.setFillColor(fillColor)
                 context.fill(CGRect(x: 0, y: 0, width: width, height: height))
             }
-            if cornerRadius > 0 && corner.isSubset(of: .allCorners) {
-                let ratio = CGFloat(width) / displaySize.width
-                let currentCornerRadius = cornerRadius * ratio
-                
-                context.scaleBy(x: 1, y: -1)
-                context.translateBy(x: 0, y: CGFloat(-height))
-                context.saveGState()
-                
+            if cornerRadius > 0 && corner.isSubset(of: .allCorners) && !corner.isEmpty {
                 let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
                 context.addPath(clipPath.cgPath)
                 context.clip()
                 
                 context.scaleBy(x: 1, y: -1)
                 context.translateBy(x: 0, y: CGFloat(-height))
-                if shouldScaleDown {
-                    drawForScaleDown(context, sourceImage: souceImage)
-                } else {
-                    context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-                }
-                context.restoreGState()
-                
-                if let strokeColor = borderColor?.cgColor,
-                    borderWidth > 0 {
-                    let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
-                    context.addPath(strokePath.cgPath)
-                    context.setLineWidth(borderWidth * ratio)
-                    context.setStrokeColor(strokeColor)
-                    context.strokePath()
-                }
+            }
+            if shouldScaleDown {
+                drawForScaleDown(context, sourceImage: souceImage)
             } else {
                 context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            }
+            context.restoreGState()
+            if let strokeColor = borderColor?.cgColor,
+                borderWidth > 0 {
+                let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
+                context.addPath(strokePath.cgPath)
+                context.setLineWidth(borderWidth * ratio)
+                context.setStrokeColor(strokeColor)
+                context.strokePath()
             }
             return context.makeImage().flatMap { UIImage(cgImage: $0) }
         }
@@ -107,6 +104,8 @@ public struct BBWebImageEditor {
                         startAngle: CGFloat.pi,
                         endAngle: CGFloat.pi * 3 / 2,
                         clockwise: true)
+        } else {
+            path.move(to: CGPoint.zero)
         }
         if corner.isSuperset(of: .topRight) {
             path.addLine(to: CGPoint(x: size.width - cornerRadius, y: 0))
