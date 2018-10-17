@@ -25,6 +25,7 @@ class TestVC: UIViewController {
         
         let url = URL(string: "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/origin/1.jpg")!
         let editor = BBWebImageEditor.editorForScaleAspectFillContentMode(with: imageView.frame.size,
+                                                                          maxResolution: 0,
                                                                           corner: [.topLeft, .bottomRight],
                                                                           cornerRadius: 10,
                                                                           borderWidth: 2,

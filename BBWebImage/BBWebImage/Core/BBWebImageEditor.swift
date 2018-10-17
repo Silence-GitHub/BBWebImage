@@ -10,6 +10,9 @@ import UIKit
 
 public typealias BBWebImageEditMethod = (UIImage?, Data?) -> UIImage?
 
+public let bb_shareColorSpace = CGColorSpaceCreateDeviceRGB()
+public let bb_ScreenScale = UIScreen.main.scale
+
 public struct BBWebImageEditor {
     public var key: String
     public var edit: BBWebImageEditMethod
@@ -27,7 +30,9 @@ public struct BBWebImageEditor {
                                                            borderColor: UIColor? = nil,
                                                            backgroundColor: UIColor? = nil) -> BBWebImageEditor {
         let edit: BBWebImageEditMethod = { (image: UIImage?, data: Data?) in
-            guard let currentData = data,
+            guard displaySize.width > 0,
+                displaySize.height > 0,
+                let currentData = data,
                 let currentImage = UIImage(data: currentData),
                 let souceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
             var bitmapInfo = souceImage.bitmapInfo
@@ -44,8 +49,15 @@ public struct BBWebImageEditor {
             let currentMaxResolution = max(maxResolution, 1024 * 1024 * 4)
             let resolutionRatio = sqrt(CGFloat(souceImage.width * souceImage.height) / CGFloat(currentMaxResolution))
             let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
-            let width = shouldScaleDown ? Int(CGFloat(souceImage.width) / resolutionRatio) : souceImage.width
-            let height = shouldScaleDown ? Int(CGFloat(souceImage.height) / resolutionRatio) : souceImage.height
+            var width = souceImage.width
+            var height = souceImage.height
+            if shouldScaleDown {
+                width = Int(CGFloat(souceImage.width) / resolutionRatio)
+                height = Int(CGFloat(souceImage.height) / resolutionRatio)
+            } else if CGFloat(width) < displaySize.width * bb_ScreenScale {
+                width = Int(displaySize.width * bb_ScreenScale)
+                height = Int(displaySize.height * bb_ScreenScale)
+            }
             guard let context = CGContext(data: nil,
                                           width: width,
                                           height: height,
@@ -174,8 +186,6 @@ public struct BBWebImageEditor {
         }
     }
 }
-
-public let bb_shareColorSpace = CGColorSpaceCreateDeviceRGB()
 
 public extension UIImage {
     // Image rect to display in image coordinate
