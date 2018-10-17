@@ -55,17 +55,19 @@ public struct BBWebImageEditor {
                                           bitmapInfo: bitmapInfo.rawValue) else { return nil }
             context.scaleBy(x: 1, y: -1)
             context.translateBy(x: 0, y: CGFloat(-height))
+            context.interpolationQuality = .high
             context.saveGState()
             
             let ratio = CGFloat(width) / displaySize.width
             let currentCornerRadius = cornerRadius * ratio
+            let currentBorderWidth = borderWidth * ratio
             
             if let fillColor = backgroundColor?.cgColor {
                 context.setFillColor(fillColor)
                 context.fill(CGRect(x: 0, y: 0, width: width, height: height))
             }
             if cornerRadius > 0 && corner.isSubset(of: .allCorners) && !corner.isEmpty {
-                let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
+                let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
                 context.addPath(clipPath.cgPath)
                 context.clip()
                 
@@ -80,9 +82,9 @@ public struct BBWebImageEditor {
             context.restoreGState()
             if let strokeColor = borderColor?.cgColor,
                 borderWidth > 0 {
-                let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius)
+                let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
                 context.addPath(strokePath.cgPath)
-                context.setLineWidth(borderWidth * ratio)
+                context.setLineWidth(currentBorderWidth)
                 context.setStrokeColor(strokeColor)
                 context.strokePath()
             }
@@ -95,55 +97,54 @@ public struct BBWebImageEditor {
         return BBWebImageEditor(key: key, edit: edit)
     }
     
-    private static func borderPath(with size: CGSize, corner: UIRectCorner, cornerRadius: CGFloat) -> UIBezierPath {
+    private static func borderPath(with size: CGSize, corner: UIRectCorner, cornerRadius: CGFloat, borderWidth: CGFloat) -> UIBezierPath {
+        let halfBorderWidth = borderWidth / 2
         let path = UIBezierPath()
         if corner.isSuperset(of: .topLeft) {
-            path.move(to: CGPoint(x: 0, y: cornerRadius))
-            path.addArc(withCenter: CGPoint(x: cornerRadius, y: cornerRadius),
+            path.move(to: CGPoint(x: halfBorderWidth, y: cornerRadius + halfBorderWidth))
+            path.addArc(withCenter: CGPoint(x: cornerRadius + halfBorderWidth, y: cornerRadius + halfBorderWidth),
                         radius: cornerRadius,
                         startAngle: CGFloat.pi,
                         endAngle: CGFloat.pi * 3 / 2,
                         clockwise: true)
         } else {
-            path.move(to: CGPoint.zero)
+            path.move(to: CGPoint(x: halfBorderWidth, y: halfBorderWidth))
         }
         if corner.isSuperset(of: .topRight) {
-            path.addLine(to: CGPoint(x: size.width - cornerRadius, y: 0))
-            path.addArc(withCenter: CGPoint(x: size.width - cornerRadius, y: cornerRadius),
+            path.addLine(to: CGPoint(x: size.width - cornerRadius - halfBorderWidth, y: halfBorderWidth))
+            path.addArc(withCenter: CGPoint(x: size.width - cornerRadius - halfBorderWidth, y: cornerRadius + halfBorderWidth),
                         radius: cornerRadius,
                         startAngle: CGFloat.pi * 3 / 2,
                         endAngle: 0,
                         clockwise: true)
         } else {
-            path.addLine(to: CGPoint(x: size.width, y: 0))
+            path.addLine(to: CGPoint(x: size.width - halfBorderWidth, y: halfBorderWidth))
         }
         if corner.isSuperset(of: .bottomRight) {
-            path.addLine(to: CGPoint(x: size.width, y: size.height - cornerRadius))
-            path.addArc(withCenter: CGPoint(x: size.width - cornerRadius, y: size.height - cornerRadius),
+            path.addLine(to: CGPoint(x: size.width - halfBorderWidth, y: size.height - cornerRadius - halfBorderWidth))
+            path.addArc(withCenter: CGPoint(x: size.width - cornerRadius - halfBorderWidth, y: size.height - cornerRadius - halfBorderWidth),
                         radius: cornerRadius,
                         startAngle: 0,
                         endAngle: CGFloat.pi / 2,
                         clockwise: true)
         } else {
-            path.addLine(to: CGPoint(x: size.width, y: size.height))
+            path.addLine(to: CGPoint(x: size.width - halfBorderWidth, y: size.height - halfBorderWidth))
         }
         if corner.isSuperset(of: .bottomLeft) {
-            path.addLine(to: CGPoint(x: cornerRadius, y: size.height))
-            path.addArc(withCenter: CGPoint(x: cornerRadius, y: size.height - cornerRadius),
+            path.addLine(to: CGPoint(x: cornerRadius + halfBorderWidth, y: size.height - halfBorderWidth))
+            path.addArc(withCenter: CGPoint(x: cornerRadius + halfBorderWidth, y: size.height - cornerRadius - halfBorderWidth),
                         radius: cornerRadius,
                         startAngle: CGFloat.pi / 2,
                         endAngle: CGFloat.pi,
                         clockwise: true)
         } else {
-            path.addLine(to: CGPoint(x: 0, y: size.height))
+            path.addLine(to: CGPoint(x: halfBorderWidth, y: size.height - halfBorderWidth))
         }
         path.close()
         return path
     }
     
     private static func drawForScaleDown(_ context: CGContext, sourceImage: CGImage) {
-        context.interpolationQuality = .high
-        
         let sourceImageTileSizeMB = 20
         let pixelsPerMB = 1024 * 1024 * 4
         let tileTotalPixels = sourceImageTileSizeMB * pixelsPerMB
