@@ -40,7 +40,9 @@ public struct BBWebImageEditor {
                 // No alpha
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
             }
-            let resolutionRatio = sqrt(CGFloat(souceImage.width * souceImage.height) / CGFloat(maxResolution))
+            // Make sure resolution is not too small
+            let currentMaxResolution = max(maxResolution, 1024 * 1024 * 4)
+            let resolutionRatio = sqrt(CGFloat(souceImage.width * souceImage.height) / CGFloat(currentMaxResolution))
             let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
             let width = shouldScaleDown ? Int(CGFloat(souceImage.width) / resolutionRatio) : souceImage.width
             let height = shouldScaleDown ? Int(CGFloat(souceImage.height) / resolutionRatio) : souceImage.height
@@ -56,7 +58,7 @@ public struct BBWebImageEditor {
                 context.fill(CGRect(x: 0, y: 0, width: width, height: height))
             }
             if cornerRadius > 0 && corner.isSubset(of: .allCorners) {
-                let ratio = shouldScaleDown ? resolutionRatio : CGFloat(souceImage.width) / displaySize.width
+                let ratio = CGFloat(width) / displaySize.width
                 let currentCornerRadius = cornerRadius * ratio
                 
                 context.scaleBy(x: 1, y: -1)
@@ -150,15 +152,15 @@ public struct BBWebImageEditor {
         var sourceTile = CGRect(x: 0, y: 0, width: sourceImage.width, height: tileTotalPixels / sourceImage.width)
         var destTile = CGRect(x: 0, y: 0, width: CGFloat(context.width), height: sourceTile.height * imageScale)
         let destSeemOverlap: CGFloat = 2
-        let sourceSeemOverlap = Int(destSeemOverlap / CGFloat(context.height) * CGFloat(sourceImage.height))
+        let sourceSeemOverlap = trunc(destSeemOverlap / CGFloat(context.height) * CGFloat(sourceImage.height))
         var iterations = Int(CGFloat(sourceImage.height) / sourceTile.height)
         let remainder = sourceImage.height % Int(sourceTile.height)
         if remainder != 0 { iterations += 1 }
         let sourceTileHeightMinusOverlap = sourceTile.height
-        sourceTile.size.height += CGFloat(sourceSeemOverlap)
+        sourceTile.size.height += sourceSeemOverlap
         destTile.size.height += destSeemOverlap
         for y in 0..<iterations {
-            sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap + CGFloat(sourceSeemOverlap)
+            sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap + sourceSeemOverlap
             destTile.origin.y = CGFloat(context.height) - (CGFloat(y + 1) * sourceTileHeightMinusOverlap * imageScale + destSeemOverlap)
             if let sourceTileImage = sourceImage.cropping(to: sourceTile) {
                 if y == iterations - 1 && remainder != 0 {
@@ -176,10 +178,6 @@ public struct BBWebImageEditor {
 public let bb_shareColorSpace = CGColorSpaceCreateDeviceRGB()
 
 public extension UIImage {
-    public func shouldScaleDown(with displaySize: CGSize) -> Bool {
-        return (displaySize.width * displaySize.height * UIScreen.main.scale) < (size.width * size.height)
-    }
-    
     // Image rect to display in image coordinate
     public func rectToDisplay(with displaySize: CGSize, contentMode: UIView.ContentMode) -> CGRect {
         let sourceRatio = size.width / size.height
