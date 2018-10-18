@@ -46,7 +46,7 @@ public struct BBWebImageEditor {
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
             }
             // Make sure resolution is not too small
-            let currentMaxResolution = max(maxResolution, 1024 * 1024 * 4)
+            let currentMaxResolution = max(maxResolution, Int(displaySize.width * displaySize.height * 7))
             let resolutionRatio = sqrt(CGFloat(souceImage.width * souceImage.height) / CGFloat(currentMaxResolution))
             let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
             var width = souceImage.width
@@ -162,9 +162,9 @@ public struct BBWebImageEditor {
         let tileTotalPixels = sourceImageTileSizeMB * pixelsPerMB
         let imageScale = sqrt(CGFloat(context.width * context.height) / CGFloat(sourceImage.width * sourceImage.height))
         var sourceTile = CGRect(x: 0, y: 0, width: sourceImage.width, height: tileTotalPixels / sourceImage.width)
-        var destTile = CGRect(x: 0, y: 0, width: CGFloat(context.width), height: sourceTile.height * imageScale)
+        var destTile = CGRect(x: 0, y: 0, width: CGFloat(context.width), height: ceil(sourceTile.height * imageScale))
         let destSeemOverlap: CGFloat = 2
-        let sourceSeemOverlap = trunc(destSeemOverlap / CGFloat(context.height) * CGFloat(sourceImage.height))
+        let sourceSeemOverlap = trunc(destSeemOverlap / imageScale)
         var iterations = Int(CGFloat(sourceImage.height) / sourceTile.height)
         let remainder = sourceImage.height % Int(sourceTile.height)
         if remainder != 0 { iterations += 1 }
@@ -172,12 +172,12 @@ public struct BBWebImageEditor {
         sourceTile.size.height += sourceSeemOverlap
         destTile.size.height += destSeemOverlap
         for y in 0..<iterations {
-            sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap + sourceSeemOverlap
-            destTile.origin.y = CGFloat(context.height) - (CGFloat(y + 1) * sourceTileHeightMinusOverlap * imageScale + destSeemOverlap)
+            sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap // + sourceSeemOverlap
+            destTile.origin.y = CGFloat(context.height) - ceil(CGFloat(y + 1) * sourceTileHeightMinusOverlap * imageScale + destSeemOverlap)
             if let sourceTileImage = sourceImage.cropping(to: sourceTile) {
                 if y == iterations - 1 && remainder != 0 {
                     var dify = destTile.height
-                    destTile.size.height = CGFloat(sourceTileImage.height) * imageScale
+                    destTile.size.height = ceil(CGFloat(sourceTileImage.height) * imageScale)
                     dify -= destTile.height
                     destTile.origin.y += dify
                 }

@@ -31,6 +31,10 @@ class TestVC: UIViewController {
                                                                           borderWidth: 2,
                                                                           borderColor: UIColor.yellow,
                                                                           backgroundColor: UIColor.blue)
+//        let dataUrl = Bundle.main.url(forResource: "large_leaves_70mp", withExtension: "jpg")!
+//        let data = try! Data(contentsOf: dataUrl)
+//        imageView.image = editor.edit(nil, data)
+//        return;
         imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             print("Completion")
             if let currentImage = image {
