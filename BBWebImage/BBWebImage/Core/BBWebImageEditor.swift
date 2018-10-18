@@ -169,11 +169,12 @@ public struct BBWebImageEditor {
         let remainder = sourceImage.height % Int(sourceTile.height)
         if remainder != 0 { iterations += 1 }
         let sourceTileHeightMinusOverlap = sourceTile.height
+        let destTileHeightMinusOverlap = destTile.height
         sourceTile.size.height += sourceSeemOverlap
         destTile.size.height += destSeemOverlap
         for y in 0..<iterations {
             sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap // + sourceSeemOverlap
-            destTile.origin.y = CGFloat(context.height) - ceil(CGFloat(y + 1) * sourceTileHeightMinusOverlap * imageScale + destSeemOverlap)
+            destTile.origin.y = CGFloat(context.height) - ceil(CGFloat(y + 1) * destTileHeightMinusOverlap + destSeemOverlap)
             if let sourceTileImage = sourceImage.cropping(to: sourceTile) {
                 if y == iterations - 1 && remainder != 0 {
                     var dify = destTile.height
