@@ -24,6 +24,12 @@
 		4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5DE8FB217191EE0074EEFD /* String+MD5.swift */; };
 		4A62CAA2216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */; };
 		4A62CAA3216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */; };
+		4A6E2D86218787C400CE1CD2 /* BBMemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D85218787C400CE1CD2 /* BBMemoryCache.swift */; };
+		4A6E2D87218787C400CE1CD2 /* BBMemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D85218787C400CE1CD2 /* BBMemoryCache.swift */; };
+		4A6E2D89218787FA00CE1CD2 /* BBDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D88218787FA00CE1CD2 /* BBDiskCache.swift */; };
+		4A6E2D8A218787FB00CE1CD2 /* BBDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D88218787FA00CE1CD2 /* BBDiskCache.swift */; };
+		4A6E2D8C2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */; };
+		4A6E2D8D2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */; };
 		4A87E908216BE4430073E53C /* Data+ImageFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E907216BE4430073E53C /* Data+ImageFormat.swift */; };
 		4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E907216BE4430073E53C /* Data+ImageFormat.swift */; };
 		4A87E911216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */; };
@@ -62,6 +68,9 @@
 		4A53315A2165BC8500C68080 /* BBImageCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCoder.swift; sourceTree = "<group>"; };
 		4A5DE8FB217191EE0074EEFD /* String+MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
 		4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageEditor.swift; sourceTree = "<group>"; };
+		4A6E2D85218787C400CE1CD2 /* BBMemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBMemoryCache.swift; sourceTree = "<group>"; };
+		4A6E2D88218787FA00CE1CD2 /* BBDiskCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDiskCache.swift; sourceTree = "<group>"; };
+		4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDiskStorage.swift; sourceTree = "<group>"; };
 		4A87E907216BE4430073E53C /* Data+ImageFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+ImageFormat.swift"; sourceTree = "<group>"; };
 		4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageImageIOCoder.swift; sourceTree = "<group>"; };
 		4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ImageFormat.swift"; sourceTree = "<group>"; };
@@ -133,6 +142,9 @@
 				4A5331482165828300C68080 /* BBWebImageManager.swift */,
 				4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */,
 				4A53314F21658F9F00C68080 /* BBImageCache.swift */,
+				4A6E2D85218787C400CE1CD2 /* BBMemoryCache.swift */,
+				4A6E2D88218787FA00CE1CD2 /* BBDiskCache.swift */,
+				4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */,
 				4A5331522165902A00C68080 /* BBImageDownloader.swift */,
 				4A5331562165943100C68080 /* BBImageDownloadOperation.swift */,
 				4A53315A2165BC8500C68080 /* BBImageCoder.swift */,
@@ -265,17 +277,20 @@
 			files = (
 				4A5DE8FC217191EE0074EEFD /* String+MD5.swift in Sources */,
 				4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
+				4A6E2D8C2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */,
 				4A5331532165902A00C68080 /* BBImageDownloader.swift in Sources */,
 				4A53315B2165BC8500C68080 /* BBImageCoder.swift in Sources */,
 				4AF3D1EB216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */,
 				4A87E911216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
 				4A87E908216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
 				4A87E914216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */,
+				4A6E2D89218787FA00CE1CD2 /* BBDiskCache.swift in Sources */,
 				4A5331572165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4A53315021658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A62CAA2216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */,
 				4A5331492165828300C68080 /* BBWebImageManager.swift in Sources */,
 				4A87E917216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,
+				4A6E2D86218787C400CE1CD2 /* BBMemoryCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +299,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4AF3D1EC216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */,
+				4A6E2D87218787C400CE1CD2 /* BBMemoryCache.swift in Sources */,
+				4A6E2D8D2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */,
 				4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */,
 				4A53315121658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */,
@@ -297,6 +314,7 @@
 				4A53310F21657DC500C68080 /* BBWebImageTests.swift in Sources */,
 				4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */,
 				4A87E915216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */,
+				4A6E2D8A218787FB00CE1CD2 /* BBDiskCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
