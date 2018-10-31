@@ -9,11 +9,11 @@
 import UIKit
 
 public class BBDiskCache {
-    let storage: BBDiskStorage
-    let sizeThreshold: Int
-    let queue: DispatchQueue // Concurrent
+    private let storage: BBDiskStorage
+    private let sizeThreshold: Int
+    private let queue: DispatchQueue // Concurrent
     
-    init?(path: String, sizeThreshold threshold: Int) {
+    public init?(path: String, sizeThreshold threshold: Int) {
         if let currentStorage = BBDiskStorage(path: path) {
             storage = currentStorage
         } else {
@@ -39,11 +39,33 @@ public class BBDiskCache {
         storage.store(data, forKey: key, type: (data.count > sizeThreshold ? .file : .sqlite))
     }
     
-    public func store(_ data: Data, forKey key: String, completion: @escaping () -> Void) {
+    public func store(_ data: Data, forKey key: String, completion: BBImageCacheStoreCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.store(data, forKey: key)
-            completion()
+            completion?()
+        }
+    }
+    
+    public func store(_ dataWork: @escaping () -> Data?, forKey key: String, completion: BBImageCacheStoreCompletion?) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            if let data = dataWork() {
+                self.store(data, forKey: key)
+            }
+            completion?()
+        }
+    }
+    
+    public func removeData(forKey key: String) {
+        storage.removeData(forKey: key)
+    }
+    
+    public func removeData(forKey key: String, completion: BBImageCacheRemoveCompletion?) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.removeData(forKey: key)
+            completion?()
         }
     }
 }

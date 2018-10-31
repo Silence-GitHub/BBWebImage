@@ -51,7 +51,8 @@ public class BBWebImageManager {
     private let taskLock: DispatchSemaphore
     
     public init() {
-        imageCache = BBLRUImageCache()
+        let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
+        imageCache = BBLRUImageCache(path: path, sizeThreshold: 20 * 1024)
         imageDownloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
         imageCoder = BBImageCoderManager()
         coderQueue = DispatchQueue(label: "com.Kaibo.BBWebImage.ImageManager.Coder", qos: .userInitiated)

@@ -68,21 +68,54 @@ public extension BBImageCache {
 }
 
 public class BBLRUImageCache: BBImageCache {
+    public let memoryCache: BBMemoryCache
+    public let diskCache: BBDiskCache?
+    
+    init(path: String, sizeThreshold: Int) {
+        memoryCache = BBMemoryCache()
+        diskCache = BBDiskCache(path: path, sizeThreshold: sizeThreshold)
+    }
+    
     // Get image
     public func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion) {
-        #warning ("Get image")
+        if cacheType.contains(.memory),
+            let image = memoryCache.image(forKey: key) {
+            return completion(.memory(image: image))
+        }
+        if cacheType.contains(.disk),
+            let currentDiskCache = diskCache  {
+            return currentDiskCache.data(forKey: key) { (data) in
+                if let currentData = data {
+                    completion(.disk(data: currentData))
+                } else {
+                    completion(.none)
+                }
+            }
+        }
         completion(.none)
     }
     
     // Store image
     public func store(_ image: UIImage, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
-        #warning ("Store image")
-        if let completion = completion { completion() }
+        if cacheType.contains(.memory) { memoryCache.store(image, forKey: key) }
+        if cacheType.contains(.disk),
+            let currentDiskCache = diskCache {
+            return currentDiskCache.store({ () -> Data? in
+                if let data = image.bb_originalImageData { return data }
+                // TODO: Encode image
+                return nil
+            }, forKey: key, completion: completion)
+        }
+        completion?()
     }
     
     // Remove image
     public func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?) {
-        #warning ("Remove image")
-        if let completion = completion { completion() }
+        if cacheType.contains(.memory) { memoryCache.removeImage(forKey: key) }
+        if cacheType.contains(.disk),
+            let currentDiskCache = diskCache {
+            return currentDiskCache.removeData(forKey: key, completion: completion)
+        }
+        completion?()
     }
 }

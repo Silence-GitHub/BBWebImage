@@ -9,5 +9,16 @@
 import UIKit
 
 public class BBMemoryCache {
-
+    func image(forKey key: String) -> UIImage? {
+        #warning("Image for key")
+        return nil
+    }
+    
+    func store(_ image: UIImage, forKey key: String) {
+        #warning("Store image for key")
+    }
+    
+    func removeImage(forKey key: String) {
+        #warning("Remove image for key")
+    }
 }

@@ -9,14 +9,6 @@
 import UIKit
 import SQLite3
 
-public struct BBDiskStorageItem {
-    let key: String
-    let filename: String?
-    let data: Data?
-    let size: Int
-    let lastAccessTime: Int
-}
-
 public enum BBDiskStorageType {
     case file
     case sqlite
@@ -27,7 +19,7 @@ public class BBDiskStorage {
     private let baseDataPath: String
     private var database: OpaquePointer?
     
-    init?(path: String) {
+    public init?(path: String) {
         ioLock = DispatchSemaphore(value: 1)
         baseDataPath = path + "/Data"
         do {
