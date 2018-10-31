@@ -62,6 +62,7 @@ public class BBDiskStorage {
     }
     
     public func data(forKey key: String) -> Data? {
+        if key.isEmpty { return nil }
         ioLock.wait()
         var data: Data?
         let sql = "SELECT filename, data, size, FROM Storage_item WHERE key = '\(key)';"
@@ -95,6 +96,7 @@ public class BBDiskStorage {
     }
     
     public func store(_ data: Data, forKey key: String, type: BBDiskStorageType) {
+        if key.isEmpty { return }
         ioLock.wait()
         let sql = "INSERT OR REPLACE INTO Storage_item (key, \(type == .file ? "filename" : "data"), size, last_access_time) VALUES (?1, ?2, ?3, ?4);"
         var stmt: OpaquePointer?
@@ -102,7 +104,7 @@ public class BBDiskStorage {
             sqlite3_bind_text(stmt, 1, key, -1, nil)
             let nsdata = data as NSData
             if type == .file {
-                sqlite3_bind_text(stmt, 2, key, -1, nil) // TODO: Use filename instead of key
+                sqlite3_bind_text(stmt, 2, key.md5, -1, nil)
             } else {
                 sqlite3_bind_blob(stmt, 2, nsdata.bytes, Int32(nsdata.length), nil)
             }
@@ -117,6 +119,7 @@ public class BBDiskStorage {
     }
     
     public func removeData(forKey key: String) {
+        if key.isEmpty { return }
         ioLock.wait()
         // Get filename and delete file data
         let selectSql = "SELECT filename FROM Storage_item WHERE key = '\(key)';"

@@ -105,7 +105,7 @@ public struct BBWebImageEditor {
         let cornerKey = corner.intersection([.topLeft, .topRight, .bottomLeft, .bottomRight]).rawValue
         let borderColorKey = borderColor?.cgColor.components ?? []
         let backgroundColorKey = backgroundColor?.cgColor.components ?? []
-        let key = "size=\(displaySize),corner=\(cornerKey),cornerRadius=\(cornerRadius),borderWidth=\(borderWidth),borderColor=\(borderColorKey),backgroundColor=\(backgroundColorKey)".md5
+        let key = "size=\(displaySize),corner=\(cornerKey),cornerRadius=\(cornerRadius),borderWidth=\(borderWidth),borderColor=\(borderColorKey),backgroundColor=\(backgroundColorKey)"
         return BBWebImageEditor(key: key, edit: edit)
     }
     
