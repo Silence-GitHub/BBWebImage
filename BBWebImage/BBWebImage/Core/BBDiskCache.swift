@@ -68,4 +68,16 @@ public class BBDiskCache {
             completion?()
         }
     }
+    
+    public func clear() {
+        storage.clear()
+    }
+    
+    public func clear(_ completion: BBImageCacheRemoveCompletion?) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.clear()
+            completion?()
+        }
+    }
 }

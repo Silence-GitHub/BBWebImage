@@ -39,6 +39,7 @@ class TestVC: UIViewController {
             print("Completion")
             if let currentImage = image {
                 print("Image: \(currentImage)")
+                print("Cache type: \(cacheType)")
                 if let imageFormat = currentImage.bb_imageFormat {
                     print("Image format: \(imageFormat)")
                 } else {

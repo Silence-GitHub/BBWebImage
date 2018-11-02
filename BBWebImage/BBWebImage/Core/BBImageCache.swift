@@ -48,22 +48,31 @@ public protocol BBImageCache {
     // Remove image
     func removeImage(forKey key: String, completion: BBImageCacheRemoveCompletion?)
     func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
+    
+    // Clear image
+    func clear(_ completion: BBImageCacheRemoveCompletion?)
+    func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
 }
 
 public extension BBImageCache {
     // Get image
     func image(forKey key: String, completion: @escaping BBImageCacheQueryCompletion) {
-        self.image(forKey: key, cacheType: .all, completion: completion)
+        image(forKey: key, cacheType: .all, completion: completion)
     }
     
     // Store image
-    func store(_ image: UIImage, forKey key: String, completion: BBImageCacheStoreCompletion?) {
-        self.store(image, forKey: key, cacheType: .all, completion: completion)
+    func store(_ image: UIImage, forKey key: String, completion: BBImageCacheStoreCompletion? = nil) {
+        store(image, forKey: key, cacheType: .all, completion: completion)
     }
     
     // Remove image
-    func removeImage(forKey key: String, completion: BBImageCacheRemoveCompletion?) {
-        self.removeImage(forKey: key, cacheType: .all, completion: completion)
+    func removeImage(forKey key: String, completion: BBImageCacheRemoveCompletion? = nil) {
+        removeImage(forKey: key, cacheType: .all, completion: completion)
+    }
+    
+    // Clear image
+    func clear(_ completion: BBImageCacheRemoveCompletion? = nil) {
+        clear(.all, completion: completion)
     }
 }
 
@@ -83,7 +92,7 @@ public class BBLRUImageCache: BBImageCache {
             return completion(.memory(image: image))
         }
         if cacheType.contains(.disk),
-            let currentDiskCache = diskCache  {
+            let currentDiskCache = diskCache {
             return currentDiskCache.data(forKey: key) { (data) in
                 if let currentData = data {
                     completion(.disk(data: currentData))
@@ -115,6 +124,16 @@ public class BBLRUImageCache: BBImageCache {
         if cacheType.contains(.disk),
             let currentDiskCache = diskCache {
             return currentDiskCache.removeData(forKey: key, completion: completion)
+        }
+        completion?()
+    }
+    
+    // Clear image
+    public func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion? = nil) {
+        if type.contains(.memory) { memoryCache.clear() }
+        if type.contains(.disk),
+            let currentDiskCache = diskCache {
+            return currentDiskCache.clear(completion)
         }
         completion?()
     }

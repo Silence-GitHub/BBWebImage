@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import BBWebImage
 
 class MainMenuVC: UIViewController {
 
@@ -20,7 +21,10 @@ class MainMenuVC: UIViewController {
         let test = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(TestVC(), animated: true) }
         }
-        list = [("Test", test)]
+        let clearCache = { [weak self] in
+            if self != nil { BBWebImageManager.shared.imageCache.clear() }
+        }
+        list = [("Test", test), ("Clear cache", clearCache)]
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: UITableViewCell.description())
         tableView.dataSource = self
