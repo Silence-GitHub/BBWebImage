@@ -57,7 +57,7 @@ public class BBDiskStorage {
         if key.isEmpty { return nil }
         ioLock.wait()
         var data: Data?
-        let sql = "SELECT filename, data, size, FROM Storage_item WHERE key = '\(key)';"
+        let sql = "SELECT filename, data, size FROM Storage_item WHERE key = '\(key)';"
         var stmt: OpaquePointer?
         if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
             if sqlite3_step(stmt) == SQLITE_ROW {
@@ -90,18 +90,22 @@ public class BBDiskStorage {
     public func store(_ data: Data, forKey key: String, type: BBDiskStorageType) {
         if key.isEmpty { return }
         ioLock.wait()
-        let sql = "INSERT OR REPLACE INTO Storage_item (key, \(type == .file ? "filename" : "data"), size, last_access_time) VALUES (?1, ?2, ?3, ?4);"
+        let sql = "INSERT OR REPLACE INTO Storage_item (key, filename, data, size, last_access_time) VALUES (?1, ?2, ?3, ?4, ?5);"
         var stmt: OpaquePointer?
         if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
-            sqlite3_bind_text(stmt, 1, key, -1, nil)
+            sqlite3_bind_text(stmt, 1, (key as NSString).utf8String, -1, nil)
             let nsdata = data as NSData
             if type == .file {
-                sqlite3_bind_text(stmt, 2, key.md5, -1, nil)
+                let filename = key.md5
+                sqlite3_bind_text(stmt, 2, (filename as NSString).utf8String, -1, nil)
+                sqlite3_bind_blob(stmt, 3, nil, 0, nil)
+                try? data.write(to: URL(fileURLWithPath: "\(baseDataPath)/\(filename)"))
             } else {
-                sqlite3_bind_blob(stmt, 2, nsdata.bytes, Int32(nsdata.length), nil)
+                sqlite3_bind_text(stmt, 2, nil, -1, nil)
+                sqlite3_bind_blob(stmt, 3, nsdata.bytes, Int32(nsdata.length), nil)
             }
-            sqlite3_bind_int(stmt, 3, Int32(nsdata.length))
-            sqlite3_bind_double(stmt, 4, CACurrentMediaTime())
+            sqlite3_bind_int(stmt, 4, Int32(nsdata.length))
+            sqlite3_bind_double(stmt, 5, CACurrentMediaTime())
             if sqlite3_step(stmt) != SQLITE_DONE {
                 print("Fail to insert data for key \(key)")
             }
@@ -129,6 +133,23 @@ public class BBDiskStorage {
         let sql = "DELETE FROM Storage_item WHERE key = '\(key)';"
         if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
             print("Fail to remove data for key \(key)")
+        }
+        ioLock.signal()
+    }
+    
+    public func clear() {
+        ioLock.wait()
+        let sql = "DELETE FROM Storage_item;"
+        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+            print("Fail to delete data")
+        }
+        if let enumerator = FileManager.default.enumerator(atPath: baseDataPath) {
+            for next in enumerator {
+                if let path = next as? String {
+                    try? FileManager.default.removeItem(atPath: "\(baseDataPath)/\(path)")
+                    print("Clear item at path: \(baseDataPath)/\(path)")
+                }
+            }
         }
         ioLock.signal()
     }
