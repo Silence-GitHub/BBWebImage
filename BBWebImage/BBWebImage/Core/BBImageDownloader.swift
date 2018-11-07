@@ -50,14 +50,18 @@ public class BBMergeRequestImageDownloader {
     private let sessionConfiguration: URLSessionConfiguration
     private lazy var sessionDelegate: BBImageDownloadSessionDelegate = { BBImageDownloadSessionDelegate(downloader: self) }()
     private lazy var session: URLSession = {
-        URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil) // TODO: Create session delegate queue
+        let queue = OperationQueue()
+        queue.qualityOfService = .background
+        queue.maxConcurrentOperationCount = 1
+        return URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: queue)
     }()
     
     public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
         urlOperations = [:]
         operationLock = DispatchSemaphore(value: 1)
-        downloadQueue = OperationQueue() // TODO: Set download queue qualityOfService
+        downloadQueue = OperationQueue()
+        downloadQueue.qualityOfService = .background
         downloadQueue.maxConcurrentOperationCount = 6
         self.sessionConfiguration = sessionConfiguration
     }
