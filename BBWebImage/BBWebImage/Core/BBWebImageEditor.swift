@@ -82,10 +82,9 @@ public struct BBWebImageEditor {
                 let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
                 context.addPath(clipPath.cgPath)
                 context.clip()
-                
-                context.scaleBy(x: 1, y: -1)
-                context.translateBy(x: 0, y: CGFloat(-height))
             }
+            context.scaleBy(x: 1, y: -1)
+            context.translateBy(x: 0, y: CGFloat(-height))
             if shouldScaleDown {
                 drawForScaleDown(context, sourceImage: souceImage)
             } else {
