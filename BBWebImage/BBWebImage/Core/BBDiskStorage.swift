@@ -147,10 +147,7 @@ public class BBDiskStorage {
     
     public func trim(toCost cost: Int) {
         if cost == .max { return }
-        if cost <= 0 {
-            clear()
-            return
-        }
+        if cost <= 0 { return clear() }
         ioLock.wait()
         var totalCost = totalItemSize()
         while totalCost > cost {
@@ -171,7 +168,25 @@ public class BBDiskStorage {
     }
     
     public func trim(toCount count: Int) {
-        
+        if count == .max { return }
+        if count <= 0 { return clear() }
+        ioLock.wait()
+        var totalCount = totalItemCount()
+        while totalCount > count {
+            if let items = itemsForTrimming(withLimit: 16) {
+                for item in items {
+                    if totalCount > count {
+                        _removeData(forKey: item.key)
+                        totalCount -= 1
+                    } else {
+                        break
+                    }
+                }
+            } else {
+                break
+            }
+        }
+        ioLock.signal()
     }
     
     public func trim(toAge age: TimeInterval) {
@@ -228,5 +243,18 @@ public class BBDiskStorage {
             sqlite3_finalize(stmt)
         }
         return size
+    }
+    
+    private func totalItemCount() -> Int {
+        var count: Int = 0
+        let sql = "SELECT count(*) FROM Storage_item;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                count = Int(sqlite3_column_int(stmt, 0))
+            }
+            sqlite3_finalize(stmt)
+        }
+        return count
     }
 }
