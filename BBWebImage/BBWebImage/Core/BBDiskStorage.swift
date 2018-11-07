@@ -9,6 +9,14 @@
 import UIKit
 import SQLite3
 
+private struct BBDiskStorageItem {
+    let key: String
+    var filename: String?
+    var data: Data?
+    let size: Int32
+    let lastAccessTime: TimeInterval
+}
+
 public enum BBDiskStorageType {
     case file
     case sqlite
@@ -117,6 +125,60 @@ public class BBDiskStorage {
     public func removeData(forKey key: String) {
         if key.isEmpty { return }
         ioLock.wait()
+        _removeData(forKey: key)
+        ioLock.signal()
+    }
+    
+    public func clear() {
+        ioLock.wait()
+        let sql = "DELETE FROM Storage_item;"
+        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+            print("Fail to delete data")
+        }
+        if let enumerator = FileManager.default.enumerator(atPath: baseDataPath) {
+            for next in enumerator {
+                if let path = next as? String {
+                    try? FileManager.default.removeItem(atPath: "\(baseDataPath)/\(path)")
+                }
+            }
+        }
+        ioLock.signal()
+    }
+    
+    public func trim(toCost cost: Int) {
+        if cost == .max { return }
+        if cost <= 0 {
+            clear()
+            return
+        }
+        ioLock.wait()
+        var totalCost = totalItemSize()
+        while totalCost > cost {
+            if let items = itemsForTrimming(withLimit: 16) {
+                for item in items {
+                    if totalCost > cost {
+                        _removeData(forKey: item.key)
+                        totalCost -= Int(item.size)
+                    } else {
+                        break
+                    }
+                }
+            } else {
+                break
+            }
+        }
+        ioLock.signal()
+    }
+    
+    public func trim(toCount count: Int) {
+        
+    }
+    
+    public func trim(toAge age: TimeInterval) {
+        
+    }
+    
+    private func _removeData(forKey key: String) {
         // Get filename and delete file data
         let selectSql = "SELECT filename FROM Storage_item WHERE key = '\(key)';"
         var stmt: OpaquePointer?
@@ -134,35 +196,37 @@ public class BBDiskStorage {
         if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
             print("Fail to remove data for key \(key)")
         }
-        ioLock.signal()
     }
     
-    public func clear() {
-        ioLock.wait()
-        let sql = "DELETE FROM Storage_item;"
-        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
-            print("Fail to delete data")
-        }
-        if let enumerator = FileManager.default.enumerator(atPath: baseDataPath) {
-            for next in enumerator {
-                if let path = next as? String {
-                    try? FileManager.default.removeItem(atPath: "\(baseDataPath)/\(path)")
-                    print("Clear item at path: \(baseDataPath)/\(path)")
+    private func itemsForTrimming(withLimit limit: Int) -> [BBDiskStorageItem]? {
+        var items: [BBDiskStorageItem]?
+        let sql = "SELECT key, size FROM Storage_item ORDER BY last_access_time LIMIT \(limit);"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+            items = []
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                var key: String = ""
+                if let keyPointer = sqlite3_column_text(stmt, 0) {
+                    key = String(cString: keyPointer)
                 }
+                let size: Int32 = sqlite3_column_int(stmt, 1)
+                items?.append(BBDiskStorageItem(key: key, filename: nil, data: nil, size: size, lastAccessTime: 0))
             }
+            sqlite3_finalize(stmt)
         }
-        ioLock.signal()
+        return items
     }
     
-    public func trim(toCost cost: Int) {
-        
-    }
-    
-    public func trim(toCount count: Int) {
-        
-    }
-    
-    public func trim(toAge age: TimeInterval) {
-        
+    private func totalItemSize() -> Int {
+        var size: Int = 0
+        let sql = "SELECT sum(size) FROM Storage_item;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                size = Int(sqlite3_column_int(stmt, 0))
+            }
+            sqlite3_finalize(stmt)
+        }
+        return size
     }
 }
