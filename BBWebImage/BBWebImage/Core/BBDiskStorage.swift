@@ -45,11 +45,13 @@ public class BBDiskStorage {
         let databasePath = path + "/BBCache.sqlite"
         if sqlite3_open(databasePath, &database) != SQLITE_OK {
             print("Fail to open sqlite at \(databasePath)")
+            try? FileManager.default.removeItem(atPath: databasePath)
             return nil
         }
         let sql = "CREATE TABLE IF NOT EXISTS Storage_item (key text PRIMARY KEY, filename text, data blob, size integer, last_access_time real);"
         if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
             print("Fail to create BBCache sqlite Storage_item table")
+            try? FileManager.default.removeItem(atPath: databasePath)
             return nil
         }
         // TODO: Create index
