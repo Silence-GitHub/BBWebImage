@@ -21,10 +21,13 @@ class MainMenuVC: UIViewController {
         let test = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(TestVC(), animated: true) }
         }
+        let imageWall = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(ImageWallVC(), animated: true) }
+        }
         let clearCache = { [weak self] in
             if self != nil { BBWebImageManager.shared.imageCache.clear() }
         }
-        list = [("Test", test), ("Clear cache", clearCache)]
+        list = [("Test", test), ("Image wall", imageWall), ("Clear cache", clearCache)]
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: UITableViewCell.description())
         tableView.dataSource = self
