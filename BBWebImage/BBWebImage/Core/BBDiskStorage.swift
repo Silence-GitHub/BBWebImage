@@ -190,7 +190,17 @@ public class BBDiskStorage {
     }
     
     public func trim(toAge age: TimeInterval) {
-        
+        if age == .greatestFiniteMagnitude { return }
+        if age <= 0 { return clear() }
+        ioLock.wait()
+        let time = CACurrentMediaTime() - age
+        if let filenames = filenamesEarlierThan(time) {
+            for filename in filenames {
+                try? FileManager.default.removeItem(atPath: "\(baseDataPath)/\(filename)")
+            }
+        }
+        removeDataEarlierThan(time)
+        ioLock.signal()
     }
     
     private func _removeData(forKey key: String) {
@@ -227,6 +237,7 @@ public class BBDiskStorage {
                 let size: Int32 = sqlite3_column_int(stmt, 1)
                 items?.append(BBDiskStorageItem(key: key, filename: nil, data: nil, size: size, lastAccessTime: 0))
             }
+            if items?.count == 0 { items = nil }
             sqlite3_finalize(stmt)
         }
         return items
@@ -256,5 +267,29 @@ public class BBDiskStorage {
             sqlite3_finalize(stmt)
         }
         return count
+    }
+    
+    private func filenamesEarlierThan(_ time: TimeInterval) -> [String]? {
+        var filenames: [String]?
+        let sql = "SELECT filename FROM Storage_item WHERE last_access_time < \(time) AND filename IS NOT NULL;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+            filenames = []
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                if let filenamePointer = sqlite3_column_text(stmt, 0) {
+                    filenames?.append(String(cString: filenamePointer))
+                }
+            }
+            if filenames?.count == 0 { filenames = nil }
+            sqlite3_finalize(stmt)
+        }
+        return filenames
+    }
+    
+    private func removeDataEarlierThan(_ time: TimeInterval) {
+        let sql = "DELETE FROM Storage_item WHERE last_access_time < \(time);"
+        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+            print("Fail to remove data earlier than \(time)")
+        }
     }
 }
