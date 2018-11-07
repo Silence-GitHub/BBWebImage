@@ -79,12 +79,16 @@ public class BBMemoryCache {
     private var countLimit: Int = Int.max
     private var ageLimit: TimeInterval = .greatestFiniteMagnitude
     private var lock = pthread_mutex_t()
+    private var queue: DispatchQueue
     
     init() {
         pthread_mutex_init(&lock, nil)
+        queue = DispatchQueue(label: "com.Kaibo.BBWebImage.MemoryCache.queue", qos: .background)
         
         NotificationCenter.default.addObserver(self, selector: #selector(clear), name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(clear), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        
+        trimRecursively()
     }
     
     deinit {
@@ -118,9 +122,19 @@ public class BBMemoryCache {
             node.cost = realCost
             linkedMap.dic[key] = node
             linkedMap.insertNodeAtHead(node)
+            
+            if linkedMap.totalCount > countLimit,
+                let tail = linkedMap.tail {
+                linkedMap.remove(tail)
+            }
+        }
+        if linkedMap.totalCost > costLimit {
+            queue.async { [weak self] in
+                guard let self = self else { return }
+                self.trim(toCost: self.costLimit)
+            }
         }
         pthread_mutex_unlock(&lock)
-        // TODO: Trim
     }
     
     public func removeImage(forKey key: String) {
@@ -137,5 +151,125 @@ public class BBMemoryCache {
         linkedMap.dic.removeAll()
         linkedMap.removeAll()
         pthread_mutex_unlock(&lock)
+    }
+    
+    public func setCostLimit(_ cost: Int) {
+        pthread_mutex_lock(&lock)
+        costLimit = cost
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.trim(toCost: cost)
+        }
+        pthread_mutex_unlock(&lock)
+    }
+    
+    public func setCountLimit(_ count: Int) {
+        pthread_mutex_lock(&lock)
+        countLimit = count
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.trim(toCount: count)
+        }
+        pthread_mutex_unlock(&lock)
+    }
+    
+    public func setAgeLimit(_ age: TimeInterval) {
+        pthread_mutex_lock(&lock)
+        ageLimit = age
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.trim(toAge: age)
+        }
+        pthread_mutex_unlock(&lock)
+    }
+    
+    private func trim(toCost cost: Int) {
+        pthread_mutex_lock(&lock)
+        let unlock: () -> Void = { pthread_mutex_unlock(&self.lock) }
+        if cost <= 0 {
+            linkedMap.dic.removeAll()
+            linkedMap.removeAll()
+            return unlock()
+        } else if linkedMap.totalCost <= cost {
+            return unlock()
+        }
+        unlock()
+        
+        while true {
+            if pthread_mutex_trylock(&lock) == 0 {
+                if linkedMap.totalCost > cost,
+                    let tail = linkedMap.tail {
+                    linkedMap.remove(tail)
+                } else {
+                    return unlock()
+                }
+                unlock()
+            } else {
+                usleep(10 * 1000) // 10 ms
+            }
+        }
+    }
+    
+    private func trim(toCount count: Int) {
+        pthread_mutex_lock(&lock)
+        let unlock: () -> Void = { pthread_mutex_unlock(&self.lock) }
+        if count <= 0 {
+            linkedMap.dic.removeAll()
+            linkedMap.removeAll()
+            return unlock()
+        } else if linkedMap.totalCount <= count {
+            return unlock()
+        }
+        unlock()
+        
+        while true {
+            if pthread_mutex_trylock(&lock) == 0 {
+                if linkedMap.totalCount > count,
+                    let tail = linkedMap.tail {
+                    linkedMap.remove(tail)
+                } else {
+                    return unlock()
+                }
+                unlock()
+            } else {
+                usleep(10 * 1000) // 10 ms
+            }
+        }
+    }
+    
+    private func trim(toAge age: TimeInterval) {
+        pthread_mutex_lock(&lock)
+        let unlock: () -> Void = { pthread_mutex_unlock(&self.lock) }
+        let now = CACurrentMediaTime()
+        if age <= 0 {
+            linkedMap.dic.removeAll()
+            linkedMap.removeAll()
+            return unlock()
+        } else if linkedMap.tail == nil || now - linkedMap.tail!.lastAccessTime <= age {
+            return unlock()
+        }
+        unlock()
+        
+        while true {
+            if pthread_mutex_trylock(&lock) == 0 {
+                if let tail = linkedMap.tail,
+                    now - tail.lastAccessTime > age {
+                    linkedMap.remove(tail)
+                } else {
+                    return unlock()
+                }
+                unlock()
+            } else {
+                usleep(10 * 1000) // 10 ms
+            }
+        }
+    }
+    
+    private func trimRecursively() {
+        queue.asyncAfter(deadline: .now() + 5) { [weak self] in
+            guard let self = self else { return }
+            self.trim(toAge: self.ageLimit)
+            self.trimRecursively()
+        }
     }
 }
