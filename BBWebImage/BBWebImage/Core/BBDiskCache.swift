@@ -12,6 +12,9 @@ public class BBDiskCache {
     private let storage: BBDiskStorage
     private let sizeThreshold: Int
     private let queue: DispatchQueue // Concurrent
+    private var costLimit: Int
+    private var countLimit: Int
+    private var ageLimit: TimeInterval
     
     public init?(path: String, sizeThreshold threshold: Int) {
         if let currentStorage = BBDiskStorage(path: path) {
@@ -21,7 +24,10 @@ public class BBDiskCache {
         }
         sizeThreshold = threshold
         queue = DispatchQueue(label: "com.Kaibo.BBWebImage.DiskCache.queue", qos: .utility, attributes: .concurrent)
-        // TODO: Trim by time, size, count
+        costLimit = .max
+        countLimit = .max
+        ageLimit = .greatestFiniteMagnitude
+        trimRecursively()
     }
     
     public func data(forKey key: String) -> Data? {
@@ -78,6 +84,15 @@ public class BBDiskCache {
             guard let self = self else { return }
             self.clear()
             completion?()
+        }
+    }
+    
+    private func trimRecursively() {
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 60) { [weak self] in
+            guard let self = self else { return }
+            self.storage.trim(toCost: self.costLimit)
+            self.storage.trim(toCount: self.countLimit)
+            self.storage.trim(toAge: self.ageLimit)
         }
     }
 }

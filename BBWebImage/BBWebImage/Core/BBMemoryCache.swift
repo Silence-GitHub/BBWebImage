@@ -12,21 +12,28 @@ private class BBLinkedMapNode {
     fileprivate weak var prev: BBLinkedMapNode?
     fileprivate weak var next: BBLinkedMapNode?
     fileprivate var value: Any
-    fileprivate var cost: Int = 0
+    fileprivate var cost: Int
     fileprivate var lastAccessTime: TimeInterval
     
     fileprivate init(value: Any) {
         self.value = value
+        self.cost = 0
         self.lastAccessTime = CACurrentMediaTime()
     }
 }
 
 private class BBLinkedMap {
-    fileprivate var dic: [String : BBLinkedMapNode] = [:]
-    fileprivate var totalCost: Int = 0
-    fileprivate var totalCount: Int = 0
+    fileprivate var dic: [String : BBLinkedMapNode]
+    fileprivate var totalCost: Int
+    fileprivate var totalCount: Int
     fileprivate var head: BBLinkedMapNode?
     fileprivate var tail: BBLinkedMapNode?
+    
+    init() {
+        dic = [:]
+        totalCost = 0
+        totalCount = 0
+    }
     
     fileprivate func bringNodeToHead(_ node: BBLinkedMapNode) {
         if head === node { return }
@@ -74,14 +81,19 @@ private class BBLinkedMap {
 }
 
 public class BBMemoryCache {
-    private let linkedMap = BBLinkedMap()
-    private var costLimit: Int = Int.max
-    private var countLimit: Int = Int.max
-    private var ageLimit: TimeInterval = .greatestFiniteMagnitude
-    private var lock = pthread_mutex_t()
+    private let linkedMap: BBLinkedMap
+    private var costLimit: Int
+    private var countLimit: Int
+    private var ageLimit: TimeInterval
+    private var lock: pthread_mutex_t
     private var queue: DispatchQueue
     
     init() {
+        linkedMap = BBLinkedMap()
+        costLimit = .max
+        countLimit = .max
+        ageLimit = .greatestFiniteMagnitude
+        lock = pthread_mutex_t()
         pthread_mutex_init(&lock, nil)
         queue = DispatchQueue(label: "com.Kaibo.BBWebImage.MemoryCache.queue", qos: .background)
         

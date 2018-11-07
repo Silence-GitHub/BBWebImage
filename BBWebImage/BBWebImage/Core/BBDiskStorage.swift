@@ -153,4 +153,16 @@ public class BBDiskStorage {
         }
         ioLock.signal()
     }
+    
+    public func trim(toCost cost: Int) {
+        
+    }
+    
+    public func trim(toCount count: Int) {
+        
+    }
+    
+    public func trim(toAge age: TimeInterval) {
+        
+    }
 }
