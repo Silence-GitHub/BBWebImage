@@ -18,6 +18,8 @@ class MainMenuVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        automaticallyAdjustsScrollViewInsets = false
+        
         let test = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(TestVC(), animated: true) }
         }
