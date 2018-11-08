@@ -60,6 +60,8 @@ class BBMergeRequestImageDownloadOperation: Operation {
     override func start() {
         stateLock.wait()
         if isCancelled {
+            isFinished = true
+            reset()
             stateLock.signal()
             // Completion call back will not be called when task is cancelled
             return
@@ -83,17 +85,25 @@ class BBMergeRequestImageDownloadOperation: Operation {
         defer { stateLock.signal() }
         if isFinished { return }
         super.cancel()
-        dataTask?.cancel()
-        done()
+        if let task = dataTask {
+            task.cancel()
+            if _executing { isExecuting = false }
+            if !_finished { isFinished = true }
+        }
+        reset()
     }
     
     private func done() {
+        isFinished = true
+        isExecuting = false
+        reset()
+    }
+    
+    private func reset() {
         taskLock.wait()
         tasks.removeAll()
         taskLock.signal()
         dataTask = nil
-        if _executing { isExecuting = false }
-        if !_finished { isFinished = true }
     }
 }
 
