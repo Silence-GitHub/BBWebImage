@@ -103,29 +103,21 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
     public func cancel(task: BBImageDownloadTask) {
         operationLock.wait()
         task.cancel()
-        if let operation = urlOperations[task.url] {
-            if operation.taskCount <= 1 {
-                operation.cancel()
-                urlOperations.removeValue(forKey: task.url)
-            }
+        if let operation = urlOperations[task.url],
+            operation.taskCount <= 1 {
+            operation.cancel() // We do not need to remove operation from urlOperations
         }
         operationLock.signal()
     }
     
     public func cancel(url: URL) {
         operationLock.wait()
-        if let operation = urlOperations[url] {
-            operation.cancel()
-            urlOperations.removeValue(forKey: url)
-        }
+        urlOperations[url]?.cancel() // We do not need to remove operation from urlOperations
         operationLock.signal()
     }
     
     public func cancelAll() {
-        operationLock.wait()
         downloadQueue.cancelAllOperations()
-        urlOperations.removeAll()
-        operationLock.signal()
     }
 }
 

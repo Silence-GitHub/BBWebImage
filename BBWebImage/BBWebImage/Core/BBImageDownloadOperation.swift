@@ -59,25 +59,16 @@ class BBMergeRequestImageDownloadOperation: Operation {
     
     override func start() {
         stateLock.wait()
+        defer { stateLock.signal() }
         if isCancelled {
             isFinished = true
             reset()
-            stateLock.signal()
             // Completion call back will not be called when task is cancelled
             return
         }
         dataTask = session.dataTask(with: request)
+        dataTask?.resume()
         isExecuting = true
-        stateLock.signal()
-        
-        if let currentDataTask = dataTask {
-            currentDataTask.resume()
-        } else {
-            complete(withData: nil, error: NSError(domain: NSURLErrorDomain, code: NSURLErrorUnknown, userInfo: [NSLocalizedDescriptionKey : "Data task can not be initialized"]))
-            stateLock.wait()
-            done()
-            stateLock.signal()
-        }
     }
     
     override func cancel() {
@@ -145,7 +136,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
         tasks.removeAll()
         taskLock.signal()
         for task in currentTasks {
-            task.completion(data, error)
+            if !task.isCancelled { task.completion(data, error) }
         }
     }
 }
