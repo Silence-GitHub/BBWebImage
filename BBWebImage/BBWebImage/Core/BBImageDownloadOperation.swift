@@ -45,7 +45,7 @@ class BBMergeRequestImageDownloadOperation: Operation {
         }
     }
     
-    override var isAsynchronous: Bool { return true }
+    override var isConcurrent: Bool { return true }
     
     required init(request: URLRequest, session: URLSession) {
         self.request = request
