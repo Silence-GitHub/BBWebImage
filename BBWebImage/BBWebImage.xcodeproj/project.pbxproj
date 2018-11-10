@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A4819C321964EB00000B229 /* BBDispatchQueuePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */; };
+		4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */; };
 		4A53310A21657DC500C68080 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A53310021657DC500C68080 /* BBWebImage.framework */; };
 		4A53310F21657DC500C68080 /* BBWebImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53310E21657DC500C68080 /* BBWebImageTests.swift */; };
 		4A53311121657DC500C68080 /* BBWebImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A53310321657DC500C68080 /* BBWebImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -55,6 +57,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDispatchQueuePool.swift; sourceTree = "<group>"; };
 		4A53310021657DC500C68080 /* BBWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BBWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A53310321657DC500C68080 /* BBWebImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BBWebImage.h; sourceTree = "<group>"; };
 		4A53310421657DC500C68080 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -149,6 +152,7 @@
 				4A5331562165943100C68080 /* BBImageDownloadOperation.swift */,
 				4A53315A2165BC8500C68080 /* BBImageCoder.swift */,
 				4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */,
+				4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -275,6 +279,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A4819C321964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
 				4A5DE8FC217191EE0074EEFD /* String+MD5.swift in Sources */,
 				4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
 				4A6E2D8C2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */,
@@ -305,6 +310,7 @@
 				4A53315121658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */,
 				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
+				4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
 				4AF3D1E9216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
 				4A62CAA3216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */,
 				4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,

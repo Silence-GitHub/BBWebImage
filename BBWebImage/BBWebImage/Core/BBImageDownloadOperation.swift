@@ -74,11 +74,11 @@ class BBMergeRequestImageDownloadOperation: Operation {
     override func cancel() {
         stateLock.wait()
         defer { stateLock.signal() }
-        if isFinished { return }
+        if _finished { return }
         super.cancel()
-        if let task = dataTask {
-            task.cancel()
-            if _executing { isExecuting = false }
+        dataTask?.cancel()
+        if _executing {
+            isExecuting = false
             if !_finished { isFinished = true }
         }
         reset()
@@ -133,7 +133,6 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
     private func complete(withData data: Data?, error: Error?) {
         taskLock.wait()
         let currentTasks = tasks
-        tasks.removeAll()
         taskLock.signal()
         for task in currentTasks {
             if !task.isCancelled { task.completion(data, error) }

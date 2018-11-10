@@ -45,7 +45,7 @@ public class BBWebImageManager {
     public private(set) var imageCache: BBImageCache
     public private(set) var imageDownloader: BBMergeRequestImageDownloader
     public private(set) var imageCoder: BBImageCoder
-    private let coderQueue: DispatchQueue
+    private let coderQueue: BBDispatchQueuePool
     private var tasks: Set<BBWebImageLoadTask>
     private var taskSentinel: Int32
     private let taskLock: DispatchSemaphore
@@ -55,7 +55,7 @@ public class BBWebImageManager {
         imageCache = BBLRUImageCache(path: path, sizeThreshold: 20 * 1024)
         imageDownloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
         imageCoder = BBImageCoderManager()
-        coderQueue = DispatchQueue(label: "com.Kaibo.BBWebImage.ImageManager.Coder", qos: .userInitiated)
+        coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
         taskSentinel = 0
         taskLock = DispatchSemaphore(value: 1)

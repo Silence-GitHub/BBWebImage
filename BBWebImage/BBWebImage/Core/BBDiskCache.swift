@@ -11,7 +11,7 @@ import UIKit
 public class BBDiskCache {
     private let storage: BBDiskStorage
     private let sizeThreshold: Int
-    private let queue: DispatchQueue // Concurrent
+    private let queue: BBDispatchQueuePool
     private var costLimit: Int
     private var countLimit: Int
     private var ageLimit: TimeInterval
@@ -23,7 +23,7 @@ public class BBDiskCache {
             return nil
         }
         sizeThreshold = threshold
-        queue = DispatchQueue(label: "com.Kaibo.BBWebImage.DiskCache.queue", qos: .utility, attributes: .concurrent)
+        queue = BBDispatchQueuePool.utility
         costLimit = .max
         countLimit = .max
         ageLimit = .greatestFiniteMagnitude
