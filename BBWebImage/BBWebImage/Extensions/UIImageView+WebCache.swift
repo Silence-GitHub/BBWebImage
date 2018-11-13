@@ -9,7 +9,7 @@
 import UIKit
 
 public extension UIImageView {
-    func bb_setImage(with url: URL, placeholder: UIImage? = nil, editor: BBWebImageEditor? = nil, completion: BBWebImageManagerCompletion? = nil) {
+    func bb_setImage(with url: URL, placeholder: UIImage? = nil, options: BBWebImageOptions = .none, editor: BBWebImageEditor? = nil, completion: BBWebImageManagerCompletion? = nil) {
         let webCacheOperation = bb_webCacheOperation
         webCacheOperation.task?.cancel()
         DispatchQueue.main.safeSync { self.image = placeholder }

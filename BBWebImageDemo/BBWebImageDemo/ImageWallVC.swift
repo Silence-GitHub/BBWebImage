@@ -20,6 +20,7 @@ class ImageWallVC: UIViewController {
         layout.itemSize = CGSize(width: cellWidth, height: cellWidth)
         let colletionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         colletionView.register(ImageWallCell.self, forCellWithReuseIdentifier: ImageWallCell.description())
+        colletionView.backgroundColor = .gray
         colletionView.dataSource = self
         view.addSubview(colletionView)
     }

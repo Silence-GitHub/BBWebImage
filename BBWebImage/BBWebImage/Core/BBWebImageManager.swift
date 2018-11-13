@@ -8,6 +8,16 @@
 
 import UIKit
 
+public struct BBWebImageOptions: OptionSet {
+    public let rawValue: Int
+    
+    public static let none = BBWebImageOptions(rawValue: 1 << 0)
+    public static let handleCookies = BBWebImageOptions(rawValue: 1 << 1)
+    public static let useURLCache = BBWebImageOptions(rawValue: 1 << 2)
+    
+    public init(rawValue: Int) { self.rawValue = rawValue }
+}
+
 public let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
 public typealias BBWebImageManagerCompletion = (UIImage?, Error?, BBImageCacheType) -> Void
 
@@ -62,7 +72,7 @@ public class BBWebImageManager {
     }
     
     @discardableResult
-    public func loadImage(with url: URL, editor: BBWebImageEditor? = nil, completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
+    public func loadImage(with url: URL, options: BBWebImageOptions = .none, editor: BBWebImageEditor? = nil, completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
         let task = newLoadTask()
         taskLock.wait()
         tasks.insert(task)

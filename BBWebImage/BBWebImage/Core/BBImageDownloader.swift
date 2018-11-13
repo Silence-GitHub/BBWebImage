@@ -44,7 +44,7 @@ public protocol BBImageDownloadTask {
 
 public protocol BBImageDownloader {
     // Donwload
-    func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
+    func downloadImage(with url: URL, options: BBWebImageOptions, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
     // Cancel
     func cancel(task: BBImageDownloadTask)
@@ -72,6 +72,7 @@ public class BBMergeRequestImageDownloader {
     private var urlOperations: [URL : BBMergeRequestImageDownloadOperation]
     private var maxRunningCount: Int
     private var currentRunningCount: Int
+    private var httpHeaders: [String : String]
     private let lock: DispatchSemaphore
     private let sessionConfiguration: URLSessionConfiguration
     private lazy var sessionDelegate: BBImageDownloadSessionDelegate = { BBImageDownloadSessionDelegate(downloader: self) }()
@@ -89,8 +90,15 @@ public class BBMergeRequestImageDownloader {
         urlOperations = [:]
         maxRunningCount = 6
         currentRunningCount = 0
+        httpHeaders = ["Accept" : "image/*;q=0.8"]
         lock = DispatchSemaphore(value: 1)
         self.sessionConfiguration = sessionConfiguration
+    }
+    
+    public func update(value: String?, forHTTPHeaderField field: String) {
+        lock.wait()
+        httpHeaders[field] = value
+        lock.signal()
     }
     
     fileprivate func operation(for url: URL) -> BBMergeRequestImageDownloadOperation? {
@@ -104,13 +112,17 @@ public class BBMergeRequestImageDownloader {
 extension BBMergeRequestImageDownloader: BBImageDownloader {
     // Donwload
     @discardableResult
-    public func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
+    public func downloadImage(with url: URL, options: BBWebImageOptions = .none, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
         lock.wait()
         var operation: BBMergeRequestImageDownloadOperation? = urlOperations[url]
         if operation == nil { // TODO: Check operation is finished
             let timeout = donwloadTimeout > 0 ? donwloadTimeout : 15
-            let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout) // TODO: Networking parameters
+            let cachePolicy: URLRequest.CachePolicy = options.contains(.useURLCache) ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
+            var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
+            request.httpShouldHandleCookies = options.contains(.handleCookies)
+            request.allHTTPHeaderFields = httpHeaders
+            request.httpShouldUsePipelining = true
             operation = BBMergeRequestImageDownloadOperation(request: request, session: session)
             operation?.completion = { [weak self] in
                 guard let self = self else { return }

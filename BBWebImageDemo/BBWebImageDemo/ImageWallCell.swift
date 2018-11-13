@@ -26,8 +26,12 @@ class ImageWallCell: UICollectionViewCell {
     }
     
     func set(url: URL) {
-//        imageView.bb_setImage(with: url)
-        let editor = BBWebImageEditor.editorForScaleAspectFillContentMode(with: imageView.frame.size)
+        let editor = BBWebImageEditor.editorForScaleAspectFillContentMode(with: imageView.frame.size,
+                                                                          corner: .allCorners,
+                                                                          cornerRadius: 5,
+                                                                          borderWidth: 1,
+                                                                          borderColor: .yellow,
+                                                                          backgroundColor: .gray)
         imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor, completion: nil)
     }
 }
