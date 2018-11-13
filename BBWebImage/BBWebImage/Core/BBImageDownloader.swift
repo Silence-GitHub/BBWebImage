@@ -10,6 +10,30 @@ import UIKit
 
 public typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
 
+private class BBLinkedListNode {
+    fileprivate let value: Any
+    fileprivate var next: BBLinkedListNode?
+    
+    fileprivate init(value: Any) { self.value = value }
+}
+
+private class BBLinkedListQueue {
+    fileprivate var head: BBLinkedListNode?
+    fileprivate var tail: BBLinkedListNode?
+    
+    fileprivate func enqueue(_ node: BBLinkedListNode) {
+        if head == nil { head = node }
+        tail?.next = node
+        tail = node
+    }
+    
+    fileprivate func dequeue() -> BBLinkedListNode? {
+        let node = head
+        head = head?.next
+        return node
+    }
+}
+
 public protocol BBImageDownloadTask {
     var url: URL { get }
     var isCancelled: Bool { get }
@@ -44,32 +68,35 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
 
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
+    private let waitingQueue: BBLinkedListQueue
     private var urlOperations: [URL : BBMergeRequestImageDownloadOperation]
-    private let operationLock: DispatchSemaphore
-    private let downloadQueue: OperationQueue
+    private var maxRunningCount: Int
+    private var currentRunningCount: Int
+    private let lock: DispatchSemaphore
     private let sessionConfiguration: URLSessionConfiguration
     private lazy var sessionDelegate: BBImageDownloadSessionDelegate = { BBImageDownloadSessionDelegate(downloader: self) }()
     private lazy var session: URLSession = {
         let queue = OperationQueue()
         queue.qualityOfService = .background
         queue.maxConcurrentOperationCount = 1
+        queue.name = "com.Kaibo.BBWebImage.download"
         return URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: queue)
     }()
     
     public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
+        waitingQueue = BBLinkedListQueue()
         urlOperations = [:]
-        operationLock = DispatchSemaphore(value: 1)
-        downloadQueue = OperationQueue()
-        downloadQueue.qualityOfService = .background
-        downloadQueue.maxConcurrentOperationCount = 6
+        maxRunningCount = 6
+        currentRunningCount = 0
+        lock = DispatchSemaphore(value: 1)
         self.sessionConfiguration = sessionConfiguration
     }
     
     fileprivate func operation(for url: URL) -> BBMergeRequestImageDownloadOperation? {
-        operationLock.wait()
+        lock.wait()
         let operation = urlOperations[url]
-        operationLock.signal()
+        lock.signal()
         return operation
     }
 }
@@ -79,45 +106,68 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
     @discardableResult
     public func downloadImage(with url: URL, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
-        operationLock.wait()
+        lock.wait()
         var operation: BBMergeRequestImageDownloadOperation? = urlOperations[url]
         if operation == nil { // TODO: Check operation is finished
             let timeout = donwloadTimeout > 0 ? donwloadTimeout : 15
             let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout) // TODO: Networking parameters
             operation = BBMergeRequestImageDownloadOperation(request: request, session: session)
-            operation?.completionBlock = { [weak self] in
+            operation?.completion = { [weak self] in
                 guard let self = self else { return }
-                self.operationLock.wait()
+                self.lock.wait()
                 self.urlOperations.removeValue(forKey: url)
-                self.operationLock.signal()
+                if let next = self.waitingQueue.dequeue()?.value as? BBImageDownloadOperation {
+                    BBDispatchQueuePool.background.async {
+                        next.start()
+                    }
+                } else if self.currentRunningCount > 0 {
+                    self.currentRunningCount -= 1
+                }
+                self.lock.signal()
             }
             urlOperations[url] = operation
-            downloadQueue.addOperation(operation!)
+            if currentRunningCount < maxRunningCount {
+                currentRunningCount += 1
+                BBDispatchQueuePool.background.async { [weak self] in
+                    guard self != nil else { return }
+                    operation?.start()
+                }
+            } else if let next = operation {
+                let node = BBLinkedListNode(value: next)
+                waitingQueue.enqueue(node)
+            }
         }
-        operationLock.signal()
         operation?.add(task: task)
+        lock.signal()
         return task
     }
     
     // Cancel
     public func cancel(task: BBImageDownloadTask) {
-        operationLock.wait()
+        lock.wait()
         task.cancel()
         if let operation = urlOperations[task.url],
             operation.taskCount <= 1 {
             operation.cancel() // We do not need to remove operation from urlOperations
         }
-        operationLock.signal()
+        lock.signal()
     }
     
     public func cancel(url: URL) {
-        operationLock.wait()
+        lock.wait()
         urlOperations[url]?.cancel() // We do not need to remove operation from urlOperations
-        operationLock.signal()
+        lock.signal()
     }
     
     public func cancelAll() {
-        downloadQueue.cancelAllOperations()
+        BBDispatchQueuePool.background.async { [weak self] in
+            guard let self = self else { return }
+            self.lock.wait()
+            for (_, operation) in self.urlOperations {
+                operation.cancel()
+            }
+            self.lock.signal()
+        }
     }
 }
 

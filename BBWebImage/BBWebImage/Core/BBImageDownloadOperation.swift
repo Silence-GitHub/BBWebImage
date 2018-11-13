@@ -13,10 +13,13 @@ public protocol BBImageDownloadOperation {
     
     init(request: URLRequest, session: URLSession)
     func add(task: BBImageDownloadTask)
+    func start()
+    func cancel()
 }
 
-class BBMergeRequestImageDownloadOperation: Operation {
+class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     var url: URL { return request.url! }
+    var completion: (() -> Void)?
     private let request: URLRequest
     private let session: URLSession
     private var tasks: [BBImageDownloadTask]
@@ -25,80 +28,9 @@ class BBMergeRequestImageDownloadOperation: Operation {
     private let stateLock: DispatchSemaphore
     private var imageData: Data?
     
-    private var _executing: Bool
-    override var isExecuting: Bool {
-        get { return _executing }
-        set {
-            self.willChangeValue(forKey: "isExecuting")
-            _executing = newValue
-            self.willChangeValue(forKey: "isExecuting")
-        }
-    }
+    private var cancelled: Bool
+    private var finished: Bool
     
-    private var _finished: Bool
-    override var isFinished: Bool {
-        get { return _finished }
-        set {
-            self.willChangeValue(forKey: "isFinished")
-            _finished = newValue
-            self.didChangeValue(forKey: "isFinished")
-        }
-    }
-    
-    override var isConcurrent: Bool { return true }
-    
-    required init(request: URLRequest, session: URLSession) {
-        self.request = request
-        self.session = session
-        tasks = []
-        taskLock = DispatchSemaphore(value: 1)
-        stateLock = DispatchSemaphore(value: 1)
-        _executing = false
-        _finished = false
-    }
-    
-    override func start() {
-        stateLock.wait()
-        defer { stateLock.signal() }
-        if isCancelled {
-            isFinished = true
-            reset()
-            // Completion call back will not be called when task is cancelled
-            return
-        }
-        dataTask = session.dataTask(with: request)
-        dataTask?.resume()
-        isExecuting = true
-    }
-    
-    override func cancel() {
-        stateLock.wait()
-        defer { stateLock.signal() }
-        if _finished { return }
-        super.cancel()
-        dataTask?.cancel()
-        if _executing {
-            isExecuting = false
-            if !_finished { isFinished = true }
-        }
-        reset()
-    }
-    
-    private func done() {
-        isFinished = true
-        isExecuting = false
-        reset()
-    }
-    
-    private func reset() {
-        taskLock.wait()
-        tasks.removeAll()
-        taskLock.signal()
-        dataTask = nil
-    }
-}
-
-extension BBMergeRequestImageDownloadOperation: BBImageDownloadOperation {
     var taskCount: Int {
         taskLock.wait()
         let count = tasks.count
@@ -106,10 +38,49 @@ extension BBMergeRequestImageDownloadOperation: BBImageDownloadOperation {
         return count
     }
     
+    required init(request: URLRequest, session: URLSession) {
+        self.request = request
+        self.session = session
+        tasks = []
+        taskLock = DispatchSemaphore(value: 1)
+        stateLock = DispatchSemaphore(value: 1)
+        cancelled = false
+        finished = false
+    }
+    
     func add(task: BBImageDownloadTask) {
         taskLock.wait()
         tasks.append(task)
         taskLock.signal()
+    }
+    
+    func start() {
+        stateLock.wait()
+        defer { stateLock.signal() }
+        if cancelled { return done() } // Completion call back will not be called when task is cancelled
+        dataTask = session.dataTask(with: request)
+        dataTask?.resume()
+    }
+    
+    func cancel() {
+        stateLock.wait()
+        defer { stateLock.signal() }
+        if finished { return }
+        cancelled = true
+        dataTask?.cancel()
+        done()
+    }
+    
+    private func done() {
+        finished = true
+        taskLock.wait()
+        tasks.removeAll()
+        taskLock.signal()
+        dataTask = nil
+        if let work = completion {
+            BBDispatchQueuePool.background.async(work: work)
+            completion = nil
+        }
     }
 }
 
