@@ -18,11 +18,11 @@ public class BBDispatchQueuePool {
     private let queues: [DispatchQueue]
     private var index: Int32
     
-    public init(label: String, qos: DispatchQoS) {
-        let count = min(16, max(1, ProcessInfo.processInfo.activeProcessorCount))
+    public init(label: String, qos: DispatchQoS, queueCount: Int = 0) {
+        let count = queueCount > 0 ? queueCount : min(16, max(1, ProcessInfo.processInfo.activeProcessorCount))
         var pool: [DispatchQueue] = []
         for i in 0..<count {
-            let queue = DispatchQueue(label: "\(label).\(i)", qos: qos)
+            let queue = DispatchQueue(label: "\(label).\(i)", qos: qos, target: DispatchQueue.global(qos: qos.qosClass))
             pool.append(queue)
         }
         queues = pool
