@@ -69,7 +69,7 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
     private let waitingQueue: BBLinkedListQueue
-    private var urlOperations: [URL : BBMergeRequestImageDownloadOperation]
+    private var urlOperations: [URL : BBImageDownloadOperation]
     private var maxRunningCount: Int
     private var currentRunningCount: Int
     private var httpHeaders: [String : String]
@@ -101,7 +101,7 @@ public class BBMergeRequestImageDownloader {
         lock.signal()
     }
     
-    fileprivate func operation(for url: URL) -> BBMergeRequestImageDownloadOperation? {
+    fileprivate func operation(for url: URL) -> BBImageDownloadOperation? {
         lock.wait()
         let operation = urlOperations[url]
         lock.signal()
@@ -115,7 +115,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
     public func downloadImage(with url: URL, options: BBWebImageOptions = .none, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
         lock.wait()
-        var operation: BBMergeRequestImageDownloadOperation? = urlOperations[url]
+        var operation: BBImageDownloadOperation? = urlOperations[url]
         if operation == nil { // TODO: Check operation is finished
             let timeout = donwloadTimeout > 0 ? donwloadTimeout : 15
             let cachePolicy: URLRequest.CachePolicy = options.contains(.useURLCache) ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
@@ -123,8 +123,8 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
             request.httpShouldHandleCookies = options.contains(.handleCookies)
             request.allHTTPHeaderFields = httpHeaders
             request.httpShouldUsePipelining = true
-            operation = BBMergeRequestImageDownloadOperation(request: request, session: session)
-            operation?.completion = { [weak self] in
+            let newOperation = BBMergeRequestImageDownloadOperation(request: request, session: session)
+            newOperation.completion = { [weak self] in
                 guard let self = self else { return }
                 self.lock.wait()
                 self.urlOperations.removeValue(forKey: url)
@@ -137,17 +137,18 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
                 }
                 self.lock.signal()
             }
-            urlOperations[url] = operation
+            urlOperations[url] = newOperation
             if currentRunningCount < maxRunningCount {
                 currentRunningCount += 1
                 BBDispatchQueuePool.background.async { [weak self] in
                     guard self != nil else { return }
-                    operation?.start()
+                    newOperation.start()
                 }
-            } else if let next = operation {
-                let node = BBLinkedListNode(value: next)
+            } else {
+                let node = BBLinkedListNode(value: newOperation)
                 waitingQueue.enqueue(node)
             }
+            operation = newOperation
         }
         operation?.add(task: task)
         lock.signal()
@@ -192,8 +193,9 @@ private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let url = task.originalRequest?.url,
-            let operation = downloader?.operation(for: url) {
-            operation.urlSession(session, task: task, didCompleteWithError: error)
+            let operation = downloader?.operation(for: url),
+            let taskDelegate = operation as? URLSessionTaskDelegate {
+            taskDelegate.urlSession?(session, task: task, didCompleteWithError: error)
         }
     }
 }
@@ -201,8 +203,9 @@ private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
 extension BBImageDownloadSessionDelegate: URLSessionDataDelegate {
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if let url = dataTask.originalRequest?.url,
-            let operation = downloader?.operation(for: url) {
-            operation.urlSession(session, dataTask: dataTask, didReceive: data)
+            let operation = downloader?.operation(for: url),
+            let dataDelegate = operation as? URLSessionDataDelegate {
+            dataDelegate.urlSession?(session, dataTask: dataTask, didReceive: data)
         }
     }
 }

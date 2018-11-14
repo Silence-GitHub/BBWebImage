@@ -16,7 +16,7 @@ public extension UIImageView {
         webCacheOperation.task = BBWebImageManager.shared.loadImage(with: url, editor: editor) { [weak self] (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
             guard let self = self else { return }
             if let currentImage = image { self.image = currentImage }
-            if let currentCompletion = completion { currentCompletion(image, error, cacheType) }
+            completion?(image, error, cacheType)
         }
     }
 }
