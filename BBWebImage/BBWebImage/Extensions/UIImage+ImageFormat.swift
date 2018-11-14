@@ -28,3 +28,9 @@ public extension UIImage {
         set { objc_setAssociatedObject(self, &imageEditKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
 }
+
+public extension CGImage {
+    var containsAlpha: Bool {
+        return !(alphaInfo == .none || alphaInfo == .noneSkipFirst || alphaInfo == .noneSkipLast)
+    }
+}

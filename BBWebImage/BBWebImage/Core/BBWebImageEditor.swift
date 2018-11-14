@@ -37,12 +37,9 @@ public struct BBWebImageEditor {
                 let souceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
             var bitmapInfo = souceImage.bitmapInfo
             bitmapInfo.remove(.alphaInfoMask)
-            let alphaInfo = souceImage.alphaInfo
-            if !(alphaInfo == .none || alphaInfo == .noneSkipFirst || alphaInfo == .noneSkipLast) {
-                // Has alpha
+            if souceImage.containsAlpha {
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
             } else {
-                // No alpha
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
             }
             // Make sure resolution is not too small

@@ -62,9 +62,11 @@ public class BBWebImageManager {
     
     public init() {
         let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
-        imageCache = BBLRUImageCache(path: path, sizeThreshold: 20 * 1024)
+        let cache = BBLRUImageCache(path: path, sizeThreshold: 20 * 1024)
+        imageCache = cache
         imageDownloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
         imageCoder = BBImageCoderManager()
+        cache.imageCoder = imageCoder
         coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
         taskSentinel = 0

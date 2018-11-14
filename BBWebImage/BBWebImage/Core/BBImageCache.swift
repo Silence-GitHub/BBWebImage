@@ -77,6 +77,7 @@ public extension BBImageCache {
 public class BBLRUImageCache: BBImageCache {
     public let memoryCache: BBMemoryCache
     public let diskCache: BBDiskCache?
+    public weak var imageCoder: BBImageCoder?
     
     init(path: String, sizeThreshold: Int) {
         memoryCache = BBMemoryCache()
@@ -107,9 +108,13 @@ public class BBLRUImageCache: BBImageCache {
         if cacheType.contains(.memory) { memoryCache.store(image, forKey: key) }
         if cacheType.contains(.disk),
             let currentDiskCache = diskCache {
-            return currentDiskCache.store({ () -> Data? in
+            return currentDiskCache.store({ [weak self] () -> Data? in
+                guard let self = self else { return nil }
                 if let data = image.bb_originalImageData { return data }
-                // TODO: Encode image
+                if let coder = self.imageCoder,
+                    let data = coder.encode(image, toFormat: image.bb_imageFormat ?? .unknown) {
+                    return data
+                }
                 return nil
             }, forKey: key, completion: completion)
         }

@@ -8,9 +8,11 @@
 
 import UIKit
 
-public protocol BBImageCoder {
+public protocol BBImageCoder: AnyObject {
     func canDecode(imageData: Data) -> Bool
     func decode(imageData: Data) -> UIImage?
+    func canEncode(_ format: BBImageFormat) -> Bool
+    func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data?
 }
 
 public class BBImageCoderManager {
@@ -43,6 +45,26 @@ extension BBImageCoderManager: BBImageCoder {
         coderLock.signal()
         for coder in currentCoders where coder.canDecode(imageData: imageData) {
             return coder.decode(imageData: imageData)
+        }
+        return nil
+    }
+    
+    public func canEncode(_ format: BBImageFormat) -> Bool {
+        coderLock.wait()
+        let currentCoders = coders
+        coderLock.signal()
+        for coder in currentCoders {
+            if coder.canEncode(format) { return true }
+        }
+        return false
+    }
+    
+    public func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data? {
+        coderLock.wait()
+        let currentCoders = coders
+        coderLock.signal()
+        for coder in currentCoders where coder.canEncode(format) {
+            return coder.encode(image, toFormat: format)
         }
         return nil
     }

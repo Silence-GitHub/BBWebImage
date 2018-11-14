@@ -7,11 +7,21 @@
 //
 
 import UIKit
+import MobileCoreServices
 
 public enum BBImageFormat {
     case unknown
     case JPEG
     case PNG
+    
+    var UTType: CFString {
+        switch self {
+        case .JPEG:
+            return kUTTypeJPEG
+        default:
+            return kUTTypePNG
+        }
+    }
 }
 
 public extension Data {

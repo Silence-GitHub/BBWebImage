@@ -25,4 +25,25 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         image?.bb_originalImageData = imageData
         return image
     }
+    
+    public func canEncode(_ format: BBImageFormat) -> Bool {
+        return true
+    }
+    
+    public func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data? {
+        guard let sourceImage = image.cgImage,
+            let data = CFDataCreateMutable(kCFAllocatorDefault, 0) else { return nil }
+        var imageFormat = format
+        if format == .unknown {
+            imageFormat = sourceImage.containsAlpha ? .PNG : .JPEG
+        }
+        if let destination = CGImageDestinationCreateWithData(data, imageFormat.UTType, 1, nil) {
+            CGImageDestinationAddImage(destination, sourceImage, nil)
+            if !CGImageDestinationFinalize(destination) {
+                return nil
+            }
+            return data as Data
+        }
+        return nil
+    }
 }
