@@ -26,6 +26,34 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         return image
     }
     
+    public func decompressedImage(withImage image: UIImage, data: Data) -> UIImage? {
+        guard let sourceImage = image.cgImage else { return image }
+        let width = sourceImage.width
+        let height = sourceImage.height
+        var bitmapInfo = sourceImage.bitmapInfo
+        bitmapInfo.remove(.alphaInfoMask)
+        if sourceImage.bb_containsAlpha {
+            bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
+        } else {
+            bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+        }
+        guard let context = CGContext(data: nil,
+                                      width: width,
+                                      height: height,
+                                      bitsPerComponent: sourceImage.bitsPerComponent,
+                                      bytesPerRow: 0,
+                                      space: bb_shareColorSpace,
+                                      bitmapInfo: bitmapInfo.rawValue) else { return image }
+        context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        if let cgimage = context.makeImage() {
+            let finalImage = UIImage(cgImage: cgimage, scale: image.scale, orientation: image.imageOrientation)
+            finalImage.bb_imageFormat = image.bb_imageFormat
+            finalImage.bb_originalImageData = image.bb_originalImageData
+            return finalImage
+        }
+        return image
+    }
+    
     public func canEncode(_ format: BBImageFormat) -> Bool {
         return true
     }

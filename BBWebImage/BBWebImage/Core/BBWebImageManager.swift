@@ -55,6 +55,7 @@ public class BBWebImageManager {
     public private(set) var imageCache: BBImageCache
     public private(set) var imageDownloader: BBMergeRequestImageDownloader
     public private(set) var imageCoder: BBImageCoder
+    public var shouldDecompressImage: Bool
     private let coderQueue: BBDispatchQueuePool
     private var tasks: Set<BBWebImageLoadTask>
     private var taskSentinel: Int32
@@ -67,6 +68,7 @@ public class BBWebImageManager {
         imageDownloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
         imageCoder = BBImageCoderManager()
         cache.imageCoder = imageCoder
+        shouldDecompressImage = true
         coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
         taskSentinel = 0
@@ -189,7 +191,11 @@ public class BBWebImageManager {
                 } else {
                     DispatchQueue.main.async { completion(nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
                 }
-            } else if let image = self.imageCoder.decode(imageData: data) {
+            } else if var image = self.imageCoder.decode(imageData: data) {
+                if self.shouldDecompressImage,
+                    let decompressedImage = self.imageCoder.decompressedImage(withImage: image, data: data) {
+                    image = decompressedImage
+                }
                 DispatchQueue.main.async { completion(image, nil, cacheType) }
                 let storeCacheType: BBImageCacheType = (cacheType == .disk ? .memory : .all)
                 self.imageCache.store(image, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)

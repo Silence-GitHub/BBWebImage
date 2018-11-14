@@ -11,6 +11,7 @@ import UIKit
 public protocol BBImageCoder: AnyObject {
     func canDecode(imageData: Data) -> Bool
     func decode(imageData: Data) -> UIImage?
+    func decompressedImage(withImage image: UIImage, data: Data) -> UIImage?
     func canEncode(_ format: BBImageFormat) -> Bool
     func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data?
 }
@@ -45,6 +46,16 @@ extension BBImageCoderManager: BBImageCoder {
         coderLock.signal()
         for coder in currentCoders where coder.canDecode(imageData: imageData) {
             return coder.decode(imageData: imageData)
+        }
+        return nil
+    }
+    
+    public func decompressedImage(withImage image: UIImage, data: Data) -> UIImage? {
+        coderLock.wait()
+        let currentCoders = coders
+        coderLock.signal()
+        for coder in currentCoders where coder.canDecode(imageData: data) {
+            return coder.decompressedImage(withImage: image, data: data)
         }
         return nil
     }
