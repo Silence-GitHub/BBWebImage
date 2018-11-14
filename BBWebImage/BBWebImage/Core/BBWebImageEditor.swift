@@ -34,23 +34,23 @@ public struct BBWebImageEditor {
                 displaySize.height > 0,
                 let currentData = data,
                 let currentImage = UIImage(data: currentData),
-                let souceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
-            var bitmapInfo = souceImage.bitmapInfo
+                let sourceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
+            var bitmapInfo = sourceImage.bitmapInfo
             bitmapInfo.remove(.alphaInfoMask)
-            if souceImage.containsAlpha {
+            if sourceImage.containsAlpha {
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
             } else {
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
             }
             // Make sure resolution is not too small
             let currentMaxResolution = max(maxResolution, Int(displaySize.width * displaySize.height * 7))
-            let resolutionRatio = sqrt(CGFloat(souceImage.width * souceImage.height) / CGFloat(currentMaxResolution))
+            let resolutionRatio = sqrt(CGFloat(sourceImage.width * sourceImage.height) / CGFloat(currentMaxResolution))
             let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
-            var width = souceImage.width
-            var height = souceImage.height
+            var width = sourceImage.width
+            var height = sourceImage.height
             if shouldScaleDown {
-                width = Int(CGFloat(souceImage.width) / resolutionRatio)
-                height = Int(CGFloat(souceImage.height) / resolutionRatio)
+                width = Int(CGFloat(sourceImage.width) / resolutionRatio)
+                height = Int(CGFloat(sourceImage.height) / resolutionRatio)
             } else if CGFloat(width) < displaySize.width * bb_ScreenScale {
                 width = Int(displaySize.width * bb_ScreenScale)
                 height = Int(displaySize.height * bb_ScreenScale)
@@ -58,7 +58,7 @@ public struct BBWebImageEditor {
             guard let context = CGContext(data: nil,
                                           width: width,
                                           height: height,
-                                          bitsPerComponent: souceImage.bitsPerComponent,
+                                          bitsPerComponent: sourceImage.bitsPerComponent,
                                           bytesPerRow: 0,
                                           space: bb_shareColorSpace,
                                           bitmapInfo: bitmapInfo.rawValue) else { return nil }
@@ -83,9 +83,9 @@ public struct BBWebImageEditor {
             context.scaleBy(x: 1, y: -1)
             context.translateBy(x: 0, y: CGFloat(-height))
             if shouldScaleDown {
-                drawForScaleDown(context, sourceImage: souceImage)
+                drawForScaleDown(context, sourceImage: sourceImage)
             } else {
-                context.draw(souceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
             }
             context.restoreGState()
             if let strokeColor = borderColor?.cgColor,

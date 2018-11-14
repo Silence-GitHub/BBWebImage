@@ -34,7 +34,7 @@ public typealias BBImageCacheQueryCompletion = (BBImageCachQueryCompletionResult
 public typealias BBImageCacheStoreCompletion = () -> Void
 public typealias BBImageCacheRemoveCompletion = () -> Void
 
-public protocol BBImageCache {
+public protocol BBImageCache: AnyObject {
     // Get image
     func image(forKey key: String, completion: @escaping BBImageCacheQueryCompletion)
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)

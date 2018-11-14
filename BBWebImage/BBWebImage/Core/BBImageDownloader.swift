@@ -42,7 +42,7 @@ public protocol BBImageDownloadTask {
     func cancel()
 }
 
-public protocol BBImageDownloader {
+public protocol BBImageDownloader: AnyObject {
     // Donwload
     func downloadImage(with url: URL, options: BBWebImageOptions, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
