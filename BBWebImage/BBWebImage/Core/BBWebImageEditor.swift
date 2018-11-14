@@ -37,7 +37,7 @@ public struct BBWebImageEditor {
                 let sourceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
             var bitmapInfo = sourceImage.bitmapInfo
             bitmapInfo.remove(.alphaInfoMask)
-            if sourceImage.containsAlpha {
+            if sourceImage.bb_containsAlpha {
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
             } else {
                 bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)

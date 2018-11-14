@@ -35,7 +35,7 @@ public class BBWebImageImageIOCoder: BBImageCoder {
             let data = CFDataCreateMutable(kCFAllocatorDefault, 0) else { return nil }
         var imageFormat = format
         if format == .unknown {
-            imageFormat = sourceImage.containsAlpha ? .PNG : .JPEG
+            imageFormat = sourceImage.bb_containsAlpha ? .PNG : .JPEG
         }
         if let destination = CGImageDestinationCreateWithData(data, imageFormat.UTType, 1, nil) {
             CGImageDestinationAddImage(destination, sourceImage, nil)

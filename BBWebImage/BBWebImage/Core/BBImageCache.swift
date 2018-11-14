@@ -105,7 +105,7 @@ public class BBLRUImageCache: BBImageCache {
     
     // Store image
     public func store(_ image: UIImage, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
-        if cacheType.contains(.memory) { memoryCache.store(image, forKey: key) }
+        if cacheType.contains(.memory) { memoryCache.store(image, forKey: key, cost: image.cgImage?.bb_cost ?? 1) }
         if cacheType.contains(.disk),
             let currentDiskCache = diskCache {
             return currentDiskCache.store({ [weak self] () -> Data? in
