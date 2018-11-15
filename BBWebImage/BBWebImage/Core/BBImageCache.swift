@@ -15,6 +15,8 @@ public struct BBImageCacheType: OptionSet {
     public static let memory = BBImageCacheType(rawValue: 1 << 1)
     public static let disk = BBImageCacheType(rawValue: 1 << 2)
     
+    public static let any = BBImageCacheType(rawValue: ~0)
+    
     public static let all: BBImageCacheType = [.memory, .disk]
     
     public init(rawValue: Int) { self.rawValue = rawValue }
@@ -28,6 +30,7 @@ public enum BBImageCachQueryCompletionResult {
     case none
     case memory(image: UIImage)
     case disk(data: Data)
+    case all(image: UIImage, data: Data)
 }
 
 public typealias BBImageCacheQueryCompletion = (BBImageCachQueryCompletionResult) -> Void
@@ -40,8 +43,8 @@ public protocol BBImageCache: AnyObject {
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)
     
     // Store image
-    func store(_ image: UIImage, forKey key: String, completion: BBImageCacheStoreCompletion?)
-    func store(_ image: UIImage, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?)
+    func store(_ image: UIImage?, data: Data?, forKey key: String, completion: BBImageCacheStoreCompletion?)
+    func store(_ image: UIImage?, data: Data?, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?)
     
     // Remove image
     func removeImage(forKey key: String, completion: BBImageCacheRemoveCompletion?)
@@ -59,8 +62,8 @@ public extension BBImageCache {
     }
     
     // Store image
-    func store(_ image: UIImage, forKey key: String, completion: BBImageCacheStoreCompletion? = nil) {
-        store(image, forKey: key, cacheType: .all, completion: completion)
+    func store(_ image: UIImage?, data: Data?, forKey key: String, completion: BBImageCacheStoreCompletion? = nil) {
+        store(image, data: data, forKey: key, cacheType: .all, completion: completion)
     }
     
     // Remove image
@@ -86,15 +89,28 @@ public class BBLRUImageCache: BBImageCache {
     
     // Get image
     public func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion) {
+        var memoryImage: UIImage?
         if cacheType.contains(.memory),
             let image = memoryCache.image(forKey: key) {
-            return completion(.memory(image: image))
+            if cacheType == .all {
+                memoryImage = image
+            } else {
+                return completion(.memory(image: image))
+            }
         }
         if cacheType.contains(.disk),
             let currentDiskCache = diskCache {
             return currentDiskCache.data(forKey: key) { (data) in
                 if let currentData = data {
-                    completion(.disk(data: currentData))
+                    if cacheType == .all,
+                        let currentImage = memoryImage {
+                        completion(.all(image: currentImage, data: currentData))
+                    } else {
+                        completion(.disk(data: currentData))
+                    }
+                } else if let currentImage = memoryImage {
+                    // Cache type is all
+                    completion(.memory(image: currentImage))
                 } else {
                     completion(.none)
                 }
@@ -104,15 +120,21 @@ public class BBLRUImageCache: BBImageCache {
     }
     
     // Store image
-    public func store(_ image: UIImage, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
-        if cacheType.contains(.memory) { memoryCache.store(image, forKey: key, cost: image.cgImage?.bb_cost ?? 1) }
+    public func store(_ image: UIImage?, data: Data?, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
+        if cacheType.contains(.memory),
+            let currentImage = image {
+            memoryCache.store(currentImage, forKey: key, cost: currentImage.cgImage?.bb_cost ?? 1)
+        }
         if cacheType.contains(.disk),
             let currentDiskCache = diskCache {
+            if let currentData = data {
+                return currentDiskCache.store(currentData, forKey: key, completion: completion)
+            }
             return currentDiskCache.store({ [weak self] () -> Data? in
                 guard let self = self else { return nil }
-                if let data = image.bb_originalImageData { return data }
-                if let coder = self.imageCoder,
-                    let data = coder.encode(image, toFormat: image.bb_imageFormat ?? .unknown) {
+                if let currentImage = image,
+                    let coder = self.imageCoder,
+                    let data = coder.encode(currentImage, toFormat: currentImage.bb_imageFormat ?? .unknown) {
                     return data
                 }
                 return nil

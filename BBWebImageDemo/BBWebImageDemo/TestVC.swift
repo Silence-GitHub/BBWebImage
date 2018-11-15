@@ -35,7 +35,7 @@ class TestVC: UIViewController {
 //        let data = try! Data(contentsOf: dataUrl)
 //        imageView.image = editor.edit(nil, data)
 //        return;
-        imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor) { (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
+        imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor) { (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
             print("Completion")
             if let currentImage = image {
                 print("Image: \(currentImage)")

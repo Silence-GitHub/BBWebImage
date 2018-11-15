@@ -13,10 +13,10 @@ public extension UIImageView {
         let webCacheOperation = bb_webCacheOperation
         webCacheOperation.task?.cancel()
         DispatchQueue.main.safeSync { self.image = placeholder }
-        webCacheOperation.task = BBWebImageManager.shared.loadImage(with: url, editor: editor) { [weak self] (image: UIImage?, error: Error?, cacheType: BBImageCacheType) in
+        webCacheOperation.task = BBWebImageManager.shared.loadImage(with: url, editor: editor) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
             guard let self = self else { return }
             if let currentImage = image { self.image = currentImage }
-            completion?(image, error, cacheType)
+            completion?(image, data, error, cacheType)
         }
     }
 }

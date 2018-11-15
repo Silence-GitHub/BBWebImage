@@ -22,7 +22,6 @@ public class BBWebImageImageIOCoder: BBImageCoder {
     public func decode(imageData: Data) -> UIImage? {
         let image = UIImage(data: imageData)
         image?.bb_imageFormat = imageData.bb_imageFormat
-        image?.bb_originalImageData = imageData
         return image
     }
     
@@ -48,7 +47,6 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         if let cgimage = context.makeImage() {
             let finalImage = UIImage(cgImage: cgimage, scale: image.scale, orientation: image.imageOrientation)
             finalImage.bb_imageFormat = image.bb_imageFormat
-            finalImage.bb_originalImageData = image.bb_originalImageData
             return finalImage
         }
         return image

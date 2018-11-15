@@ -15,10 +15,12 @@ public let bb_ScreenScale = UIScreen.main.scale
 
 public struct BBWebImageEditor {
     public var key: String
+    public var needData: Bool
     public var edit: BBWebImageEditMethod
     
-    public init(key: String, edit: @escaping (UIImage?, Data?) -> UIImage?) {
+    public init(key: String, needData: Bool, edit: @escaping BBWebImageEditMethod) {
         self.key = key
+        self.needData = needData
         self.edit = edit
     }
     
@@ -102,7 +104,7 @@ public struct BBWebImageEditor {
         let borderColorKey = borderColor?.cgColor.components ?? []
         let backgroundColorKey = backgroundColor?.cgColor.components ?? []
         let key = "size=\(displaySize),corner=\(cornerKey),cornerRadius=\(cornerRadius),borderWidth=\(borderWidth),borderColor=\(borderColorKey),backgroundColor=\(backgroundColorKey)"
-        return BBWebImageEditor(key: key, edit: edit)
+        return BBWebImageEditor(key: key, needData: true, edit: edit)
     }
     
     private static func borderPath(with size: CGSize, corner: UIRectCorner, cornerRadius: CGFloat, borderWidth: CGFloat) -> UIBezierPath {

@@ -18,11 +18,6 @@ public extension UIImage {
         set { objc_setAssociatedObject(self, &imageFormatKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
-    public var bb_originalImageData: Data? {
-        get { return objc_getAssociatedObject(self, &imageDataKey) as? Data }
-        set { objc_setAssociatedObject(self, &imageDataKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
-    }
-    
     public var bb_imageEditKey: String? {
         get { return objc_getAssociatedObject(self, &imageEditKey) as? String }
         set { objc_setAssociatedObject(self, &imageEditKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
