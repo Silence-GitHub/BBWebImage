@@ -11,9 +11,9 @@ import UIKit
 public struct BBImageCacheType: OptionSet {
     public let rawValue: Int
     
-    public static let none = BBImageCacheType(rawValue: 1 << 0)
-    public static let memory = BBImageCacheType(rawValue: 1 << 1)
-    public static let disk = BBImageCacheType(rawValue: 1 << 2)
+    public static let none = BBImageCacheType(rawValue: 0)
+    public static let memory = BBImageCacheType(rawValue: 1 << 0)
+    public static let disk = BBImageCacheType(rawValue: 1 << 1)
     
     public static let any = BBImageCacheType(rawValue: ~0)
     
@@ -22,7 +22,7 @@ public struct BBImageCacheType: OptionSet {
     public init(rawValue: Int) { self.rawValue = rawValue }
     
     public var cached: Bool {
-        return (self.rawValue & BBImageCacheType.memory.rawValue) != 0 || (self.rawValue & BBImageCacheType.disk.rawValue) != 0
+        return (rawValue & BBImageCacheType.memory.rawValue) != 0 || (rawValue & BBImageCacheType.disk.rawValue) != 0
     }
 }
 

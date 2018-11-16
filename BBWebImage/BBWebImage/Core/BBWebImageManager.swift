@@ -11,7 +11,8 @@ import UIKit
 public struct BBWebImageOptions: OptionSet {
     public let rawValue: Int
     
-    public static let none = BBWebImageOptions(rawValue: 1 << 0)
+    public static let none = BBWebImageOptions(rawValue: 0)
+    public static let queryDataWhenInMemory = BBWebImageOptions(rawValue: 1 << 0)
     public static let handleCookies = BBWebImageOptions(rawValue: 1 << 1)
     public static let useURLCache = BBWebImageOptions(rawValue: 1 << 2)
     
@@ -81,7 +82,7 @@ public class BBWebImageManager {
         taskLock.wait()
         tasks.insert(task)
         taskLock.signal()
-        let needData = editor?.needData ?? false
+        let needData = options.contains(.queryDataWhenInMemory) || (editor != nil && editor!.needData)
         weak var wtask = task
         imageCache.image(forKey: url.absoluteString, cacheType: needData ? .all : .any) { [weak self] (result: BBImageCachQueryCompletionResult) in
             guard let self = self, let task = wtask else { return }
@@ -137,7 +138,7 @@ public class BBWebImageManager {
                         completion: @escaping BBWebImageManagerCompletion) {
         if let currentEditor = editor {
             if currentEditor.key == image.bb_imageEditKey {
-                DispatchQueue.main.safeAsync { completion(image, data, nil, .memory) }
+                DispatchQueue.main.safeAsync { completion(image, data, nil, cacheType) }
                 self.remove(loadTask: task)
             } else {
                 weak var wtask = task
