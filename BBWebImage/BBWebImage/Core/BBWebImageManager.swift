@@ -82,21 +82,68 @@ public class BBWebImageManager {
         taskLock.wait()
         tasks.insert(task)
         taskLock.signal()
-        let needData = options.contains(.queryDataWhenInMemory) || (editor != nil && editor!.needData)
-        imageCache.image(forKey: url.absoluteString, cacheType: needData ? .all : .any) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
+        
+        // Get memory image first
+        var memoryImage: UIImage?
+        imageCache.image(forKey: url.absoluteString, cacheType: .memory) { (result: BBImageCachQueryCompletionResult) in
+            switch result {
+            case .memory(image: let image):
+                memoryImage = image
+            default:
+                break
+            }
+        }
+        var finished = false
+        if let currentImage = memoryImage,
+            !options.contains(.queryDataWhenInMemory) {
+            if let currentEditor = editor {
+                if currentEditor.key == currentImage.bb_imageEditKey {
+                    DispatchQueue.main.safeAsync { completion(currentImage, nil, nil, .memory) }
+                    self.remove(loadTask: task)
+                    finished = true
+                } else if !currentEditor.needData {
+                    coderQueue.async { [weak self, weak task] in
+                        guard let self = self, let task = task else { return }
+                        guard !task.isCancelled else {
+                            self.remove(loadTask: task)
+                            return
+                        }
+                        if let image = currentEditor.edit(currentImage, nil) {
+                            guard !task.isCancelled else {
+                                self.remove(loadTask: task)
+                                return
+                            }
+                            image.bb_imageEditKey = currentEditor.key
+                            image.bb_imageFormat = currentImage.bb_imageFormat
+                            DispatchQueue.main.async { completion(image, nil, nil, .memory) }
+                            self.imageCache.store(image, data: nil, forKey: url.absoluteString, cacheType: .memory, completion: nil)
+                        } else {
+                            DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
+                        }
+                        self.remove(loadTask: task)
+                    }
+                    finished = true
+                }
+            } else if currentImage.bb_imageEditKey == nil {
+                DispatchQueue.main.safeAsync { completion(currentImage, nil, nil, .memory) }
+                self.remove(loadTask: task)
+                finished = true
+            }
+        }
+        if finished { return task }
+        
+        // Get disk data
+        imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
             guard let self = self, let task = task else { return }
             guard !task.isCancelled else {
                 self.remove(loadTask: task)
                 return
             }
             switch result {
-            case .memory(image: let image):
-                self.handle(memoryImage: image, diskData: nil, cacheType: .memory, forTask: task, url: url, editor: editor, completion: completion)
             case .disk(data: let data):
-                self.handle(imageData: data, cacheType: .disk, forTask: task, url: url, editor: editor, completion: completion)
-            case .all(image: let image, data: let data):
-                self.handle(memoryImage: image, diskData: data, cacheType: .all, forTask: task, url: url, editor: editor, completion: completion)
-            default:
+                self.handle(imageData: data, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
+            case .none:
+                // Download
                 task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self, weak task] (data: Data?, error: Error?) in
                     guard let self = self, let task = task else { return }
                     guard !task.isCancelled else {
@@ -110,6 +157,9 @@ public class BBWebImageManager {
                         self.remove(loadTask: task)
                     }
                 }
+            default:
+                print("Error: illegal query disk data result")
+                break
             }
         }
         return task
@@ -125,44 +175,6 @@ public class BBWebImageManager {
         taskLock.wait()
         tasks.remove(loadTask)
         taskLock.signal()
-    }
-    
-    private func handle(memoryImage image: UIImage,
-                        diskData data: Data?,
-                        cacheType: BBImageCacheType,
-                        forTask task: BBWebImageLoadTask,
-                        url: URL,
-                        editor: BBWebImageEditor?,
-                        completion: @escaping BBWebImageManagerCompletion) {
-        if let currentEditor = editor {
-            if currentEditor.key == image.bb_imageEditKey {
-                DispatchQueue.main.safeAsync { completion(image, data, nil, cacheType) }
-                self.remove(loadTask: task)
-            } else {
-                self.coderQueue.async { [weak self, weak task] in
-                    guard let self = self, let task = task else { return }
-                    guard !task.isCancelled else {
-                        self.remove(loadTask: task)
-                        return
-                    }
-                    if let currentImage = currentEditor.edit(image, data) {
-                        guard !task.isCancelled else {
-                            self.remove(loadTask: task)
-                            return
-                        }
-                        currentImage.bb_imageEditKey = currentEditor.key
-                        currentImage.bb_imageFormat = image.bb_imageFormat
-                        DispatchQueue.main.async { completion(currentImage, data, nil, cacheType) }
-                    } else {
-                        DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
-                    }
-                    self.remove(loadTask: task)
-                }
-            }
-        } else {
-            DispatchQueue.main.safeAsync { completion(image, data, nil, cacheType) }
-            self.remove(loadTask: task)
-        }
     }
     
     private func handle(imageData data: Data,
