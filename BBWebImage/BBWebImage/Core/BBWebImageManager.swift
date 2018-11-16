@@ -83,9 +83,8 @@ public class BBWebImageManager {
         tasks.insert(task)
         taskLock.signal()
         let needData = options.contains(.queryDataWhenInMemory) || (editor != nil && editor!.needData)
-        weak var wtask = task
-        imageCache.image(forKey: url.absoluteString, cacheType: needData ? .all : .any) { [weak self] (result: BBImageCachQueryCompletionResult) in
-            guard let self = self, let task = wtask else { return }
+        imageCache.image(forKey: url.absoluteString, cacheType: needData ? .all : .any) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
+            guard let self = self, let task = task else { return }
             guard !task.isCancelled else {
                 self.remove(loadTask: task)
                 return
@@ -98,9 +97,8 @@ public class BBWebImageManager {
             case .all(image: let image, data: let data):
                 self.handle(memoryImage: image, diskData: data, cacheType: .all, forTask: task, url: url, editor: editor, completion: completion)
             default:
-                weak var wtask = task
-                task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self] (data: Data?, error: Error?) in
-                    guard let self = self, let task = wtask else { return }
+                task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self, weak task] (data: Data?, error: Error?) in
+                    guard let self = self, let task = task else { return }
                     guard !task.isCancelled else {
                         self.remove(loadTask: task)
                         return
@@ -141,9 +139,8 @@ public class BBWebImageManager {
                 DispatchQueue.main.safeAsync { completion(image, data, nil, cacheType) }
                 self.remove(loadTask: task)
             } else {
-                weak var wtask = task
-                self.coderQueue.async { [weak self] in
-                    guard let self = self, let task = wtask else { return }
+                self.coderQueue.async { [weak self, weak task] in
+                    guard let self = self, let task = task else { return }
                     guard !task.isCancelled else {
                         self.remove(loadTask: task)
                         return
@@ -174,9 +171,8 @@ public class BBWebImageManager {
                         url: URL,
                         editor: BBWebImageEditor?,
                         completion: @escaping BBWebImageManagerCompletion) {
-        weak var wtask = task
-        self.coderQueue.async { [weak self] in
-            guard let self = self, let task = wtask else { return }
+        self.coderQueue.async { [weak self, weak task] in
+            guard let self = self, let task = task else { return }
             guard !task.isCancelled else {
                 self.remove(loadTask: task)
                 return
