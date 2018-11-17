@@ -60,7 +60,7 @@ public class BBWebImageManager {
     private let coderQueue: BBDispatchQueuePool
     private var tasks: Set<BBWebImageLoadTask>
     private var taskSentinel: Int32
-    private let taskLock: DispatchSemaphore
+    private var taskLock: pthread_mutex_t
     
     public init() {
         let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
@@ -73,15 +73,16 @@ public class BBWebImageManager {
         coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
         taskSentinel = 0
-        taskLock = DispatchSemaphore(value: 1)
+        taskLock = pthread_mutex_t()
+        pthread_mutex_init(&taskLock, nil)
     }
     
     @discardableResult
     public func loadImage(with url: URL, options: BBWebImageOptions = .none, editor: BBWebImageEditor? = nil, completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
         let task = newLoadTask()
-        taskLock.wait()
+        pthread_mutex_lock(&taskLock)
         tasks.insert(task)
-        taskLock.signal()
+        pthread_mutex_unlock(&taskLock)
         
         // Get memory image first
         var memoryImage: UIImage?
@@ -172,9 +173,9 @@ public class BBWebImageManager {
     }
     
     fileprivate func remove(loadTask: BBWebImageLoadTask) {
-        taskLock.wait()
+        pthread_mutex_lock(&taskLock)
         tasks.remove(loadTask)
-        taskLock.signal()
+        pthread_mutex_unlock(&taskLock)
     }
     
     private func handle(imageData data: Data,

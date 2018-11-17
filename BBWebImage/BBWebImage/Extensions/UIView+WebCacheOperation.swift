@@ -14,21 +14,22 @@ public class BBWebCacheOperation {
     private weak var _task: BBWebImageLoadTask?
     public var task: BBWebImageLoadTask? {
         get {
-            lock.wait()
+            pthread_mutex_lock(&lock)
             let t = _task
-            lock.signal()
+            pthread_mutex_unlock(&lock)
             return t
         }
         set {
-            lock.wait()
+            pthread_mutex_lock(&lock)
             _task = newValue
-            lock.signal()
+            pthread_mutex_unlock(&lock)
         }
     }
-    private let lock: DispatchSemaphore
+    private var lock: pthread_mutex_t
     
     public init() {
-        lock = DispatchSemaphore(value: 1)
+        lock = pthread_mutex_t()
+        pthread_mutex_init(&lock, nil)
     }
 }
 

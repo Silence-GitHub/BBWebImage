@@ -18,22 +18,27 @@ public protocol BBImageCoder: AnyObject {
 
 public class BBImageCoderManager {
     public var coders: [BBImageCoder] {
-        willSet { coderLock.wait() }
-        didSet { coderLock.signal() }
+        willSet { pthread_mutex_lock(&coderLock) }
+        didSet { pthread_mutex_unlock(&coderLock) }
     }
-    private let coderLock: DispatchSemaphore
+    private var safeCoders: [BBImageCoder] {
+        pthread_mutex_lock(&coderLock)
+        let currentCoders = coders
+        pthread_mutex_unlock(&coderLock)
+        return currentCoders
+    }
+    private var coderLock: pthread_mutex_t
     
     init() {
         coders = [BBWebImageImageIOCoder()]
-        coderLock = DispatchSemaphore(value: 1)
+        coderLock = pthread_mutex_t()
+        pthread_mutex_init(&coderLock, nil)
     }
 }
 
 extension BBImageCoderManager: BBImageCoder {
     public func canDecode(imageData: Data) -> Bool {
-        coderLock.wait()
-        let currentCoders = coders
-        coderLock.signal()
+        let currentCoders = safeCoders
         for coder in currentCoders {
             if coder.canDecode(imageData: imageData) { return true }
         }
@@ -41,9 +46,7 @@ extension BBImageCoderManager: BBImageCoder {
     }
     
     public func decode(imageData: Data) -> UIImage? {
-        coderLock.wait()
-        let currentCoders = coders
-        coderLock.signal()
+        let currentCoders = safeCoders
         for coder in currentCoders where coder.canDecode(imageData: imageData) {
             return coder.decode(imageData: imageData)
         }
@@ -51,9 +54,7 @@ extension BBImageCoderManager: BBImageCoder {
     }
     
     public func decompressedImage(withImage image: UIImage, data: Data) -> UIImage? {
-        coderLock.wait()
-        let currentCoders = coders
-        coderLock.signal()
+        let currentCoders = safeCoders
         for coder in currentCoders where coder.canDecode(imageData: data) {
             return coder.decompressedImage(withImage: image, data: data)
         }
@@ -61,9 +62,7 @@ extension BBImageCoderManager: BBImageCoder {
     }
     
     public func canEncode(_ format: BBImageFormat) -> Bool {
-        coderLock.wait()
-        let currentCoders = coders
-        coderLock.signal()
+        let currentCoders = safeCoders
         for coder in currentCoders {
             if coder.canEncode(format) { return true }
         }
@@ -71,9 +70,7 @@ extension BBImageCoderManager: BBImageCoder {
     }
     
     public func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data? {
-        coderLock.wait()
-        let currentCoders = coders
-        coderLock.signal()
+        let currentCoders = safeCoders
         for coder in currentCoders where coder.canEncode(format) {
             return coder.encode(image, toFormat: format)
         }
