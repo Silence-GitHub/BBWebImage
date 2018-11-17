@@ -16,6 +16,7 @@ public struct BBWebImageOptions: OptionSet {
     public static let refreshCache = BBWebImageOptions(rawValue: 1 << 1)
     public static let useURLCache = BBWebImageOptions(rawValue: 1 << 2)
     public static let handleCookies = BBWebImageOptions(rawValue: 1 << 3)
+    public static let ignorePlaceholder = BBWebImageOptions(rawValue: 1 << 4)
     
     public init(rawValue: Int) { self.rawValue = rawValue }
 }
