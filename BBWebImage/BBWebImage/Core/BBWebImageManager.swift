@@ -13,8 +13,9 @@ public struct BBWebImageOptions: OptionSet {
     
     public static let none = BBWebImageOptions(rawValue: 0)
     public static let queryDataWhenInMemory = BBWebImageOptions(rawValue: 1 << 0)
-    public static let handleCookies = BBWebImageOptions(rawValue: 1 << 1)
+    public static let refreshCache = BBWebImageOptions(rawValue: 1 << 1)
     public static let useURLCache = BBWebImageOptions(rawValue: 1 << 2)
+    public static let handleCookies = BBWebImageOptions(rawValue: 1 << 3)
     
     public init(rawValue: Int) { self.rawValue = rawValue }
 }
@@ -84,6 +85,11 @@ public class BBWebImageManager {
         tasks.insert(task)
         pthread_mutex_unlock(&taskLock)
         
+        if options.contains(.refreshCache) {
+            downloadImage(with: url, task: task, editor: editor, completion: completion)
+            return task
+        }
+        
         // Get memory image first
         var memoryImage: UIImage?
         imageCache.image(forKey: url.absoluteString, cacheType: .memory) { (result: BBImageCachQueryCompletionResult) in
@@ -145,19 +151,7 @@ public class BBWebImageManager {
                 self.handle(imageData: data, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
             case .none:
                 // Download
-                task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self, weak task] (data: Data?, error: Error?) in
-                    guard let self = self, let task = task else { return }
-                    guard !task.isCancelled else {
-                        self.remove(loadTask: task)
-                        return
-                    }
-                    if let currentData = data {
-                        self.handle(imageData: currentData, cacheType: .none, forTask: task, url: url, editor: editor, completion: completion)
-                    } else if let currentError = error {
-                        DispatchQueue.main.async { completion(nil, nil, currentError, .none) }
-                        self.remove(loadTask: task)
-                    }
-                }
+                self.downloadImage(with: url, task: task, editor: editor, completion: completion)
             default:
                 print("Error: illegal query disk data result")
                 break
@@ -216,6 +210,22 @@ public class BBWebImageManager {
                 DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]), .none) }
             }
             self.remove(loadTask: task)
+        }
+    }
+    
+    private func downloadImage(with url: URL, task: BBWebImageLoadTask, editor: BBWebImageEditor?, completion: @escaping BBWebImageManagerCompletion) {
+        task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self, weak task] (data: Data?, error: Error?) in
+            guard let self = self, let task = task else { return }
+            guard !task.isCancelled else {
+                self.remove(loadTask: task)
+                return
+            }
+            if let currentData = data {
+                self.handle(imageData: currentData, cacheType: .none, forTask: task, url: url, editor: editor, completion: completion)
+            } else if let currentError = error {
+                DispatchQueue.main.async { completion(nil, nil, currentError, .none) }
+                self.remove(loadTask: task)
+            }
         }
     }
 }

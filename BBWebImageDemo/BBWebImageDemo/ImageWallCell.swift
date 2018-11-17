@@ -32,6 +32,6 @@ class ImageWallCell: UICollectionViewCell {
                                                                           borderWidth: 1,
                                                                           borderColor: .yellow,
                                                                           backgroundColor: .gray)
-        imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), editor: editor, completion: nil)
+        imageView.bb_setImage(with: url, placeholder: UIImage(named: "placeholder"), options: .none, editor: editor, completion: nil)
     }
 }
