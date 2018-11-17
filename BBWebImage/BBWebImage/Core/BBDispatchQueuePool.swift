@@ -9,11 +9,11 @@
 import UIKit
 
 public class BBDispatchQueuePool {
-    public static let userInteractive = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool", qos: .userInteractive)
-    public static let userInitiated = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool", qos: .userInitiated)
-    public static let utility = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool", qos: .utility)
-    public static let `default` = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool", qos: .default)
-    public static let background = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool", qos: .background)
+    public static let userInteractive = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.userInteractive", qos: .userInteractive)
+    public static let userInitiated = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.userInitiated", qos: .userInitiated)
+    public static let utility = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.utility", qos: .utility)
+    public static let `default` = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.default", qos: .default)
+    public static let background = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.background", qos: .background)
     
     private let queues: [DispatchQueue]
     private var index: Int32
