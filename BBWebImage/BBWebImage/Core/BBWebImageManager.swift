@@ -107,7 +107,7 @@ public class BBWebImageManager {
             if let currentEditor = editor {
                 if currentEditor.key == currentImage.bb_imageEditKey {
                     DispatchQueue.main.safeAsync { completion(currentImage, nil, nil, .memory) }
-                    self.remove(loadTask: task)
+                    remove(loadTask: task)
                     finished = true
                 } else if !currentEditor.needData {
                     coderQueue.async { [weak self, weak task] in
