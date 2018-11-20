@@ -93,6 +93,7 @@ public class BBDiskCache {
             self.storage.trim(toCost: self.costLimit)
             self.storage.trim(toCount: self.countLimit)
             self.storage.trim(toAge: self.ageLimit)
+            self.trimRecursively()
         }
     }
 }
