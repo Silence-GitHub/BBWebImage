@@ -13,11 +13,12 @@ public struct BBWebImageOptions: OptionSet {
     
     public static let none = BBWebImageOptions(rawValue: 0)
     public static let queryDataWhenInMemory = BBWebImageOptions(rawValue: 1 << 0)
-    public static let refreshCache = BBWebImageOptions(rawValue: 1 << 1)
-    public static let useURLCache = BBWebImageOptions(rawValue: 1 << 2)
-    public static let handleCookies = BBWebImageOptions(rawValue: 1 << 3)
-    public static let ignorePlaceholder = BBWebImageOptions(rawValue: 1 << 4)
-    public static let ignoreImageDecoding = BBWebImageOptions(rawValue: 1 << 5)
+    public static let ignoreDiskCache = BBWebImageOptions(rawValue: 1 << 1)
+    public static let refreshCache = BBWebImageOptions(rawValue: 1 << 2)
+    public static let useURLCache = BBWebImageOptions(rawValue: 1 << 3)
+    public static let handleCookies = BBWebImageOptions(rawValue: 1 << 4)
+    public static let ignorePlaceholder = BBWebImageOptions(rawValue: 1 << 5)
+    public static let ignoreImageDecoding = BBWebImageOptions(rawValue: 1 << 6)
     
     public init(rawValue: Int) { self.rawValue = rawValue }
 }
@@ -91,7 +92,7 @@ public class BBWebImageManager: NSObject {
             return task
         }
         
-        // Get memory image first
+        // Get memory image
         var memoryImage: UIImage?
         imageCache.image(forKey: url.absoluteString, cacheType: .memory) { (result: BBImageCachQueryCompletionResult) in
             switch result {
@@ -140,22 +141,26 @@ public class BBWebImageManager: NSObject {
         }
         if finished { return task }
         
-        // Get disk data
-        imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
-            guard let self = self, let task = task else { return }
-            guard !task.isCancelled else {
-                self.remove(loadTask: task)
-                return
-            }
-            switch result {
-            case .disk(data: let data):
-                self.handle(imageData: data, options: options, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
-            case .none:
-                // Download
-                self.downloadImage(with: url, options: options, task: task, editor: editor, completion: completion)
-            default:
-                print("Error: illegal query disk data result")
-                break
+        if options.contains(.ignoreDiskCache) {
+            downloadImage(with: url, options: options, task: task, editor: editor, completion: completion)
+        } else {
+            // Get disk data
+            imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
+                guard let self = self, let task = task else { return }
+                guard !task.isCancelled else {
+                    self.remove(loadTask: task)
+                    return
+                }
+                switch result {
+                case .disk(data: let data):
+                    self.handle(imageData: data, options: options, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
+                case .none:
+                    // Download
+                    self.downloadImage(with: url, options: options, task: task, editor: editor, completion: completion)
+                default:
+                    print("Error: illegal query disk data result")
+                    break
+                }
             }
         }
         return task
@@ -195,7 +200,7 @@ public class BBWebImageManager: NSObject {
                     image.bb_imageEditKey = currentEditor.key
                     image.bb_imageFormat = data.bb_imageFormat
                     DispatchQueue.main.async { completion(image, data, nil, cacheType) }
-                    let storeCacheType: BBImageCacheType = (cacheType == .disk ? .memory : .all)
+                    let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
                     self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
                 } else {
                     DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
@@ -206,7 +211,7 @@ public class BBWebImageManager: NSObject {
                     image = decompressedImage
                 }
                 DispatchQueue.main.async { completion(image, data, nil, cacheType) }
-                let storeCacheType: BBImageCacheType = (cacheType == .disk ? .memory : .all)
+                let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
                 self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
             } else {
                 DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]), .none) }
