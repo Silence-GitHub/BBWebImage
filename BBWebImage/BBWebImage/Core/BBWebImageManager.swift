@@ -52,7 +52,8 @@ extension BBWebImageLoadTask: Hashable {
     }
 }
 
-public class BBWebImageManager {
+// If not subclass NSObject, there is memory leak (unknown reason)
+public class BBWebImageManager: NSObject {
     public static let shared = BBWebImageManager()
     
     public private(set) var imageCache: BBImageCache
@@ -64,7 +65,7 @@ public class BBWebImageManager {
     private var taskSentinel: Int32
     private var taskLock: pthread_mutex_t
     
-    public init() {
+    public override init() {
         let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
         let cache = BBLRUImageCache(path: path, sizeThreshold: 20 * 1024)
         imageCache = cache
