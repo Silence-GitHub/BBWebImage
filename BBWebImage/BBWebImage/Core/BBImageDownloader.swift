@@ -116,7 +116,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         let task = BBImageDefaultDownloadTask(url: url, completion: completion)
         lock.wait()
         var operation: BBImageDownloadOperation? = urlOperations[url]
-        if operation == nil { // TODO: Check operation is finished
+        if operation == nil {
             let timeout = donwloadTimeout > 0 ? donwloadTimeout : 15
             let cachePolicy: URLRequest.CachePolicy = options.contains(.useURLCache) ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
             var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
@@ -157,29 +157,29 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
     
     // Cancel
     public func cancel(task: BBImageDownloadTask) {
-        lock.wait()
         task.cancel()
-        if let operation = urlOperations[task.url],
-            operation.taskCount <= 1 {
-            operation.cancel() // We do not need to remove operation from urlOperations
-        }
+        lock.wait()
+        let operation = urlOperations[task.url]
         lock.signal()
+        if let operation = operation,
+            operation.taskCount <= 1 {
+            operation.cancel()
+        }
     }
     
     public func cancel(url: URL) {
         lock.wait()
-        urlOperations[url]?.cancel() // We do not need to remove operation from urlOperations
+        let operation = urlOperations[url]
         lock.signal()
+        operation?.cancel()
     }
     
     public func cancelAll() {
-        BBDispatchQueuePool.background.async { [weak self] in
-            guard let self = self else { return }
-            self.lock.wait()
-            for (_, operation) in self.urlOperations {
-                operation.cancel()
-            }
-            self.lock.signal()
+        self.lock.wait()
+        let operations = urlOperations
+        self.lock.signal()
+        for (_, operation) in operations {
+            operation.cancel()
         }
     }
 }

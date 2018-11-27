@@ -10,6 +10,7 @@ import UIKit
 
 public protocol BBImageDownloadOperation {
     var taskCount: Int { get }
+    var isFinished: Bool { get }
     
     init(request: URLRequest, session: URLSession)
     func add(task: BBImageDownloadTask)
@@ -30,6 +31,12 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     
     private var cancelled: Bool
     private var finished: Bool
+    var isFinished: Bool {
+        stateLock.wait()
+        let f = finished
+        stateLock.signal()
+        return f
+    }
     
     var taskCount: Int {
         taskLock.wait()
@@ -57,7 +64,7 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     func start() {
         stateLock.wait()
         defer { stateLock.signal() }
-        if cancelled { return done() } // Completion call back will not be called when task is cancelled
+        if cancelled || finished { return } // Completion call back will not be called when task is cancelled
         dataTask = session.dataTask(with: request)
         dataTask?.resume()
     }
@@ -77,10 +84,8 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
         tasks.removeAll()
         taskLock.signal()
         dataTask = nil
-        if let work = completion {
-            BBDispatchQueuePool.background.async(work: work)
-            completion = nil
-        }
+        completion?()
+        completion = nil
     }
 }
 
