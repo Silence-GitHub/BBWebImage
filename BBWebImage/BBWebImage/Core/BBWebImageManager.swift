@@ -27,15 +27,33 @@ public let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
 public typealias BBWebImageManagerCompletion = (UIImage?, Data?, Error?, BBImageCacheType) -> Void
 
 public class BBWebImageLoadTask {
+    public var isCancelled: Bool {
+        pthread_mutex_lock(&lock)
+        let c = cancelled
+        pthread_mutex_unlock(&lock)
+        return c
+    }
+    private var cancelled: Bool
+    private var lock: pthread_mutex_t
     fileprivate let sentinel: Int32
     fileprivate var downloadTask: BBImageDownloadTask?
     fileprivate weak var imageManager: BBWebImageManager?
-    public private(set) var isCancelled: Bool = false
     
-    init(sentinel: Int32) { self.sentinel = sentinel }
+    init(sentinel: Int32) {
+        self.sentinel = sentinel
+        cancelled = false
+        lock = pthread_mutex_t()
+        pthread_mutex_init(&lock, nil)
+    }
     
     public func cancel() {
-        isCancelled = true
+        pthread_mutex_lock(&lock)
+        if cancelled {
+            pthread_mutex_unlock(&lock)
+            return
+        }
+        cancelled = true
+        pthread_mutex_unlock(&lock)
         if let task = downloadTask,
             let downloader = imageManager?.imageDownloader {
             downloader.cancel(task: task)
@@ -112,16 +130,9 @@ public class BBWebImageManager: NSObject {
                     finished = true
                 } else if !currentEditor.needData {
                     coderQueue.async { [weak self, weak task] in
-                        guard let self = self, let task = task else { return }
-                        guard !task.isCancelled else {
-                            self.remove(loadTask: task)
-                            return
-                        }
+                        guard let self = self, let task = task, !task.isCancelled else { return }
                         if let image = currentEditor.edit(currentImage, nil) {
-                            guard !task.isCancelled else {
-                                self.remove(loadTask: task)
-                                return
-                            }
+                            guard !task.isCancelled else { return }
                             image.bb_imageEditKey = currentEditor.key
                             image.bb_imageFormat = currentImage.bb_imageFormat
                             DispatchQueue.main.async { completion(image, nil, nil, .memory) }
@@ -146,11 +157,7 @@ public class BBWebImageManager: NSObject {
         } else {
             // Get disk data
             imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
-                guard let self = self, let task = task else { return }
-                guard !task.isCancelled else {
-                    self.remove(loadTask: task)
-                    return
-                }
+                guard let self = self, let task = task, !task.isCancelled else { return }
                 switch result {
                 case .disk(data: let data):
                     self.handle(imageData: data, options: options, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
@@ -186,17 +193,10 @@ public class BBWebImageManager: NSObject {
                         editor: BBWebImageEditor?,
                         completion: @escaping BBWebImageManagerCompletion) {
         self.coderQueue.async { [weak self, weak task] in
-            guard let self = self, let task = task else { return }
-            guard !task.isCancelled else {
-                self.remove(loadTask: task)
-                return
-            }
+            guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentEditor = editor {
                 if let image = currentEditor.edit(nil, data) {
-                    guard !task.isCancelled else {
-                        self.remove(loadTask: task)
-                        return
-                    }
+                    guard !task.isCancelled else { return }
                     image.bb_imageEditKey = currentEditor.key
                     image.bb_imageFormat = data.bb_imageFormat
                     DispatchQueue.main.async { completion(image, data, nil, cacheType) }
@@ -222,16 +222,14 @@ public class BBWebImageManager: NSObject {
     
     private func downloadImage(with url: URL, options: BBWebImageOptions, task: BBWebImageLoadTask, editor: BBWebImageEditor?, completion: @escaping BBWebImageManagerCompletion) {
         task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self, weak task] (data: Data?, error: Error?) in
-            guard let self = self, let task = task else { return }
-            guard !task.isCancelled else {
-                self.remove(loadTask: task)
-                return
-            }
+            guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentData = data {
                 self.handle(imageData: currentData, options: options, cacheType: .none, forTask: task, url: url, editor: editor, completion: completion)
             } else if let currentError = error {
                 DispatchQueue.main.async { completion(nil, nil, currentError, .none) }
                 self.remove(loadTask: task)
+            } else {
+                print("Error: illegal result of download")
             }
         }
     }
