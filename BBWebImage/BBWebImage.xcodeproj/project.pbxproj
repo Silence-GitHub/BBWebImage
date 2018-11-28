@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A1CACEA21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1CACE921AE6D2800DC0D61 /* BBCILookupFilter.swift */; };
+		4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1CACE921AE6D2800DC0D61 /* BBCILookupFilter.swift */; };
+		4A1CACED21AE6E2D00DC0D61 /* BBCILookup.cikernel in Resources */ = {isa = PBXBuildFile; fileRef = 4A1CACEC21AE6E2D00DC0D61 /* BBCILookup.cikernel */; };
+		4A1CACEE21AE6E2D00DC0D61 /* BBCILookup.cikernel in Resources */ = {isa = PBXBuildFile; fileRef = 4A1CACEC21AE6E2D00DC0D61 /* BBCILookup.cikernel */; };
 		4A4819C321964EB00000B229 /* BBDispatchQueuePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */; };
 		4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */; };
 		4A53310A21657DC500C68080 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A53310021657DC500C68080 /* BBWebImage.framework */; };
@@ -57,6 +61,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4A1CACE921AE6D2800DC0D61 /* BBCILookupFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBCILookupFilter.swift; sourceTree = "<group>"; };
+		4A1CACEC21AE6E2D00DC0D61 /* BBCILookup.cikernel */ = {isa = PBXFileReference; lastKnownFileType = text; path = BBCILookup.cikernel; sourceTree = "<group>"; };
 		4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDispatchQueuePool.swift; sourceTree = "<group>"; };
 		4A53310021657DC500C68080 /* BBWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BBWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A53310321657DC500C68080 /* BBWebImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BBWebImage.h; sourceTree = "<group>"; };
@@ -101,6 +107,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A1CACE221AE6B9C00DC0D61 /* Filter */ = {
+			isa = PBXGroup;
+			children = (
+				4A1CACE921AE6D2800DC0D61 /* BBCILookupFilter.swift */,
+				4A1CACEC21AE6E2D00DC0D61 /* BBCILookup.cikernel */,
+			);
+			path = Filter;
+			sourceTree = "<group>";
+		};
 		4A5330F621657DC500C68080 = {
 			isa = PBXGroup;
 			children = (
@@ -124,6 +139,7 @@
 			children = (
 				4A5331412165820E00C68080 /* Core */,
 				4A87E906216BE39D0073E53C /* Extensions */,
+				4A1CACE221AE6B9C00DC0D61 /* Filter */,
 				4A53310321657DC500C68080 /* BBWebImage.h */,
 				4A53310421657DC500C68080 /* Info.plist */,
 			);
@@ -262,6 +278,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A1CACED21AE6E2D00DC0D61 /* BBCILookup.cikernel in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,6 +286,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A1CACEE21AE6E2D00DC0D61 /* BBCILookup.cikernel in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +298,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A4819C321964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
+				4A1CACEA21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FC217191EE0074EEFD /* String+MD5.swift in Sources */,
 				4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
 				4A6E2D8C2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */,
@@ -315,6 +334,7 @@
 				4A62CAA3216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */,
 				4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,
 				4A87E912216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
+				4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */,
 				4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
 				4A53310F21657DC500C68080 /* BBWebImageTests.swift in Sources */,
