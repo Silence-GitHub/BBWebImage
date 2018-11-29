@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class BBCILookupFilter {
+public class BBCILookupFilter: CIFilter {
     private static var _kernel: CIKernel?
     
     private static var kernel: CIKernel? {
@@ -32,5 +32,32 @@ public class BBCILookupFilter {
             if index == 0 { return destRect }
             return lookupTable.extent
         }, arguments: [inputImage, lookupTable, intensity])
+    }
+    
+    public var inputImage: CIImage?
+    
+    public var lookupTable: CIImage?
+    
+    private var _intensity: CGFloat
+    public var intensity: CGFloat {
+        get { return _intensity }
+        set { _intensity = min(1, max(0, newValue)) }
+    }
+    
+    public override var outputImage: CIImage? {
+        if let inputImage = inputImage,
+            let lookupTable = lookupTable {
+            return BBCILookupFilter.outputImage(withInputImage: inputImage, lookupTable: lookupTable, intensity: _intensity)
+        }
+        return nil
+    }
+    
+    public override init() {
+        _intensity = 1
+        super.init()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
