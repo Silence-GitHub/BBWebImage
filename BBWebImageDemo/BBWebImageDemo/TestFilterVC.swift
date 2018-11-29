@@ -37,10 +37,8 @@ class TestFilterVC: UIViewController {
     @objc private func clickButton() {
         filtered = !filtered
         if filtered {
-            let filter = BBCILookupFilter()
+            let filter = BBCILookupTestFilter()
             filter.inputImage = CIImage(cgImage: imageView.image!.cgImage!)
-            let url = Bundle.main.url(forResource: "test_lookup", withExtension: "png")!
-            filter.lookupTable = CIImage(contentsOf: url)
             let output = filter.outputImage!
             // Set working color space or color is wrong
             let context = CIContext(options: [CIContextOption.workingColorSpace : CGColorSpaceCreateDeviceRGB()])

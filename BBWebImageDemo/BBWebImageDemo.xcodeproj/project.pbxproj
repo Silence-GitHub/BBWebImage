@@ -10,6 +10,7 @@
 		4A2CEA9A21AF1A8D00E054A8 /* TestFilterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2CEA9921AF1A8D00E054A8 /* TestFilterVC.swift */; };
 		4A2CEAB221AF582E00E054A8 /* test_lookup.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A2CEAB121AF582E00E054A8 /* test_lookup.png */; };
 		4A2CEAB421AF588C00E054A8 /* sunflower.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A2CEAB321AF588C00E054A8 /* sunflower.jpg */; };
+		4A2CEAB821B07BDA00E054A8 /* BBCILookupTestFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2CEAB721B07BDA00E054A8 /* BBCILookupTestFilter.swift */; };
 		4A53312721657ECD00C68080 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53312621657ECD00C68080 /* AppDelegate.swift */; };
 		4A53312921657ECD00C68080 /* MainMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53312821657ECD00C68080 /* MainMenuVC.swift */; };
 		4A53312C21657ECD00C68080 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312A21657ECD00C68080 /* Main.storyboard */; };
@@ -43,6 +44,7 @@
 		4A2CEA9921AF1A8D00E054A8 /* TestFilterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFilterVC.swift; sourceTree = "<group>"; };
 		4A2CEAB121AF582E00E054A8 /* test_lookup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test_lookup.png; sourceTree = "<group>"; };
 		4A2CEAB321AF588C00E054A8 /* sunflower.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sunflower.jpg; sourceTree = "<group>"; };
+		4A2CEAB721B07BDA00E054A8 /* BBCILookupTestFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBCILookupTestFilter.swift; sourceTree = "<group>"; };
 		4A53312321657ECD00C68080 /* BBWebImageDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BBWebImageDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A53312621657ECD00C68080 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A53312821657ECD00C68080 /* MainMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuVC.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				4A5ABB3621936EB200036971 /* ImageWallCell.swift */,
 				4A5ABB3121936B4800036971 /* ImageURLProvider.swift */,
 				4A2CEA9921AF1A8D00E054A8 /* TestFilterVC.swift */,
+				4A2CEAB721B07BDA00E054A8 /* BBCILookupTestFilter.swift */,
 				4AF3D1ED216DA8B500320E6C /* placeholder.png */,
 				4A5DE8FE2171973E0074EEFD /* large_leaves_70mp.jpg */,
 				4A2CEAB321AF588C00E054A8 /* sunflower.jpg */,
@@ -199,6 +202,7 @@
 				4A2CEA9A21AF1A8D00E054A8 /* TestFilterVC.swift in Sources */,
 				4A5ABB3521936D0200036971 /* ImageWallVC.swift in Sources */,
 				4A5ABB3221936B4800036971 /* ImageURLProvider.swift in Sources */,
+				4A2CEAB821B07BDA00E054A8 /* BBCILookupTestFilter.swift in Sources */,
 				4A53312721657ECD00C68080 /* AppDelegate.swift in Sources */,
 				4A5ABB3721936EB200036971 /* ImageWallCell.swift in Sources */,
 			);

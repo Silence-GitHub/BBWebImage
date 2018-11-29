@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class BBCILookupFilter: CIFilter {
+open class BBCILookupFilter: CIFilter {
     private static var _kernel: CIKernel?
     
     private static var kernel: CIKernel? {
@@ -25,7 +25,7 @@ public class BBCILookupFilter: CIFilter {
         return try! String(contentsOfFile: path, encoding: String.Encoding.utf8)
     }
     
-    public static func clear() { _kernel = nil }
+    open class func clear() { _kernel = nil }
     
     public static func outputImage(withInputImage inputImage: CIImage, lookupTable: CIImage, intensity: CGFloat) -> CIImage? {
         return kernel?.apply(extent: inputImage.extent, roiCallback: { (index: Int32, destRect: CGRect) -> CGRect in
@@ -44,7 +44,7 @@ public class BBCILookupFilter: CIFilter {
         set { _intensity = min(1, max(0, newValue)) }
     }
     
-    public override var outputImage: CIImage? {
+    open override var outputImage: CIImage? {
         if let inputImage = inputImage,
             let lookupTable = lookupTable {
             return BBCILookupFilter.outputImage(withInputImage: inputImage, lookupTable: lookupTable, intensity: _intensity)
@@ -57,7 +57,7 @@ public class BBCILookupFilter: CIFilter {
         super.init()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
