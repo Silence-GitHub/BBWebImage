@@ -9,14 +9,26 @@
 import UIKit
 
 public class BBCILookupFilter {
-    private static let kernel: CIKernel = CIKernel(source: kernelString)!
+    private static var _kernel: CIKernel?
+    
+    private static var kernel: CIKernel? {
+        var localKernel = _kernel // Use local var to prevent multithreading problem
+        if localKernel == nil {
+            localKernel = CIKernel(source: kernelString)
+            _kernel = localKernel
+        }
+        return localKernel
+    }
+    
     private static var kernelString: String {
         let path = Bundle(for: self).path(forResource: "BBCILookup", ofType: "cikernel")!
         return try! String(contentsOfFile: path, encoding: String.Encoding.utf8)
     }
     
+    public static func clear() { _kernel = nil }
+    
     public static func outputImage(withInputImage inputImage: CIImage, lookupTable: CIImage, intensity: CGFloat) -> CIImage? {
-        return kernel.apply(extent: inputImage.extent, roiCallback: { (index: Int32, destRect: CGRect) -> CGRect in
+        return kernel?.apply(extent: inputImage.extent, roiCallback: { (index: Int32, destRect: CGRect) -> CGRect in
             if index == 0 { return destRect }
             return lookupTable.extent
         }, arguments: [inputImage, lookupTable, intensity])
