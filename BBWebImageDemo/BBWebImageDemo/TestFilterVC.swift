@@ -37,13 +37,8 @@ class TestFilterVC: UIViewController {
     @objc private func clickButton() {
         filtered = !filtered
         if filtered {
-            let filter = BBCILookupTestFilter()
-            filter.inputImage = CIImage(cgImage: imageView.image!.cgImage!)
-            let output = filter.outputImage!
-            // Set working color space or color is wrong
-            let context = CIContext(options: [CIContextOption.workingColorSpace : CGColorSpaceCreateDeviceRGB()])
-            let cgimage = context.createCGImage(output, from: output.extent)!
-            imageView.image = UIImage(cgImage: cgimage)
+            let editor = BBWebImageEditor.editorForCILookupTestFilter()
+            imageView.image = editor.edit(imageView.image, nil)
         } else {
             imageView.image = UIImage(named: "sunflower.jpg")
         }

@@ -35,3 +35,34 @@ class BBCILookupTestFilter: BBCILookupFilter {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+extension BBWebImageEditor {
+    public static func editorForCILookupTestFilter() -> BBWebImageEditor {
+        let edit: BBWebImageEditMethod = { (image: UIImage?, data: Data?) in
+            var inputImage: CIImage?
+            if let currentImage = image {
+                if let ciimage = currentImage.ciImage {
+                    inputImage = ciimage
+                } else if let cgimage = currentImage.cgImage {
+                    inputImage = CIImage(cgImage: cgimage)
+                } else {
+                    inputImage = CIImage(image: currentImage)
+                }
+            }
+            if inputImage == nil,
+                let currentData = data {
+                inputImage = CIImage(data: currentData)
+            }
+            if let input = inputImage {
+                let filter = BBCILookupTestFilter()
+                filter.inputImage = input
+                if let output = filter.outputImage,
+                    let cgimage = bb_shareCIContext.createCGImage(output, from: output.extent) {
+                    return UIImage(cgImage: cgimage)
+                }
+            }
+            return image
+        }
+        return BBWebImageEditor(key: BBCILookupTestFilter.description(), needData: false, edit: edit)
+    }
+}
