@@ -195,15 +195,32 @@ public class BBWebImageManager: NSObject {
         self.coderQueue.async { [weak self, weak task] in
             guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentEditor = editor {
-                if let image = currentEditor.edit(nil, data) {
-                    guard !task.isCancelled else { return }
-                    image.bb_imageEditKey = currentEditor.key
-                    image.bb_imageFormat = data.bb_imageFormat
-                    DispatchQueue.main.async { completion(image, data, nil, cacheType) }
-                    let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
-                    self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
+                if currentEditor.needData {
+                    if let image = currentEditor.edit(nil, data) {
+                        guard !task.isCancelled else { return }
+                        image.bb_imageEditKey = currentEditor.key
+                        image.bb_imageFormat = data.bb_imageFormat
+                        DispatchQueue.main.async { completion(image, data, nil, cacheType) }
+                        let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
+                        self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
+                    } else {
+                        DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
+                    }
                 } else {
-                    DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
+                    if let inputImage = self.imageCoder.decode(imageData: data) {
+                        if let image = currentEditor.edit(inputImage, nil) {
+                            guard !task.isCancelled else { return }
+                            image.bb_imageEditKey = currentEditor.key
+                            image.bb_imageFormat = data.bb_imageFormat
+                            DispatchQueue.main.async { completion(image, data, nil, cacheType) }
+                            let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
+                            self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
+                        } else {
+                            DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]), .none) }
+                        }
+                    } else {
+                        DispatchQueue.main.async { completion(nil, nil, NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]), .none) }
+                    }
                 }
             } else if var image = self.imageCoder.decode(imageData: data) {
                 if !options.contains(.ignoreImageDecoding),

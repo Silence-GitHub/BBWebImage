@@ -49,15 +49,13 @@ extension BBWebImageEditor {
                     inputImage = CIImage(image: currentImage)
                 }
             }
-            if inputImage == nil,
-                let currentData = data {
-                inputImage = CIImage(data: currentData)
-            }
             if let input = inputImage {
                 let filter = BBCILookupTestFilter()
                 filter.inputImage = input
                 if let output = filter.outputImage,
-                    let cgimage = bb_shareCIContext.createCGImage(output, from: output.extent) {
+                    let sourceImage = bb_shareCIContext.createCGImage(output, from: output.extent),
+                    let cgimage = BBWebImageImageIOCoder.decompressedImage(sourceImage) {
+                    // It cost more memory without decompressing
                     return UIImage(cgImage: cgimage)
                 }
             }
