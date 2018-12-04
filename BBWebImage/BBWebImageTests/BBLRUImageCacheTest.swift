@@ -33,7 +33,6 @@ class BBLRUImageCacheTest: XCTestCase {
     }
     
     override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
         cache = BBLRUImageCache(path: "com.Kaibo.BBWebImage.cache.test", sizeThreshold: 20 * 1024)
         fileCache = BBLRUImageCache(path: "com.Kaibo.BBWebImage.fileCache.test", sizeThreshold: 0)
         dbCache = BBLRUImageCache(path: "com.Kaibo.BBWebImage.dbCache.test", sizeThreshold: .max)
@@ -41,7 +40,6 @@ class BBLRUImageCacheTest: XCTestCase {
     }
 
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         clearCaches([cache, fileCache, dbCache])
         cache = nil
         fileCache = nil
@@ -281,7 +279,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let data = item.data
         let key = item.key
         let expectation = { () -> XCTestExpectation in
-            return self.expectation(description: "Wait for storing and getting image")
+            return self.expectation(description: "Wait for removing image")
         }
         let test = { (cache: BBLRUImageCache, expectation: XCTestExpectation) -> Void in
             cache.store(image, data: data, forKey: key, cacheType: .all) {
@@ -309,7 +307,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let data = item.data
         let key = item.key
         let expectation = { () -> XCTestExpectation in
-            return self.expectation(description: "Wait for storing and getting image")
+            return self.expectation(description: "Wait for removing image")
         }
         let test = { (cache: BBLRUImageCache, expectation: XCTestExpectation) -> Void in
             cache.store(image, data: data, forKey: key, cacheType: .all) {
@@ -338,7 +336,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let data = item.data
         let key = item.key
         let expectation = { () -> XCTestExpectation in
-            return self.expectation(description: "Wait for storing and getting image")
+            return self.expectation(description: "Wait for removing image")
         }
         let test = { (cache: BBLRUImageCache, expectation: XCTestExpectation) -> Void in
             cache.store(image, data: data, forKey: key, cacheType: .all) {
@@ -366,7 +364,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let expectations = { () -> [XCTestExpectation] in
             var list: [XCTestExpectation] = []
             for _ in items {
-                list.append(self.expectation(description: "Wait for storing and getting image"))
+                list.append(self.expectation(description: "Wait for removing image"))
             }
             return list
         }
@@ -409,7 +407,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let expectations = { () -> [XCTestExpectation] in
             var list: [XCTestExpectation] = []
             for _ in items {
-                list.append(self.expectation(description: "Wait for storing and getting image"))
+                list.append(self.expectation(description: "Wait for removing image"))
             }
             return list
         }
@@ -454,7 +452,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let expectations = { () -> [XCTestExpectation] in
             var list: [XCTestExpectation] = []
             for _ in items {
-                list.append(self.expectation(description: "Wait for storing and getting image"))
+                list.append(self.expectation(description: "Wait for removing image"))
             }
             return list
         }
@@ -499,7 +497,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let expectations = { () -> [XCTestExpectation] in
             var list: [XCTestExpectation] = []
             for _ in items {
-                list.append(self.expectation(description: "Wait for storing and getting image"))
+                list.append(self.expectation(description: "Wait for clearing image"))
             }
             return list
         }
@@ -542,7 +540,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let expectations = { () -> [XCTestExpectation] in
             var list: [XCTestExpectation] = []
             for _ in items {
-                list.append(self.expectation(description: "Wait for storing and getting image"))
+                list.append(self.expectation(description: "Wait for clearing image"))
             }
             return list
         }
@@ -587,7 +585,7 @@ class BBLRUImageCacheTest: XCTestCase {
         let expectations = { () -> [XCTestExpectation] in
             var list: [XCTestExpectation] = []
             for _ in items {
-                list.append(self.expectation(description: "Wait for storing and getting image"))
+                list.append(self.expectation(description: "Wait for clearing image"))
             }
             return list
         }
