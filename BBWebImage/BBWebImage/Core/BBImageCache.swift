@@ -15,8 +15,6 @@ public struct BBImageCacheType: OptionSet {
     public static let memory = BBImageCacheType(rawValue: 1 << 0)
     public static let disk = BBImageCacheType(rawValue: 1 << 1)
     
-    public static let any = BBImageCacheType(rawValue: ~0)
-    
     public static let all: BBImageCacheType = [.memory, .disk]
     
     public init(rawValue: Int) { self.rawValue = rawValue }
