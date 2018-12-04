@@ -9,8 +9,8 @@
 import UIKit
 
 public protocol BBImageDownloadOperation {
+    var taskId: Int { get }
     var taskCount: Int { get }
-    var isFinished: Bool { get }
     
     init(request: URLRequest, session: URLSession)
     func add(task: BBImageDownloadTask)
@@ -19,7 +19,12 @@ public protocol BBImageDownloadOperation {
 }
 
 class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
-    var url: URL { return request.url! }
+    var taskId: Int {
+        stateLock.wait()
+        let tid = dataTask?.taskIdentifier ?? 0
+        stateLock.signal()
+        return tid
+    }
     var completion: (() -> Void)?
     private let request: URLRequest
     private let session: URLSession
@@ -31,12 +36,6 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     
     private var cancelled: Bool
     private var finished: Bool
-    var isFinished: Bool {
-        stateLock.wait()
-        let f = finished
-        stateLock.signal()
-        return f
-    }
     
     var taskCount: Int {
         taskLock.wait()

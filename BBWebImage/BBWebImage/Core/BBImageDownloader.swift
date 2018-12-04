@@ -68,6 +68,28 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
 
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
+    
+    public var currentDownloadCount: Int {
+        lock.wait()
+        let count = urlOperations.count
+        lock.signal()
+        return count
+    }
+    
+    public var maxConcurrentDownloadCount: Int {
+        get {
+            lock.wait()
+            let count = maxRunningCount
+            lock.signal()
+            return count
+        }
+        set {
+            lock.wait()
+            maxRunningCount = newValue
+            lock.signal()
+        }
+    }
+    
     private let waitingQueue: BBLinkedListQueue
     private var urlOperations: [URL : BBImageDownloadOperation]
     private var maxRunningCount: Int
@@ -194,6 +216,7 @@ private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let url = task.originalRequest?.url,
             let operation = downloader?.operation(for: url),
+            operation.taskId == task.taskIdentifier,
             let taskDelegate = operation as? URLSessionTaskDelegate {
             taskDelegate.urlSession?(session, task: task, didCompleteWithError: error)
         }

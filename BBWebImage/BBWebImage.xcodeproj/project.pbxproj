@@ -46,6 +46,8 @@
 		4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTest.swift */; };
 		4ACFCD9821B5BDF4004316A5 /* sunflower.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4ACFCD9621B5BDF4004316A5 /* sunflower.jpg */; };
 		4ACFCD9921B5BDF4004316A5 /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 4ACFCD9721B5BDF4004316A5 /* placeholder.png */; };
+		4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTest.swift */; };
+		4ACFCDA321B61707004316A5 /* ImageURLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */; };
 		4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */; };
 		4AF3D1E9216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */; };
 		4AF3D1EB216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */; };
@@ -88,6 +90,8 @@
 		4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBLRUImageCacheTest.swift; sourceTree = "<group>"; };
 		4ACFCD9621B5BDF4004316A5 /* sunflower.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = sunflower.jpg; path = ../../BBWebImageDemo/BBWebImageDemo/sunflower.jpg; sourceTree = "<group>"; };
 		4ACFCD9721B5BDF4004316A5 /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = placeholder.png; path = ../../BBWebImageDemo/BBWebImageDemo/placeholder.png; sourceTree = "<group>"; };
+		4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBMergeRequestImageDownloaderTest.swift; sourceTree = "<group>"; };
+		4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageURLProvider.swift; path = ../../BBWebImageDemo/BBWebImageDemo/ImageURLProvider.swift; sourceTree = "<group>"; };
 		4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+WebCache.swift"; sourceTree = "<group>"; };
 		4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+WebCacheOperation.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -154,6 +158,8 @@
 			isa = PBXGroup;
 			children = (
 				4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTest.swift */,
+				4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTest.swift */,
+				4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */,
 				4ACFCD9721B5BDF4004316A5 /* placeholder.png */,
 				4ACFCD9621B5BDF4004316A5 /* sunflower.jpg */,
 				4A53311021657DC500C68080 /* Info.plist */,
@@ -336,6 +342,7 @@
 				4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */,
 				4A53315121658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A53314A2165828300C68080 /* BBWebImageManager.swift in Sources */,
+				4ACFCDA321B61707004316A5 /* ImageURLProvider.swift in Sources */,
 				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTest.swift in Sources */,
 				4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
@@ -343,6 +350,7 @@
 				4A62CAA3216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */,
 				4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,
 				4A87E912216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
+				4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTest.swift in Sources */,
 				4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */,
 				4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
