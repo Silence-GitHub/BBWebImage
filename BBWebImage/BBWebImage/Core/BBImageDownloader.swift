@@ -8,6 +8,7 @@
 
 import UIKit
 
+public typealias BBImageDownloaderProgress = (Int, Int) -> Void
 public typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
 
 private class BBLinkedListNode {
@@ -37,6 +38,7 @@ private class BBLinkedListQueue {
 public protocol BBImageDownloadTask {
     var url: URL { get }
     var isCancelled: Bool { get }
+    var progress: BBImageDownloaderProgress? { get }
     var completion: BBImageDownloaderCompletion { get }
     
     func cancel()
@@ -44,7 +46,7 @@ public protocol BBImageDownloadTask {
 
 public protocol BBImageDownloader: AnyObject {
     // Donwload
-    func downloadImage(with url: URL, options: BBWebImageOptions, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
+    func downloadImage(with url: URL, options: BBWebImageOptions, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
     // Cancel
     func cancel(task: BBImageDownloadTask)
@@ -55,11 +57,13 @@ public protocol BBImageDownloader: AnyObject {
 private class BBImageDefaultDownloadTask: BBImageDownloadTask {
     private(set) var url: URL
     private(set) var isCancelled: Bool
+    private(set) var progress: BBImageDownloaderProgress?
     private(set) var completion: BBImageDownloaderCompletion
     
-    init(url: URL, completion: @escaping BBImageDownloaderCompletion) {
+    init(url: URL, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) {
         self.url = url
         self.isCancelled = false
+        self.progress = progress
         self.completion = completion
     }
     
@@ -134,8 +138,8 @@ public class BBMergeRequestImageDownloader {
 extension BBMergeRequestImageDownloader: BBImageDownloader {
     // Donwload
     @discardableResult
-    public func downloadImage(with url: URL, options: BBWebImageOptions = .none, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
-        let task = BBImageDefaultDownloadTask(url: url, completion: completion)
+    public func downloadImage(with url: URL, options: BBWebImageOptions = .none, progress: BBImageDownloaderProgress? = nil, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
+        let task = BBImageDefaultDownloadTask(url: url, progress: progress, completion: completion)
         lock.wait()
         var operation: BBImageDownloadOperation? = urlOperations[url]
         if operation == nil {
@@ -224,9 +228,21 @@ private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
 }
 
 extension BBImageDownloadSessionDelegate: URLSessionDataDelegate {
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        if let url = dataTask.originalRequest?.url,
+            let operation = downloader?.operation(for: url),
+            operation.taskId == dataTask.taskIdentifier,
+            let dataDelegate = operation as? URLSessionDataDelegate {
+            dataDelegate.urlSession?(session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler)
+        } else {
+            completionHandler(.allow)
+        }
+    }
+    
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if let url = dataTask.originalRequest?.url,
             let operation = downloader?.operation(for: url),
+            operation.taskId == dataTask.taskIdentifier,
             let dataDelegate = operation as? URLSessionDataDelegate {
             dataDelegate.urlSession?(session, dataTask: dataTask, didReceive: data)
         }

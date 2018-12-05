@@ -33,6 +33,7 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     private let taskLock: DispatchSemaphore
     private let stateLock: DispatchSemaphore
     private var imageData: Data?
+    private var expectedSize: Int
     
     private var cancelled: Bool
     private var finished: Bool
@@ -50,6 +51,7 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
         tasks = []
         taskLock = DispatchSemaphore(value: 1)
         stateLock = DispatchSemaphore(value: 1)
+        expectedSize = 0
         cancelled = false
         finished = false
     }
@@ -109,15 +111,38 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
         taskLock.wait()
         let currentTasks = tasks
         taskLock.signal()
-        for task in currentTasks {
-            if !task.isCancelled { task.completion(data, error) }
+        for task in currentTasks where !task.isCancelled {
+            task.completion(data, error)
         }
     }
 }
 
 extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        expectedSize = max(0, Int(response.expectedContentLength))
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 200
+        if statusCode >= 400 || statusCode == 304 {
+            completionHandler(.cancel)
+        } else {
+            taskLock.wait()
+            let currentTasks = tasks
+            taskLock.signal()
+            for task in currentTasks where !task.isCancelled {
+                task.progress?(0, expectedSize)
+            }
+            completionHandler(.allow)
+        }
+    }
+    
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        if imageData == nil { imageData = Data() }
+        if imageData == nil { imageData = Data(capacity: expectedSize) }
         imageData?.append(data)
+        
+        taskLock.wait()
+        let currentTasks = tasks
+        taskLock.signal()
+        for task in currentTasks where !task.isCancelled {
+            task.progress?(imageData!.count, expectedSize)
+        }
     }
 }

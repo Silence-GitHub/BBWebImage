@@ -99,14 +99,14 @@ public class BBWebImageManager: NSObject {
     }
     
     @discardableResult
-    public func loadImage(with url: URL, options: BBWebImageOptions = .none, editor: BBWebImageEditor? = nil, completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
+    public func loadImage(with url: URL, options: BBWebImageOptions = .none, editor: BBWebImageEditor? = nil, progress: BBImageDownloaderProgress? = nil, completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
         let task = newLoadTask()
         pthread_mutex_lock(&taskLock)
         tasks.insert(task)
         pthread_mutex_unlock(&taskLock)
         
         if options.contains(.refreshCache) {
-            downloadImage(with: url, options: options, task: task, editor: editor, completion: completion)
+            downloadImage(with: url, options: options, task: task, editor: editor, progress: progress, completion: completion)
             return task
         }
         
@@ -153,7 +153,7 @@ public class BBWebImageManager: NSObject {
         if finished { return task }
         
         if options.contains(.ignoreDiskCache) {
-            downloadImage(with: url, options: options, task: task, editor: editor, completion: completion)
+            downloadImage(with: url, options: options, task: task, editor: editor, progress: progress, completion: completion)
         } else {
             // Get disk data
             imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
@@ -163,7 +163,7 @@ public class BBWebImageManager: NSObject {
                     self.handle(imageData: data, options: options, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
                 case .none:
                     // Download
-                    self.downloadImage(with: url, options: options, task: task, editor: editor, completion: completion)
+                    self.downloadImage(with: url, options: options, task: task, editor: editor, progress: progress, completion: completion)
                 default:
                     print("Error: illegal query disk data result")
                     break
@@ -237,8 +237,8 @@ public class BBWebImageManager: NSObject {
         }
     }
     
-    private func downloadImage(with url: URL, options: BBWebImageOptions, task: BBWebImageLoadTask, editor: BBWebImageEditor?, completion: @escaping BBWebImageManagerCompletion) {
-        task.downloadTask = self.imageDownloader.downloadImage(with: url) { [weak self, weak task] (data: Data?, error: Error?) in
+    private func downloadImage(with url: URL, options: BBWebImageOptions, task: BBWebImageLoadTask, editor: BBWebImageEditor?, progress: BBImageDownloaderProgress?, completion: @escaping BBWebImageManagerCompletion) {
+        task.downloadTask = self.imageDownloader.downloadImage(with: url, options: options, progress: progress) { [weak self, weak task] (data: Data?, error: Error?) in
             guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentData = data {
                 self.handle(imageData: currentData, options: options, cacheType: .none, forTask: task, url: url, editor: editor, completion: completion)
