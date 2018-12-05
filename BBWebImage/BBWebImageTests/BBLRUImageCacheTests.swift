@@ -1,5 +1,5 @@
 //
-//  BBLRUImageCacheTest.swift
+//  BBLRUImageCacheTests.swift
 //  BBWebImageTests
 //
 //  Created by Kaibo Lu on 2018/12/3.
@@ -14,7 +14,7 @@ struct TestImageItem {
     let key: String
 }
 
-class BBLRUImageCacheTest: XCTestCase {
+class BBLRUImageCacheTests: XCTestCase {
 
     var cache: BBLRUImageCache!
     var fileCache: BBLRUImageCache!

@@ -1,5 +1,5 @@
 //
-//  BBMergeRequestImageDownloaderTest.swift
+//  BBMergeRequestImageDownloaderTests.swift
 //  BBWebImageTests
 //
 //  Created by Kaibo Lu on 2018/12/3.
@@ -8,7 +8,7 @@
 
 import XCTest
 
-class BBMergeRequestImageDownloaderTest: XCTestCase {
+class BBMergeRequestImageDownloaderTests: XCTestCase {
     var downloader: BBMergeRequestImageDownloader!
     var urls: [URL]!
     
