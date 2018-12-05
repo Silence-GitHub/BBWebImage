@@ -35,8 +35,14 @@ class BBImageCoderManagerTests: XCTestCase {
     
     func testDecode() {
         XCTAssertNil(coder.decode(imageData: Data()))
-        XCTAssertNotNil(coder.decode(imageData: pngData))
-        XCTAssertNotNil(coder.decode(imageData: jpgData))
+        
+        let pngImage = coder.decode(imageData: pngData)
+        XCTAssertNotNil(pngImage)
+        XCTAssertEqual(pngImage?.bb_imageFormat, .PNG)
+        
+        let jpgImage = coder.decode(imageData: jpgData)
+        XCTAssertNotNil(jpgImage)
+        XCTAssertEqual(jpgImage?.bb_imageFormat, .JPEG)
     }
     
     func testDecompress() {
@@ -45,12 +51,14 @@ class BBImageCoderManagerTests: XCTestCase {
         let pngDecompressedImage = coder.decompressedImage(withImage: pngImage, data: pngData)
         XCTAssertNotNil(pngDecompressedImage)
         XCTAssertNotEqual(pngImage, pngDecompressedImage)
+        XCTAssertEqual(pngDecompressedImage?.bb_imageFormat, .PNG)
         
         let jpgData = self.jpgData
         let jpgImage = coder.decode(imageData: jpgData)!
         let jpgDecompressedImage = coder.decompressedImage(withImage: jpgImage, data: jpgData)
         XCTAssertNotNil(jpgDecompressedImage)
         XCTAssertNotEqual(jpgImage, jpgDecompressedImage)
+        XCTAssertEqual(jpgDecompressedImage?.bb_imageFormat, .JPEG)
     }
     
     func testCanEncode() {
