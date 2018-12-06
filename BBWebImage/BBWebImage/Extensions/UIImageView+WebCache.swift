@@ -31,6 +31,8 @@ public extension UIImageView {
                 var displayImage = partialImage
                 if let currentEditor = editor,
                     let currentImage = currentEditor.edit(partialImage, partialData) {
+                    currentImage.bb_imageEditKey = currentEditor.key
+                    currentImage.bb_imageFormat = partialData.bb_imageFormat
                     displayImage = currentImage
                 } else if !options.contains(.ignoreImageDecoding),
                     let currentImage = BBWebImageManager.shared.imageCoder.decompressedImage(withImage: partialImage, data: partialData) {
