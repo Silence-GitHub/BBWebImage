@@ -17,8 +17,9 @@ public struct BBWebImageOptions: OptionSet {
     public static let refreshCache = BBWebImageOptions(rawValue: 1 << 2)
     public static let useURLCache = BBWebImageOptions(rawValue: 1 << 3)
     public static let handleCookies = BBWebImageOptions(rawValue: 1 << 4)
-    public static let ignorePlaceholder = BBWebImageOptions(rawValue: 1 << 5)
-    public static let ignoreImageDecoding = BBWebImageOptions(rawValue: 1 << 6)
+    public static let progressiveDownload = BBWebImageOptions(rawValue: 1 << 5)
+    public static let ignorePlaceholder = BBWebImageOptions(rawValue: 1 << 6)
+    public static let ignoreImageDecoding = BBWebImageOptions(rawValue: 1 << 7)
     
     public init(rawValue: Int) { self.rawValue = rawValue }
 }
@@ -77,7 +78,7 @@ public class BBWebImageManager: NSObject {
     public static let shared = BBWebImageManager()
     
     public private(set) var imageCache: BBImageCache
-    public private(set) var imageDownloader: BBMergeRequestImageDownloader
+    public private(set) var imageDownloader: BBImageDownloader
     public private(set) var imageCoder: BBImageCoder
     private let coderQueue: BBDispatchQueuePool
     private var tasks: Set<BBWebImageLoadTask>
@@ -88,9 +89,11 @@ public class BBWebImageManager: NSObject {
         let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
         let cache = BBLRUImageCache(path: path, sizeThreshold: 20 * 1024)
         imageCache = cache
-        imageDownloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
+        let downloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
+        imageDownloader = downloader
         imageCoder = BBImageCoderManager()
         cache.imageCoder = imageCoder
+        downloader.imageCoder = imageCoder
         coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
         taskSentinel = 0

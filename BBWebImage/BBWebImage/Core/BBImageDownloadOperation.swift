@@ -25,7 +25,12 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
         stateLock.signal()
         return tid
     }
+    
+    weak var imageCoder: BBImageCoder?
+    private var imageProgressiveCoder: BBImageProgressiveCoder?
+    
     var completion: (() -> Void)?
+    
     private let request: URLRequest
     private let session: URLSession
     private var tasks: [BBImageDownloadTask]
@@ -37,6 +42,10 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     
     private var cancelled: Bool
     private var finished: Bool
+    
+    private lazy var coderQueue: DispatchQueue = {
+        return BBDispatchQueuePool.userInitiated.currentQueue
+    }()
     
     var taskCount: Int {
         taskLock.wait()
@@ -128,7 +137,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
             let currentTasks = tasks
             taskLock.signal()
             for task in currentTasks where !task.isCancelled {
-                task.progress?(0, expectedSize)
+                task.progress?(nil, expectedSize, nil)
             }
             completionHandler(.allow)
         }
@@ -137,12 +146,42 @@ extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if imageData == nil { imageData = Data(capacity: expectedSize) }
         imageData?.append(data)
-        
+        guard let currentImageData = imageData else { return }
+
+        if let coder = imageCoder,
+            imageProgressiveCoder == nil {
+            if let coderManager = coder as? BBImageCoderManager {
+                let coders = coderManager.coders
+                for coder in coders {
+                    if let progressiveCoder = coder as? BBImageProgressiveCoder,
+                        progressiveCoder.canIncrementallyDecode(imageData: currentImageData) {
+                        imageProgressiveCoder = progressiveCoder.copy() as? BBImageProgressiveCoder
+                        break
+                    }
+                }
+            } else if let progressiveCoder = coder as? BBImageProgressiveCoder {
+                imageProgressiveCoder = progressiveCoder.copy() as? BBImageProgressiveCoder
+            }
+        }
+        if let progressiveCoder = imageProgressiveCoder {
+            let size = expectedSize
+            let finished = currentImageData.count >= size
+            coderQueue.async { [weak self] in
+                guard let self = self, !self.cancelled, !self.finished else { return }
+                let image = progressiveCoder.incrementallyDecodedImage(withData: currentImageData, finished: finished)
+                self.progress(with: currentImageData, expectedSize: size, image: image)
+            }
+        } else {
+            progress(with: currentImageData, expectedSize: expectedSize, image: nil)
+        }
+    }
+    
+    func progress(with data: Data?, expectedSize: Int, image: UIImage?) {
         taskLock.wait()
         let currentTasks = tasks
         taskLock.signal()
         for task in currentTasks where !task.isCancelled {
-            task.progress?(imageData!.count, expectedSize)
+            task.progress?(data, expectedSize, image)
         }
     }
 }

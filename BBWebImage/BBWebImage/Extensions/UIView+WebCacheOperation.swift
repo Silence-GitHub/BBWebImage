@@ -25,9 +25,26 @@ public class BBWebCacheOperation {
             pthread_mutex_unlock(&lock)
         }
     }
+    
+    private var _downloadProgress: Double
+    public var downloadProgress: Double {
+        get {
+            pthread_mutex_lock(&lock)
+            let d = _downloadProgress
+            pthread_mutex_unlock(&lock)
+            return d
+        }
+        set {
+            pthread_mutex_lock(&lock)
+            _downloadProgress = newValue
+            pthread_mutex_unlock(&lock)
+        }
+    }
+    
     private var lock: pthread_mutex_t
     
     public init() {
+        _downloadProgress = 0
         lock = pthread_mutex_t()
         pthread_mutex_init(&lock, nil)
     }

@@ -9,7 +9,17 @@
 import UIKit
 
 public class BBWebImageImageIOCoder: BBImageCoder {
-
+    private var imageSource: CGImageSource?
+    private var imageWidth: Int
+    private var imageHeight: Int
+    private var imageOrientation: UIImage.Orientation
+    
+    init() {
+        imageWidth = 0
+        imageHeight = 0
+        imageOrientation = .up
+    }
+    
     public func canDecode(imageData: Data) -> Bool {
         switch imageData.bb_imageFormat {
         case .JPEG, .PNG:
@@ -73,5 +83,51 @@ public class BBWebImageImageIOCoder: BBImageCoder {
             return data as Data
         }
         return nil
+    }
+    
+    public func copy() -> BBImageCoder {
+        return BBWebImageImageIOCoder()
+    }
+}
+
+extension BBWebImageImageIOCoder: BBImageProgressiveCoder {
+    public func canIncrementallyDecode(imageData: Data) -> Bool {
+        switch imageData.bb_imageFormat {
+        case .JPEG, .PNG:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public func incrementallyDecodedImage(withData data: Data, finished: Bool) -> UIImage? {
+        if imageSource == nil {
+            imageSource = CGImageSourceCreateIncremental(nil)
+        }
+        guard let source = imageSource else { return nil }
+        CGImageSourceUpdateData(source, data as CFData, finished)
+        var image: UIImage?
+        if imageWidth <= 0 || imageHeight <= 0,
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString : AnyObject] {
+            if let width = properties[kCGImagePropertyPixelWidth] as? Int {
+                imageWidth = width
+            }
+            if let height = properties[kCGImagePropertyPixelHeight] as? Int {
+                imageHeight = height
+            }
+            if let rawValue = properties[kCGImagePropertyOrientation] as? UInt32,
+                let orientation = CGImagePropertyOrientation(rawValue: rawValue) {
+                imageOrientation = orientation.toUIImageOrientation
+            }
+        }
+        if imageWidth > 0 && imageHeight > 0,
+            let cgimage = CGImageSourceCreateImageAtIndex(source, 0, nil) {
+            image = UIImage(cgImage: cgimage, scale: 1, orientation: imageOrientation)
+            image?.bb_imageFormat = data.bb_imageFormat
+        }
+        if finished {
+            imageSource = nil
+        }
+        return image
     }
 }

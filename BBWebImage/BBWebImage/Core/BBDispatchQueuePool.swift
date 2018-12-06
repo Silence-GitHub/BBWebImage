@@ -18,6 +18,12 @@ public class BBDispatchQueuePool {
     private let queues: [DispatchQueue]
     private var index: Int32
     
+    public var currentQueue: DispatchQueue {
+        var currentIndex = OSAtomicIncrement32(&index)
+        if currentIndex < 0 { currentIndex = -currentIndex }
+        return queues[Int(currentIndex) % queues.count]
+    }
+    
     public init(label: String, qos: DispatchQoS, queueCount: Int = 0) {
         let count = queueCount > 0 ? queueCount : min(16, max(1, ProcessInfo.processInfo.activeProcessorCount))
         var pool: [DispatchQueue] = []
@@ -30,9 +36,6 @@ public class BBDispatchQueuePool {
     }
     
     public func async(work: @escaping () -> Void) {
-        var currentIndex = OSAtomicIncrement32(&index)
-        if currentIndex < 0 { currentIndex = -currentIndex }
-        let queue = queues[Int(currentIndex) % queues.count]
-        queue.async(execute: work)
+        currentQueue.async(execute: work)
     }
 }

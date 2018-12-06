@@ -8,7 +8,7 @@
 
 import UIKit
 
-public typealias BBImageDownloaderProgress = (Int, Int) -> Void
+public typealias BBImageDownloaderProgress = (Data?, Int, UIImage?) -> Void
 public typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
 
 private class BBLinkedListNode {
@@ -72,6 +72,7 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
 
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
+    public weak var imageCoder: BBImageCoder?
     
     public var currentDownloadCount: Int {
         lock.wait()
@@ -150,6 +151,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
             request.allHTTPHeaderFields = httpHeaders
             request.httpShouldUsePipelining = true
             let newOperation = BBMergeRequestImageDownloadOperation(request: request, session: session)
+            if options.contains(.progressiveDownload) { newOperation.imageCoder = imageCoder }
             newOperation.completion = { [weak self] in
                 guard let self = self else { return }
                 self.lock.wait()
