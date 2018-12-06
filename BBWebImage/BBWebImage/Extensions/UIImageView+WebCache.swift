@@ -19,6 +19,7 @@ public extension UIImageView {
             }
         }
         var currentProgress = progress
+        var sentinel: Int32 = 0
         if options.contains(.progressiveDownload) {
             currentProgress = { (data, expectedSize, image) in
                 guard let partialData = data,
@@ -40,6 +41,7 @@ public extension UIImageView {
                     guard let self = self else { return }
                     let webCacheOperation = self.bb_webCacheOperation
                     if let task = webCacheOperation.task,
+                        task.sentinel == sentinel,
                         !task.isCancelled,
                         webCacheOperation.downloadProgress < downloadProgress {
                         self.image = displayImage
@@ -49,11 +51,13 @@ public extension UIImageView {
                 progress?(data, expectedSize, displayImage)
             }
         }
-        webCacheOperation.task = BBWebImageManager.shared.loadImage(with: url, options: options, editor: editor, progress: currentProgress) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
+        let task = BBWebImageManager.shared.loadImage(with: url, options: options, editor: editor, progress: currentProgress) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
             guard let self = self else { return }
             if let currentImage = image { self.image = currentImage }
             if error == nil { self.bb_webCacheOperation.downloadProgress = 1 }
             completion?(image, data, error, cacheType)
         }
+        webCacheOperation.task = task
+        sentinel = task.sentinel
     }
 }

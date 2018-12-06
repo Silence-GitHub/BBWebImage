@@ -34,9 +34,9 @@ public class BBWebImageLoadTask {
         pthread_mutex_unlock(&lock)
         return c
     }
+    public let sentinel: Int32
     private var cancelled: Bool
     private var lock: pthread_mutex_t
-    fileprivate let sentinel: Int32
     fileprivate var downloadTask: BBImageDownloadTask?
     fileprivate weak var imageManager: BBWebImageManager?
     
