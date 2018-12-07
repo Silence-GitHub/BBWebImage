@@ -57,4 +57,8 @@ public extension UIView {
         objc_setAssociatedObject(self, &webCacheOperationKey, operation, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return operation
     }
+    
+    public func bb_cancelCurrentImageLoadTask() {
+        bb_webCacheOperation.task?.cancel()
+    }
 }
