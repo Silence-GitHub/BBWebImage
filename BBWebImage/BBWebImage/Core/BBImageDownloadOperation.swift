@@ -119,6 +119,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
     private func complete(withData data: Data?, error: Error?) {
         taskLock.wait()
         let currentTasks = tasks
+        tasks.removeAll()
         taskLock.signal()
         for task in currentTasks where !task.isCancelled {
             task.completion(data, error)
@@ -133,12 +134,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
         if statusCode >= 400 || statusCode == 304 {
             completionHandler(.cancel)
         } else {
-            taskLock.wait()
-            let currentTasks = tasks
-            taskLock.signal()
-            for task in currentTasks where !task.isCancelled {
-                task.progress?(nil, expectedSize, nil)
-            }
+            progress(with: nil, expectedSize: expectedSize, image: nil)
             completionHandler(.allow)
         }
     }

@@ -21,7 +21,8 @@ public extension UIImageView {
         var currentProgress = progress
         var sentinel: Int32 = 0
         if options.contains(.progressiveDownload) {
-            currentProgress = { (data, expectedSize, image) in
+            currentProgress = { [weak self] (data, expectedSize, image) in
+                guard let self = self else { return }
                 guard let partialData = data,
                     expectedSize > 0,
                     let partialImage = image else {
@@ -39,18 +40,24 @@ public extension UIImageView {
                     displayImage = currentImage
                 }
                 let downloadProgress = min(1, Double(partialData.count) / Double(expectedSize))
-                DispatchQueue.main.safeAsync { [weak self] in
+                DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
+                    let webCacheOperation = self.bb_webCacheOperation
+                    guard let task = webCacheOperation.task,
+                        task.sentinel == sentinel,
+                        !task.isCancelled,
+                        webCacheOperation.downloadProgress < downloadProgress else { return }
+                    self.image = displayImage
+                    webCacheOperation.downloadProgress = downloadProgress
+                }
+                if let userProgress = progress {
                     let webCacheOperation = self.bb_webCacheOperation
                     if let task = webCacheOperation.task,
                         task.sentinel == sentinel,
-                        !task.isCancelled,
-                        webCacheOperation.downloadProgress < downloadProgress {
-                        self.image = displayImage
-                        webCacheOperation.downloadProgress = downloadProgress
+                        !task.isCancelled {
+                        userProgress(partialData, expectedSize, displayImage)
                     }
                 }
-                progress?(data, expectedSize, displayImage)
             }
         }
         let task = BBWebImageManager.shared.loadImage(with: url, options: options, editor: editor, progress: currentProgress) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
