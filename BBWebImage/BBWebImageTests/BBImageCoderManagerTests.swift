@@ -12,12 +12,12 @@ class BBImageCoderManagerTests: XCTestCase {
     var coder: BBImageCoderManager!
     
     var pngData: Data {
-        let url = Bundle(for: classForCoder).url(forResource: "placeholder", withExtension: "png")!
+        let url = Bundle(for: classForCoder).url(forResource: "mew_baseline", withExtension: "png")!
         return try! Data(contentsOf: url)
     }
     
     var jpgData: Data {
-        let url = Bundle(for: classForCoder).url(forResource: "sunflower", withExtension: "jpg")!
+        let url = Bundle(for: classForCoder).url(forResource: "mew_baseline", withExtension: "jpg")!
         return try! Data(contentsOf: url)
     }
     
@@ -74,5 +74,23 @@ class BBImageCoderManagerTests: XCTestCase {
             XCTAssertNotNil(coder.encode(image, toFormat: .JPEG))
             XCTAssertNotNil(coder.encode(image, toFormat: .unknown))
         }
+    }
+    
+    func testCanIncrementallyDecode() {
+        XCTAssertTrue(coder.canIncrementallyDecode(imageData: pngData))
+        XCTAssertTrue(coder.canIncrementallyDecode(imageData: jpgData))
+    }
+    
+    func testIncrementallyDecodedImage() {
+        let test = { (data: Data, total: Int) -> Void in
+            for i in 1...total {
+                let finished = (i == total)
+                let end = Int((Double(i) / Double(total)) * Double(data.count))
+                let subdata = data.subdata(in: 0..<end)
+                XCTAssertNotNil(self.coder.incrementallyDecodedImage(withData: subdata, finished: finished))
+            }
+        }
+        test(pngData, 10)
+        test(jpgData, 5) // Need enough data to decode
     }
 }

@@ -127,6 +127,9 @@ extension BBWebImageImageIOCoder: BBImageProgressiveCoder {
         }
         if finished {
             imageSource = nil
+            imageWidth = 0
+            imageHeight = 0
+            imageOrientation = .up
         }
         return image
     }
