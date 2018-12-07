@@ -12,8 +12,13 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
     var downloader: BBMergeRequestImageDownloader!
     var urls: [URL]!
     
+    lazy var imageCoder: BBImageCoder = {
+        return BBImageCoderManager()
+    }()
+    
     override func setUp() {
         downloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
+        downloader.imageCoder = imageCoder
         urls = []
         for i in 1...10 {
             urls.append(ImageURLProvider.originURL(forIndex: i)!)
@@ -365,6 +370,79 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             XCTAssertEqual(self.downloader.currentDownloadCount, 0)
             expectation.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testProgressCallback() {
+        for url in urls {
+            let expectation = self.expectation(description: "Wait for downloading image")
+            
+            downloader.downloadImage(with: url, options: .none, progress: { (data, expectedSize, image) in
+                XCTFail()
+            }) { (data, error) in
+                XCTFail()
+            }.cancel()
+            
+            let lock = DispatchSemaphore(value: 1)
+            var finish = false
+            downloader.downloadImage(with: url, options: .none, progress: { (data, expectedSize, image) in
+                lock.wait()
+                XCTAssertFalse(finish)
+                lock.signal()
+                if data == nil {
+                    XCTAssertTrue(expectedSize > 0)
+                } else {
+                    XCTAssertTrue(data!.count <= expectedSize)
+                }
+                XCTAssertNil(image)
+            }) { (data, error) in
+                lock.wait()
+                finish = true
+                lock.signal()
+                XCTAssertNotNil(data)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    expectation.fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testProgressiveDownload() {
+        for url in urls {
+            let expectation = self.expectation(description: "Wait for downloading image")
+            
+            downloader.downloadImage(with: url, options: .progressiveDownload, progress: { (data, expectedSize, image) in
+                XCTFail()
+            }) { (data, error) in
+                XCTFail()
+                }.cancel()
+            
+            let lock = DispatchSemaphore(value: 1)
+            var finish = false
+            downloader.downloadImage(with: url, options: .progressiveDownload, progress: { (data, expectedSize, image) in
+                lock.wait()
+                XCTAssertFalse(finish)
+                lock.signal()
+                if data == nil {
+                    XCTAssertTrue(expectedSize > 0)
+                    XCTAssertNil(image)
+                } else {
+                    XCTAssertTrue(data!.count <= expectedSize)
+                    if data!.count >= expectedSize / 2 {
+                        XCTAssertNotNil(image)
+                    }
+                }
+            }) { (data, error) in
+                lock.wait()
+                finish = true
+                lock.signal()
+                XCTAssertNotNil(data)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    expectation.fulfill()
+                }
+            }
         }
         waitForExpectations(timeout: 10, handler: nil)
     }
