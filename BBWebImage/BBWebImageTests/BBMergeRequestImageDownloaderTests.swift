@@ -378,11 +378,12 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         for url in urls {
             let expectation = self.expectation(description: "Wait for downloading image")
             
-            downloader.downloadImage(with: url, options: .none, progress: { (data, expectedSize, image) in
+            let task = downloader.downloadImage(with: url, options: .none, progress: { (data, expectedSize, image) in
                 XCTFail()
             }) { (data, error) in
                 XCTFail()
-            }.cancel()
+            }
+            downloader.cancel(task: task)
             
             let lock = DispatchSemaphore(value: 1)
             var finish = false
@@ -413,11 +414,12 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         for url in urls {
             let expectation = self.expectation(description: "Wait for downloading image")
             
-            downloader.downloadImage(with: url, options: .progressiveDownload, progress: { (data, expectedSize, image) in
+            let task = downloader.downloadImage(with: url, options: .progressiveDownload, progress: { (data, expectedSize, image) in
                 XCTFail()
             }) { (data, error) in
                 XCTFail()
-                }.cancel()
+            }
+            downloader.cancel(task: task)
             
             let lock = DispatchSemaphore(value: 1)
             var finish = false
