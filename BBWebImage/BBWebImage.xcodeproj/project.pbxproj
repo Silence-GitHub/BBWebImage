@@ -13,6 +13,8 @@
 		4A1CACEE21AE6E2D00DC0D61 /* BBCILookup.cikernel in Resources */ = {isa = PBXBuildFile; fileRef = 4A1CACEC21AE6E2D00DC0D61 /* BBCILookup.cikernel */; };
 		4A22206921BA37BE0094F9FD /* mew_baseline.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A22206721BA37BE0094F9FD /* mew_baseline.png */; };
 		4A22206A21BA37BE0094F9FD /* mew_baseline.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A22206821BA37BE0094F9FD /* mew_baseline.jpg */; };
+		4A29383121BB027500CB8DAD /* BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A29383021BB027500CB8DAD /* BBWebCache.swift */; };
+		4A29383221BB027500CB8DAD /* BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A29383021BB027500CB8DAD /* BBWebCache.swift */; };
 		4A4819C321964EB00000B229 /* BBDispatchQueuePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */; };
 		4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */; };
 		4A53310A21657DC500C68080 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A53310021657DC500C68080 /* BBWebImage.framework */; };
@@ -49,10 +51,10 @@
 		4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */; };
 		4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */; };
 		4ACFCDA321B61707004316A5 /* ImageURLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */; };
-		4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */; };
-		4AF3D1E9216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */; };
-		4AF3D1EB216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */; };
-		4AF3D1EC216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */; };
+		4AF3D1E8216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */; };
+		4AF3D1E9216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */; };
+		4AF3D1EB216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */; };
+		4AF3D1EC216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +72,7 @@
 		4A1CACEC21AE6E2D00DC0D61 /* BBCILookup.cikernel */ = {isa = PBXFileReference; lastKnownFileType = text; path = BBCILookup.cikernel; sourceTree = "<group>"; };
 		4A22206721BA37BE0094F9FD /* mew_baseline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mew_baseline.png; sourceTree = "<group>"; };
 		4A22206821BA37BE0094F9FD /* mew_baseline.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = mew_baseline.jpg; sourceTree = "<group>"; };
+		4A29383021BB027500CB8DAD /* BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebCache.swift; sourceTree = "<group>"; };
 		4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDispatchQueuePool.swift; sourceTree = "<group>"; };
 		4A53310021657DC500C68080 /* BBWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BBWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A53310321657DC500C68080 /* BBWebImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BBWebImage.h; sourceTree = "<group>"; };
@@ -94,8 +97,8 @@
 		4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBLRUImageCacheTests.swift; sourceTree = "<group>"; };
 		4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBMergeRequestImageDownloaderTests.swift; sourceTree = "<group>"; };
 		4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageURLProvider.swift; path = ../../BBWebImageDemo/BBWebImageDemo/ImageURLProvider.swift; sourceTree = "<group>"; };
-		4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+WebCache.swift"; sourceTree = "<group>"; };
-		4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+WebCacheOperation.swift"; sourceTree = "<group>"; };
+		4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+BBWebCache.swift"; sourceTree = "<group>"; };
+		4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+BBWebCache.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +176,7 @@
 		4A5331412165820E00C68080 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				4A29383021BB027500CB8DAD /* BBWebCache.swift */,
 				4A5331482165828300C68080 /* BBWebImageManager.swift */,
 				4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */,
 				4A53314F21658F9F00C68080 /* BBImageCache.swift */,
@@ -194,8 +198,8 @@
 				4A87E907216BE4430073E53C /* Data+ImageFormat.swift */,
 				4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */,
 				4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */,
-				4AF3D1E7216D9B4300320E6C /* UIImageView+WebCache.swift */,
-				4AF3D1EA216D9D0000320E6C /* UIView+WebCacheOperation.swift */,
+				4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */,
+				4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */,
 				4A5DE8FB217191EE0074EEFD /* String+MD5.swift */,
 			);
 			path = Extensions;
@@ -317,11 +321,12 @@
 				4A4819C321964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
 				4A1CACEA21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FC217191EE0074EEFD /* String+MD5.swift in Sources */,
-				4AF3D1E8216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
+				4AF3D1E8216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */,
 				4A6E2D8C2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */,
 				4A5331532165902A00C68080 /* BBImageDownloader.swift in Sources */,
+				4A29383121BB027500CB8DAD /* BBWebCache.swift in Sources */,
 				4A53315B2165BC8500C68080 /* BBImageCoder.swift in Sources */,
-				4AF3D1EB216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */,
+				4AF3D1EB216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */,
 				4A87E911216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
 				4A87E908216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
 				4A87E914216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */,
@@ -339,7 +344,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AF3D1EC216D9D0000320E6C /* UIView+WebCacheOperation.swift in Sources */,
+				4AF3D1EC216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */,
 				4A6E2D87218787C400CE1CD2 /* BBMemoryCache.swift in Sources */,
 				4A6E2D8D2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */,
 				4A5331542165902A00C68080 /* BBImageDownloader.swift in Sources */,
@@ -350,10 +355,11 @@
 				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTests.swift in Sources */,
 				4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
-				4AF3D1E9216D9B4300320E6C /* UIImageView+WebCache.swift in Sources */,
+				4AF3D1E9216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */,
 				4A62CAA3216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */,
 				4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,
 				4A87E912216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
+				4A29383221BB027500CB8DAD /* BBWebCache.swift in Sources */,
 				4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */,
 				4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */,
