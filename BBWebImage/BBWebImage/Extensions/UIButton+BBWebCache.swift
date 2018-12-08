@@ -9,10 +9,6 @@
 import UIKit
 
 extension UIButton: BBWebCache {
-    public func bb_setImage(_ image: UIImage?) {
-        setImage(image, for: .normal)
-    }
-    
     public func bb_setImage(with url: URL,
                             forState state: UIControl.State,
                             placeholder: UIImage? = nil,
@@ -27,13 +23,19 @@ extension UIButton: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
+                    taskKey: imageLoadTaskKey(forState: state),
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
     }
     
     public func bb_cancelImageLoadTask(forState state: UIControl.State) {
-        // TODO: Cancel
+        let key = imageLoadTaskKey(forState: state)
+        bb_webCacheOperation.task(forKey: key)?.cancel()
+    }
+    
+    private func imageLoadTaskKey(forState state: UIControl.State) -> String {
+        return "UIButtonImageLoadTask\(state.rawValue)"
     }
     
     public func bb_setBackgroundImage(with url: URL,
@@ -50,12 +52,18 @@ extension UIButton: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
+                    taskKey: backgroundImageLoadTaskKey(forState: state),
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
     }
     
     public func bb_cancelBackgroundImageLoadTask(forState state: UIControl.State) {
-        // TODO: Cancel
+        let key = backgroundImageLoadTaskKey(forState: state)
+        bb_webCacheOperation.task(forKey: key)?.cancel()
+    }
+    
+    private func backgroundImageLoadTaskKey(forState state: UIControl.State) -> String {
+        return "UIButtonBackgroundImageLoadTask\(state.rawValue)"
     }
 }

@@ -17,51 +17,48 @@ public protocol BBWebCache: AnyObject {
                      placeholder: UIImage?,
                      options: BBWebImageOptions,
                      editor: BBWebImageEditor?,
-                     setImage: BBSetImage?,
+                     taskKey: String,
+                     setImage: @escaping BBSetImage,
                      progress: BBImageDownloaderProgress?,
                      completion: BBWebImageManagerCompletion?)
-    
-    func bb_setImage(_ image: UIImage?)
 }
 
 public class BBWebCacheOperation {
-    // TODO: Use weak value dic to find task with key
-    private weak var _task: BBWebImageLoadTask?
-    public var task: BBWebImageLoadTask? {
-        get {
-            pthread_mutex_lock(&lock)
-            let t = _task
-            pthread_mutex_unlock(&lock)
-            return t
-        }
-        set {
-            pthread_mutex_lock(&lock)
-            _task = newValue
-            pthread_mutex_unlock(&lock)
-        }
-    }
-    
-    private var _downloadProgress: Double
-    public var downloadProgress: Double {
-        get {
-            pthread_mutex_lock(&lock)
-            let d = _downloadProgress
-            pthread_mutex_unlock(&lock)
-            return d
-        }
-        set {
-            pthread_mutex_lock(&lock)
-            _downloadProgress = newValue
-            pthread_mutex_unlock(&lock)
-        }
-    }
-    
+    private let weakTaskMap: NSMapTable<NSString, BBWebImageLoadTask>
+    private var downloadProgressDic: [String : Double]
     private var lock: pthread_mutex_t
     
     public init() {
-        _downloadProgress = 0
+        weakTaskMap = NSMapTable(keyOptions: .strongMemory, valueOptions: .weakMemory)
+        downloadProgressDic = [:]
         lock = pthread_mutex_t()
         pthread_mutex_init(&lock, nil)
+    }
+    
+    public func task(forKey key: String) -> BBWebImageLoadTask? {
+        pthread_mutex_lock(&lock)
+        let task = weakTaskMap.object(forKey: key as NSString)
+        pthread_mutex_unlock(&lock)
+        return task
+    }
+    
+    public func setTask(_ task: BBWebImageLoadTask, forKey key: String) {
+        pthread_mutex_lock(&lock)
+        weakTaskMap.setObject(task, forKey: key as NSString)
+        pthread_mutex_unlock(&lock)
+    }
+    
+    public func downloadProgress(forKey key: String) -> Double {
+        pthread_mutex_lock(&lock)
+        let p = downloadProgressDic[key] ?? 0
+        pthread_mutex_unlock(&lock)
+        return p
+    }
+    
+    public func setDownloadProgress(_ downloadProgress: Double, forKey key: String) {
+        pthread_mutex_lock(&lock)
+        downloadProgressDic[key] = downloadProgress
+        pthread_mutex_unlock(&lock)
     }
 }
 
@@ -77,16 +74,16 @@ public extension BBWebCache {
                      placeholder: UIImage? = nil,
                      options: BBWebImageOptions = .none,
                      editor: BBWebImageEditor? = nil,
-                     setImage: BBSetImage? = nil,
+                     taskKey: String,
+                     setImage: @escaping BBSetImage,
                      progress: BBImageDownloaderProgress? = nil,
                      completion: BBWebImageManagerCompletion? = nil) {
         let webCacheOperation = bb_webCacheOperation
-        webCacheOperation.task?.cancel()
-        webCacheOperation.downloadProgress = 0
+        webCacheOperation.task(forKey: taskKey)?.cancel()
+        webCacheOperation.setDownloadProgress(0 ,forKey: taskKey)
         if !options.contains(.ignorePlaceholder) {
             DispatchQueue.main.safeSync { [weak self] in
-                guard let self = self else { return }
-                self.bb_setImage(placeholder, setImage: setImage)
+                if self != nil { setImage(placeholder) }
             }
         }
         var currentProgress = progress
@@ -114,16 +111,16 @@ public extension BBWebCache {
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
                     let webCacheOperation = self.bb_webCacheOperation
-                    guard let task = webCacheOperation.task,
+                    guard let task = webCacheOperation.task(forKey: taskKey),
                         task.sentinel == sentinel,
                         !task.isCancelled,
-                        webCacheOperation.downloadProgress < downloadProgress else { return }
-                    self.bb_setImage(displayImage, setImage: setImage)
-                    webCacheOperation.downloadProgress = downloadProgress
+                        webCacheOperation.downloadProgress(forKey: taskKey) < downloadProgress else { return }
+                    setImage(displayImage)
+                    webCacheOperation.setDownloadProgress(downloadProgress, forKey: taskKey)
                 }
                 if let userProgress = progress {
                     let webCacheOperation = self.bb_webCacheOperation
-                    if let task = webCacheOperation.task,
+                    if let task = webCacheOperation.task(forKey: taskKey),
                         task.sentinel == sentinel,
                         !task.isCancelled {
                         userProgress(partialData, expectedSize, displayImage)
@@ -133,19 +130,11 @@ public extension BBWebCache {
         }
         let task = BBWebImageManager.shared.loadImage(with: url, options: options, editor: editor, progress: currentProgress) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
             guard let self = self else { return }
-            if let currentImage = image { self.bb_setImage(currentImage, setImage: setImage) }
-            if error == nil { self.bb_webCacheOperation.downloadProgress = 1 }
+            if let currentImage = image { setImage(currentImage) }
+            if error == nil { self.bb_webCacheOperation.setDownloadProgress(1, forKey: taskKey) }
             completion?(image, data, error, cacheType)
         }
-        webCacheOperation.task = task
+        webCacheOperation.setTask(task, forKey: taskKey)
         sentinel = task.sentinel
-    }
-    
-    private func bb_setImage(_ image: UIImage?, setImage: BBSetImage?) {
-        if let currentSetImage = setImage {
-            currentSetImage(image)
-        } else {
-            bb_setImage(image)
-        }
     }
 }
