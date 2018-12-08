@@ -102,7 +102,7 @@ public class BBWebImageManager: NSObject {
     }
     
     @discardableResult
-    public func loadImage(with url: URL,
+    public func loadImage(with resource: BBWebCacheResource,
                           options: BBWebImageOptions = .none,
                           editor: BBWebImageEditor? = nil,
                           progress: BBImageDownloaderProgress? = nil,
@@ -113,7 +113,7 @@ public class BBWebImageManager: NSObject {
         pthread_mutex_unlock(&taskLock)
         
         if options.contains(.refreshCache) {
-            downloadImage(with: url,
+            downloadImage(with: resource,
                           options: options,
                           task: task,
                           editor: editor,
@@ -124,7 +124,7 @@ public class BBWebImageManager: NSObject {
         
         // Get memory image
         var memoryImage: UIImage?
-        imageCache.image(forKey: url.absoluteString, cacheType: .memory) { (result: BBImageCachQueryCompletionResult) in
+        imageCache.image(forKey: resource.cacheKey, cacheType: .memory) { (result: BBImageCachQueryCompletionResult) in
             switch result {
             case .memory(image: let image):
                 memoryImage = image
@@ -158,7 +158,7 @@ public class BBWebImageManager: NSObject {
                                           cacheType: .memory)
                             self.imageCache.store(image,
                                                   data: nil,
-                                                  forKey: url.absoluteString,
+                                                  forKey: resource.cacheKey,
                                                   cacheType: .memory,
                                                   completion: nil)
                         } else {
@@ -181,7 +181,7 @@ public class BBWebImageManager: NSObject {
         if finished { return task }
         
         if options.contains(.ignoreDiskCache) {
-            downloadImage(with: url,
+            downloadImage(with: resource,
                           options: options,
                           task: task,
                           editor: editor,
@@ -189,7 +189,7 @@ public class BBWebImageManager: NSObject {
                           completion: completion)
         } else {
             // Get disk data
-            imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
+            imageCache.image(forKey: resource.cacheKey, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
                 guard let self = self, let task = task, !task.isCancelled else { return }
                 switch result {
                 case .disk(data: let data):
@@ -197,12 +197,12 @@ public class BBWebImageManager: NSObject {
                                 options: options,
                                 cacheType: (memoryImage != nil ? .all : .disk),
                                 forTask: task,
-                                url: url,
+                                resource: resource,
                                 editor: editor,
                                 completion: completion)
                 case .none:
                     // Download
-                    self.downloadImage(with: url,
+                    self.downloadImage(with: resource,
                                        options: options,
                                        task: task,
                                        editor: editor,
@@ -233,7 +233,7 @@ public class BBWebImageManager: NSObject {
                         options: BBWebImageOptions,
                         cacheType: BBImageCacheType,
                         forTask task: BBWebImageLoadTask,
-                        url: URL,
+                        resource: BBWebCacheResource,
                         editor: BBWebImageEditor?,
                         completion: @escaping BBWebImageManagerCompletion) {
         self.coderQueue.async { [weak self, weak task] in
@@ -252,7 +252,7 @@ public class BBWebImageManager: NSObject {
                         let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
                         self.imageCache.store(image,
                                               data: data,
-                                              forKey: url.absoluteString,
+                                              forKey: resource.cacheKey,
                                               cacheType: storeCacheType,
                                               completion: nil)
                     } else {
@@ -272,7 +272,7 @@ public class BBWebImageManager: NSObject {
                             let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
                             self.imageCache.store(image,
                                                   data: data,
-                                                  forKey: url.absoluteString,
+                                                  forKey: resource.cacheKey,
                                                   cacheType: storeCacheType,
                                                   completion: nil)
                         } else {
@@ -295,7 +295,7 @@ public class BBWebImageManager: NSObject {
                 let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
                 self.imageCache.store(image,
                                       data: data,
-                                      forKey: url.absoluteString,
+                                      forKey: resource.cacheKey,
                                       cacheType: storeCacheType,
                                       completion: nil)
             } else {
@@ -305,20 +305,20 @@ public class BBWebImageManager: NSObject {
         }
     }
     
-    private func downloadImage(with url: URL,
+    private func downloadImage(with resource: BBWebCacheResource,
                                options: BBWebImageOptions,
                                task: BBWebImageLoadTask,
                                editor: BBWebImageEditor?,
                                progress: BBImageDownloaderProgress?,
                                completion: @escaping BBWebImageManagerCompletion) {
-        task.downloadTask = self.imageDownloader.downloadImage(with: url, options: options, progress: progress) { [weak self, weak task] (data: Data?, error: Error?) in
+        task.downloadTask = self.imageDownloader.downloadImage(with: resource.downloadUrl, options: options, progress: progress) { [weak self, weak task] (data: Data?, error: Error?) in
             guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentData = data {
                 self.handle(imageData: currentData,
                             options: options,
                             cacheType: .none,
                             forTask: task,
-                            url: url,
+                            resource: resource,
                             editor: editor,
                             completion: completion)
             } else if let currentError = error {

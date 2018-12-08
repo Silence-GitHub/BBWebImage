@@ -13,7 +13,7 @@ public typealias BBSetImage = (UIImage?) -> Void
 private var webCacheOperationKey: Void?
 
 public protocol BBWebCache: AnyObject {
-    func bb_setImage(with url: URL,
+    func bb_setImage(with resource: BBWebCacheResource,
                      placeholder: UIImage?,
                      options: BBWebImageOptions,
                      editor: BBWebImageEditor?,
@@ -70,7 +70,7 @@ public extension BBWebCache {
         return operation
     }
     
-    func bb_setImage(with url: URL,
+    func bb_setImage(with resource: BBWebCacheResource,
                      placeholder: UIImage? = nil,
                      options: BBWebImageOptions = .none,
                      editor: BBWebImageEditor? = nil,
@@ -128,7 +128,7 @@ public extension BBWebCache {
                 }
             }
         }
-        let task = BBWebImageManager.shared.loadImage(with: url, options: options, editor: editor, progress: currentProgress) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
+        let task = BBWebImageManager.shared.loadImage(with: resource, options: options, editor: editor, progress: currentProgress) { [weak self] (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
             guard let self = self else { return }
             if let currentImage = image { setImage(currentImage) }
             if error == nil { self.bb_webCacheOperation.setDownloadProgress(1, forKey: taskKey) }

@@ -9,7 +9,7 @@
 import UIKit
 
 extension CALayer: BBWebCache {
-    public func bb_setImage(with url: URL,
+    public func bb_setImage(with resource: BBWebCacheResource,
                             placeholder: UIImage? = nil,
                             options: BBWebImageOptions = .none,
                             editor: BBWebImageEditor? = nil,
@@ -18,7 +18,7 @@ extension CALayer: BBWebCache {
         let setImage: BBSetImage = { [weak self] (image) in
             if let self = self { self.contents = image?.cgImage }
         }
-        bb_setImage(with: url,
+        bb_setImage(with: resource,
                     placeholder: placeholder,
                     options: options,
                     editor: editor,

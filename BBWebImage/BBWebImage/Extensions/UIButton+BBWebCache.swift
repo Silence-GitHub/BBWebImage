@@ -9,7 +9,7 @@
 import UIKit
 
 extension UIButton: BBWebCache {
-    public func bb_setImage(with url: URL,
+    public func bb_setImage(with resource: BBWebCacheResource,
                             forState state: UIControl.State,
                             placeholder: UIImage? = nil,
                             options: BBWebImageOptions = .none,
@@ -19,7 +19,7 @@ extension UIButton: BBWebCache {
         let setImage: BBSetImage = { [weak self] (image) in
             if let self = self { self.setImage(image, for: state) }
         }
-        bb_setImage(with: url,
+        bb_setImage(with: resource,
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
@@ -38,7 +38,7 @@ extension UIButton: BBWebCache {
         return classForCoder.description() + "Image\(state.rawValue)"
     }
     
-    public func bb_setBackgroundImage(with url: URL,
+    public func bb_setBackgroundImage(with resource: BBWebCacheResource,
                                       forState state: UIControl.State,
                                       placeholder: UIImage? = nil,
                                       options: BBWebImageOptions = .none,
@@ -48,7 +48,7 @@ extension UIButton: BBWebCache {
         let setImage: BBSetImage = { [weak self] (image) in
             if let self = self { self.setBackgroundImage(image, for: state) }
         }
-        bb_setImage(with: url,
+        bb_setImage(with: resource,
                     placeholder: placeholder,
                     options: options,
                     editor: editor,

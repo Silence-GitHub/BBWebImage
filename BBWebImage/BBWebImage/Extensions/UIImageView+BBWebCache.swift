@@ -9,7 +9,7 @@
 import UIKit
 
 extension UIImageView: BBWebCache {
-    public func bb_setImage(with url: URL,
+    public func bb_setImage(with resource: BBWebCacheResource,
                             placeholder: UIImage? = nil,
                             options: BBWebImageOptions = .none,
                             editor: BBWebImageEditor? = nil,
@@ -18,7 +18,7 @@ extension UIImageView: BBWebCache {
         let setImage: BBSetImage = { [weak self] (image) in
             if let self = self { self.image = image }
         }
-        bb_setImage(with: url,
+        bb_setImage(with: resource,
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
@@ -34,7 +34,7 @@ extension UIImageView: BBWebCache {
     
     public var imageLoadTaskKey: String { return classForCoder.description() }
     
-    public func bb_setHighlightedImage(with url: URL,
+    public func bb_setHighlightedImage(with resource: BBWebCacheResource,
                                        placeholder: UIImage? = nil,
                                        options: BBWebImageOptions = .none,
                                        editor: BBWebImageEditor? = nil,
@@ -43,7 +43,7 @@ extension UIImageView: BBWebCache {
         let setImage: BBSetImage = { [weak self] (image) in
             if let self = self { self.highlightedImage = image }
         }
-        bb_setImage(with: url,
+        bb_setImage(with: resource,
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
