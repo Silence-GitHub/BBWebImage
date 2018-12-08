@@ -37,42 +37,20 @@ public typealias BBImageCacheRemoveCompletion = () -> Void
 
 public protocol BBImageCache: AnyObject {
     // Get image
-    func image(forKey key: String, completion: @escaping BBImageCacheQueryCompletion)
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)
     
     // Store image
-    func store(_ image: UIImage?, data: Data?, forKey key: String, completion: BBImageCacheStoreCompletion?)
-    func store(_ image: UIImage?, data: Data?, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?)
+    func store(_ image: UIImage?,
+               data: Data?,
+               forKey key: String,
+               cacheType: BBImageCacheType,
+               completion: BBImageCacheStoreCompletion?)
     
     // Remove image
-    func removeImage(forKey key: String, completion: BBImageCacheRemoveCompletion?)
     func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
     
     // Clear image
-    func clear(_ completion: BBImageCacheRemoveCompletion?)
     func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
-}
-
-public extension BBImageCache {
-    // Get image
-    func image(forKey key: String, completion: @escaping BBImageCacheQueryCompletion) {
-        image(forKey: key, cacheType: .all, completion: completion)
-    }
-    
-    // Store image
-    func store(_ image: UIImage?, data: Data?, forKey key: String, completion: BBImageCacheStoreCompletion? = nil) {
-        store(image, data: data, forKey: key, cacheType: .all, completion: completion)
-    }
-    
-    // Remove image
-    func removeImage(forKey key: String, completion: BBImageCacheRemoveCompletion? = nil) {
-        removeImage(forKey: key, cacheType: .all, completion: completion)
-    }
-    
-    // Clear image
-    func clear(_ completion: BBImageCacheRemoveCompletion? = nil) {
-        clear(.all, completion: completion)
-    }
 }
 
 public class BBLRUImageCache: BBImageCache {
@@ -118,7 +96,11 @@ public class BBLRUImageCache: BBImageCache {
     }
     
     // Store image
-    public func store(_ image: UIImage?, data: Data?, forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheStoreCompletion?) {
+    public func store(_ image: UIImage?,
+                      data: Data?,
+                      forKey key: String,
+                      cacheType: BBImageCacheType,
+                      completion: BBImageCacheStoreCompletion?) {
         if cacheType.contains(.memory),
             let currentImage = image {
             memoryCache.store(currentImage, forKey: key, cost: currentImage.cgImage?.bb_cost ?? 1)
@@ -152,7 +134,7 @@ public class BBLRUImageCache: BBImageCache {
     }
     
     // Clear image
-    public func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion? = nil) {
+    public func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion?) {
         if type.contains(.memory) { memoryCache.clear() }
         if type.contains(.disk),
             let currentDiskCache = diskCache {

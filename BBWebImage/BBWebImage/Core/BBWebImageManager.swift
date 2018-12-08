@@ -102,14 +102,23 @@ public class BBWebImageManager: NSObject {
     }
     
     @discardableResult
-    public func loadImage(with url: URL, options: BBWebImageOptions = .none, editor: BBWebImageEditor? = nil, progress: BBImageDownloaderProgress? = nil, completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
+    public func loadImage(with url: URL,
+                          options: BBWebImageOptions = .none,
+                          editor: BBWebImageEditor? = nil,
+                          progress: BBImageDownloaderProgress? = nil,
+                          completion: @escaping BBWebImageManagerCompletion) -> BBWebImageLoadTask {
         let task = newLoadTask()
         pthread_mutex_lock(&taskLock)
         tasks.insert(task)
         pthread_mutex_unlock(&taskLock)
         
         if options.contains(.refreshCache) {
-            downloadImage(with: url, options: options, task: task, editor: editor, progress: progress, completion: completion)
+            downloadImage(with: url,
+                          options: options,
+                          task: task,
+                          editor: editor,
+                          progress: progress,
+                          completion: completion)
             return task
         }
         
@@ -128,7 +137,11 @@ public class BBWebImageManager: NSObject {
             !options.contains(.queryDataWhenInMemory) {
             if let currentEditor = editor {
                 if currentEditor.key == currentImage.bb_imageEditKey {
-                    complete(with: task, completion: completion, image: currentImage, data: nil, cacheType: .memory)
+                    complete(with: task,
+                             completion: completion,
+                             image: currentImage,
+                             data: nil,
+                             cacheType: .memory)
                     remove(loadTask: task)
                     finished = true
                 } else if !currentEditor.needData {
@@ -138,8 +151,16 @@ public class BBWebImageManager: NSObject {
                             guard !task.isCancelled else { return }
                             image.bb_imageEditKey = currentEditor.key
                             image.bb_imageFormat = currentImage.bb_imageFormat
-                            self.complete(with: task, completion: completion, image: image, data: nil, cacheType: .memory)
-                            self.imageCache.store(image, data: nil, forKey: url.absoluteString, cacheType: .memory, completion: nil)
+                            self.complete(with: task,
+                                          completion: completion,
+                                          image: image,
+                                          data: nil,
+                                          cacheType: .memory)
+                            self.imageCache.store(image,
+                                                  data: nil,
+                                                  forKey: url.absoluteString,
+                                                  cacheType: .memory,
+                                                  completion: nil)
                         } else {
                             self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
                         }
@@ -148,7 +169,11 @@ public class BBWebImageManager: NSObject {
                     finished = true
                 }
             } else if currentImage.bb_imageEditKey == nil {
-                complete(with: task, completion: completion, image: currentImage, data: nil, cacheType: .memory)
+                complete(with: task,
+                         completion: completion,
+                         image: currentImage,
+                         data: nil,
+                         cacheType: .memory)
                 remove(loadTask: task)
                 finished = true
             }
@@ -156,17 +181,33 @@ public class BBWebImageManager: NSObject {
         if finished { return task }
         
         if options.contains(.ignoreDiskCache) {
-            downloadImage(with: url, options: options, task: task, editor: editor, progress: progress, completion: completion)
+            downloadImage(with: url,
+                          options: options,
+                          task: task,
+                          editor: editor,
+                          progress: progress,
+                          completion: completion)
         } else {
             // Get disk data
             imageCache.image(forKey: url.absoluteString, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
                 guard let self = self, let task = task, !task.isCancelled else { return }
                 switch result {
                 case .disk(data: let data):
-                    self.handle(imageData: data, options: options, cacheType: (memoryImage != nil ? .all : .disk), forTask: task, url: url, editor: editor, completion: completion)
+                    self.handle(imageData: data,
+                                options: options,
+                                cacheType: (memoryImage != nil ? .all : .disk),
+                                forTask: task,
+                                url: url,
+                                editor: editor,
+                                completion: completion)
                 case .none:
                     // Download
-                    self.downloadImage(with: url, options: options, task: task, editor: editor, progress: progress, completion: completion)
+                    self.downloadImage(with: url,
+                                       options: options,
+                                       task: task,
+                                       editor: editor,
+                                       progress: progress,
+                                       completion: completion)
                 default:
                     print("Error: illegal query disk data result")
                     break
@@ -203,9 +244,17 @@ public class BBWebImageManager: NSObject {
                         guard !task.isCancelled else { return }
                         image.bb_imageEditKey = currentEditor.key
                         image.bb_imageFormat = data.bb_imageFormat
-                        self.complete(with: task, completion: completion, image: image, data: data, cacheType: cacheType)
+                        self.complete(with: task,
+                                      completion: completion,
+                                      image: image,
+                                      data: data,
+                                      cacheType: cacheType)
                         let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
-                        self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
+                        self.imageCache.store(image,
+                                              data: data,
+                                              forKey: url.absoluteString,
+                                              cacheType: storeCacheType,
+                                              completion: nil)
                     } else {
                         self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
                     }
@@ -215,9 +264,17 @@ public class BBWebImageManager: NSObject {
                             guard !task.isCancelled else { return }
                             image.bb_imageEditKey = currentEditor.key
                             image.bb_imageFormat = data.bb_imageFormat
-                            self.complete(with: task, completion: completion, image: image, data: data, cacheType: cacheType)
+                            self.complete(with: task,
+                                          completion: completion,
+                                          image: image,
+                                          data: data,
+                                          cacheType: cacheType)
                             let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
-                            self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
+                            self.imageCache.store(image,
+                                                  data: data,
+                                                  forKey: url.absoluteString,
+                                                  cacheType: storeCacheType,
+                                                  completion: nil)
                         } else {
                             self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
                         }
@@ -230,9 +287,17 @@ public class BBWebImageManager: NSObject {
                     let decompressedImage = self.imageCoder.decompressedImage(with: image, data: data) {
                     image = decompressedImage
                 }
-                self.complete(with: task, completion: completion, image: image, data: data, cacheType: cacheType)
+                self.complete(with: task,
+                              completion: completion,
+                              image: image,
+                              data: data,
+                              cacheType: cacheType)
                 let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
-                self.imageCache.store(image, data: data, forKey: url.absoluteString, cacheType: storeCacheType, completion: nil)
+                self.imageCache.store(image,
+                                      data: data,
+                                      forKey: url.absoluteString,
+                                      cacheType: storeCacheType,
+                                      completion: nil)
             } else {
                 self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]))
             }
@@ -240,11 +305,22 @@ public class BBWebImageManager: NSObject {
         }
     }
     
-    private func downloadImage(with url: URL, options: BBWebImageOptions, task: BBWebImageLoadTask, editor: BBWebImageEditor?, progress: BBImageDownloaderProgress?, completion: @escaping BBWebImageManagerCompletion) {
+    private func downloadImage(with url: URL,
+                               options: BBWebImageOptions,
+                               task: BBWebImageLoadTask,
+                               editor: BBWebImageEditor?,
+                               progress: BBImageDownloaderProgress?,
+                               completion: @escaping BBWebImageManagerCompletion) {
         task.downloadTask = self.imageDownloader.downloadImage(with: url, options: options, progress: progress) { [weak self, weak task] (data: Data?, error: Error?) in
             guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentData = data {
-                self.handle(imageData: currentData, options: options, cacheType: .none, forTask: task, url: url, editor: editor, completion: completion)
+                self.handle(imageData: currentData,
+                            options: options,
+                            cacheType: .none,
+                            forTask: task,
+                            url: url,
+                            editor: editor,
+                            completion: completion)
             } else if let currentError = error {
                 self.complete(with: task, completion: completion, error: currentError)
                 self.remove(loadTask: task)
@@ -254,15 +330,34 @@ public class BBWebImageManager: NSObject {
         }
     }
     
-    private func complete(with task: BBWebImageLoadTask, completion: @escaping BBWebImageManagerCompletion, image: UIImage?, data: Data?, cacheType: BBImageCacheType) {
-        complete(with: task, completion: completion, image: image, data: data, error: nil, cacheType: cacheType)
+    private func complete(with task: BBWebImageLoadTask,
+                          completion: @escaping BBWebImageManagerCompletion,
+                          image: UIImage?,
+                          data: Data?,
+                          cacheType: BBImageCacheType) {
+        complete(with: task,
+                 completion: completion,
+                 image: image,
+                 data: data,
+                 error: nil,
+                 cacheType: cacheType)
     }
     
     private func complete(with task: BBWebImageLoadTask, completion: @escaping BBWebImageManagerCompletion, error: Error) {
-        complete(with: task, completion: completion, image: nil, data: nil, error: error, cacheType: .none)
+        complete(with: task,
+                 completion: completion,
+                 image: nil,
+                 data: nil,
+                 error: error,
+                 cacheType: .none)
     }
     
-    private func complete(with task: BBWebImageLoadTask, completion: @escaping BBWebImageManagerCompletion, image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) {
+    private func complete(with task: BBWebImageLoadTask,
+                          completion: @escaping BBWebImageManagerCompletion,
+                          image: UIImage?,
+                          data: Data?,
+                          error: Error?,
+                          cacheType: BBImageCacheType) {
         DispatchQueue.main.safeAsync { [weak self] in
             guard self != nil, !task.isCancelled else { return }
             completion(image, data, error, cacheType)

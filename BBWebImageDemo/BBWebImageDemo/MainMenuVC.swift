@@ -30,7 +30,7 @@ class MainMenuVC: UIViewController {
             if let self = self { self.navigationController?.pushViewController(ImageWallVC(), animated: true) }
         }
         let clearCache = { [weak self] in
-            if self != nil { BBWebImageManager.shared.imageCache.clear() }
+            if self != nil { BBWebImageManager.shared.imageCache.clear(.all, completion: nil) }
         }
         list = [("Test", test), ("Test filter", filter), ("Image wall", imageWall), ("Clear cache", clearCache)]
         

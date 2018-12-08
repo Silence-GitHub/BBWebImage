@@ -46,7 +46,10 @@ public protocol BBImageDownloadTask {
 
 public protocol BBImageDownloader: AnyObject {
     // Donwload
-    func downloadImage(with url: URL, options: BBWebImageOptions, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
+    func downloadImage(with url: URL,
+                       options: BBWebImageOptions,
+                       progress: BBImageDownloaderProgress?,
+                       completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
     // Cancel
     func cancel(task: BBImageDownloadTask)
@@ -139,7 +142,10 @@ public class BBMergeRequestImageDownloader {
 extension BBMergeRequestImageDownloader: BBImageDownloader {
     // Donwload
     @discardableResult
-    public func downloadImage(with url: URL, options: BBWebImageOptions = .none, progress: BBImageDownloaderProgress? = nil, completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
+    public func downloadImage(with url: URL,
+                              options: BBWebImageOptions = .none,
+                              progress: BBImageDownloaderProgress? = nil,
+                              completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = BBImageDefaultDownloadTask(url: url, progress: progress, completion: completion)
         lock.wait()
         var operation: BBImageDownloadOperation? = urlOperations[url]
@@ -230,7 +236,10 @@ private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
 }
 
 extension BBImageDownloadSessionDelegate: URLSessionDataDelegate {
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+    func urlSession(_ session: URLSession,
+                    dataTask: URLSessionDataTask,
+                    didReceive response: URLResponse,
+                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         if let url = dataTask.originalRequest?.url,
             let operation = downloader?.operation(for: url),
             operation.taskId == dataTask.taskIdentifier,

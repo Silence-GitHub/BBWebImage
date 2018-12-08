@@ -128,7 +128,10 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
 }
 
 extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+    func urlSession(_ session: URLSession,
+                    dataTask: URLSessionDataTask,
+                    didReceive response: URLResponse,
+                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         expectedSize = max(0, Int(response.expectedContentLength))
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 200
         if statusCode >= 400 || statusCode == 304 {
