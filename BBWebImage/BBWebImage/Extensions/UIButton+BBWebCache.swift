@@ -35,7 +35,7 @@ extension UIButton: BBWebCache {
     }
     
     private func imageLoadTaskKey(forState state: UIControl.State) -> String {
-        return "UIButtonImageLoadTask\(state.rawValue)"
+        return classForCoder.description() + "Image\(state.rawValue)"
     }
     
     public func bb_setBackgroundImage(with url: URL,
@@ -64,6 +64,6 @@ extension UIButton: BBWebCache {
     }
     
     private func backgroundImageLoadTaskKey(forState state: UIControl.State) -> String {
-        return "UIButtonBackgroundImageLoadTask\(state.rawValue)"
+        return classForCoder.description() + "BackgroundImage\(state.rawValue)"
     }
 }
