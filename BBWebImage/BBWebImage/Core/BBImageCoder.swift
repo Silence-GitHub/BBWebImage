@@ -9,17 +9,17 @@
 import UIKit
 
 public protocol BBImageCoder: AnyObject {
-    func canDecode(imageData: Data) -> Bool
-    func decode(imageData: Data) -> UIImage?
-    func decompressedImage(withImage image: UIImage, data: Data) -> UIImage?
+    func canDecode(_ data: Data) -> Bool
+    func decodedImage(with data: Data) -> UIImage?
+    func decompressedImage(with image: UIImage, data: Data) -> UIImage?
     func canEncode(_ format: BBImageFormat) -> Bool
-    func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data?
+    func encodedData(with image: UIImage, format: BBImageFormat) -> Data?
     func copy() -> BBImageCoder
 }
 
 public protocol BBImageProgressiveCoder: BBImageCoder {
-    func canIncrementallyDecode(imageData: Data) -> Bool
-    func incrementallyDecodedImage(withData data: Data, finished: Bool) -> UIImage?
+    func canIncrementallyDecode(_ data: Data) -> Bool
+    func incrementallyDecodedImage(with data: Data, finished: Bool) -> UIImage?
 }
 
 extension CGImagePropertyOrientation {
@@ -63,26 +63,26 @@ public class BBImageCoderManager {
 }
 
 extension BBImageCoderManager: BBImageCoder {
-    public func canDecode(imageData: Data) -> Bool {
+    public func canDecode(_ data: Data) -> Bool {
         let currentCoders = coders
-        for coder in currentCoders where coder.canDecode(imageData: imageData) {
+        for coder in currentCoders where coder.canDecode(data) {
             return true
         }
         return false
     }
     
-    public func decode(imageData: Data) -> UIImage? {
+    public func decodedImage(with data: Data) -> UIImage? {
         let currentCoders = coders
-        for coder in currentCoders where coder.canDecode(imageData: imageData) {
-            return coder.decode(imageData: imageData)
+        for coder in currentCoders where coder.canDecode(data) {
+            return coder.decodedImage(with: data)
         }
         return nil
     }
     
-    public func decompressedImage(withImage image: UIImage, data: Data) -> UIImage? {
+    public func decompressedImage(with image: UIImage, data: Data) -> UIImage? {
         let currentCoders = coders
-        for coder in currentCoders where coder.canDecode(imageData: data) {
-            return coder.decompressedImage(withImage: image, data: data)
+        for coder in currentCoders where coder.canDecode(data) {
+            return coder.decompressedImage(with: image, data: data)
         }
         return nil
     }
@@ -95,10 +95,10 @@ extension BBImageCoderManager: BBImageCoder {
         return false
     }
     
-    public func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data? {
+    public func encodedData(with image: UIImage, format: BBImageFormat) -> Data? {
         let currentCoders = coders
         for coder in currentCoders where coder.canEncode(format) {
-            return coder.encode(image, toFormat: format)
+            return coder.encodedData(with: image, format: format)
         }
         return nil
     }
@@ -116,23 +116,23 @@ extension BBImageCoderManager: BBImageCoder {
 }
 
 extension BBImageCoderManager: BBImageProgressiveCoder {
-    public func canIncrementallyDecode(imageData: Data) -> Bool {
+    public func canIncrementallyDecode(_ data: Data) -> Bool {
         let currentCoders = coders
         for coder in currentCoders {
             if let progressiveCoder = coder as? BBImageProgressiveCoder,
-                progressiveCoder.canIncrementallyDecode(imageData: imageData) {
+                progressiveCoder.canIncrementallyDecode(data) {
                 return true
             }
         }
         return false
     }
     
-    public func incrementallyDecodedImage(withData data: Data, finished: Bool) -> UIImage? {
+    public func incrementallyDecodedImage(with data: Data, finished: Bool) -> UIImage? {
         let currentCoders = coders
         for coder in currentCoders {
             if let progressiveCoder = coder as? BBImageProgressiveCoder,
-                progressiveCoder.canIncrementallyDecode(imageData: data) {
-                return progressiveCoder.incrementallyDecodedImage(withData: data, finished: finished)
+                progressiveCoder.canIncrementallyDecode(data) {
+                return progressiveCoder.incrementallyDecodedImage(with: data, finished: finished)
             }
         }
         return nil

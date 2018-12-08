@@ -210,7 +210,7 @@ public class BBWebImageManager: NSObject {
                         self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
                     }
                 } else {
-                    if let inputImage = self.imageCoder.decode(imageData: data) {
+                    if let inputImage = self.imageCoder.decodedImage(with: data) {
                         if let image = currentEditor.edit(inputImage, nil) {
                             guard !task.isCancelled else { return }
                             image.bb_imageEditKey = currentEditor.key
@@ -225,9 +225,9 @@ public class BBWebImageManager: NSObject {
                         self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]))
                     }
                 }
-            } else if var image = self.imageCoder.decode(imageData: data) {
+            } else if var image = self.imageCoder.decodedImage(with: data) {
                 if !options.contains(.ignoreImageDecoding),
-                    let decompressedImage = self.imageCoder.decompressedImage(withImage: image, data: data) {
+                    let decompressedImage = self.imageCoder.decompressedImage(with: image, data: data) {
                     image = decompressedImage
                 }
                 self.complete(with: task, completion: completion, image: image, data: data, cacheType: cacheType)

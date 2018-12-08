@@ -104,7 +104,7 @@ public extension BBWebCache {
                     currentImage.bb_imageFormat = partialData.bb_imageFormat
                     displayImage = currentImage
                 } else if !options.contains(.ignoreImageDecoding),
-                    let currentImage = BBWebImageManager.shared.imageCoder.decompressedImage(withImage: partialImage, data: partialData) {
+                    let currentImage = BBWebImageManager.shared.imageCoder.decompressedImage(with: partialImage, data: partialData) {
                     displayImage = currentImage
                 }
                 let downloadProgress = min(1, Double(partialData.count) / Double(expectedSize))

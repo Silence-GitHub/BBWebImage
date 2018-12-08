@@ -150,7 +150,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
                 let coders = coderManager.coders
                 for coder in coders {
                     if let progressiveCoder = coder as? BBImageProgressiveCoder,
-                        progressiveCoder.canIncrementallyDecode(imageData: currentImageData) {
+                        progressiveCoder.canIncrementallyDecode(currentImageData) {
                         imageProgressiveCoder = progressiveCoder.copy() as? BBImageProgressiveCoder
                         break
                     }
@@ -164,7 +164,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
             let finished = currentImageData.count >= size
             coderQueue.async { [weak self] in
                 guard let self = self, !self.cancelled, !self.finished else { return }
-                let image = progressiveCoder.incrementallyDecodedImage(withData: currentImageData, finished: finished)
+                let image = progressiveCoder.incrementallyDecodedImage(with: currentImageData, finished: finished)
                 self.progress(with: currentImageData, expectedSize: size, image: image)
             }
         } else {

@@ -132,7 +132,7 @@ public class BBLRUImageCache: BBImageCache {
                 guard let self = self else { return nil }
                 if let currentImage = image,
                     let coder = self.imageCoder,
-                    let data = coder.encode(currentImage, toFormat: currentImage.bb_imageFormat ?? .unknown) {
+                    let data = coder.encodedData(with: currentImage, format: currentImage.bb_imageFormat ?? .unknown) {
                     return data
                 }
                 return nil

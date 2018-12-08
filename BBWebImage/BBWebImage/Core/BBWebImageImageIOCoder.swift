@@ -14,14 +14,14 @@ public class BBWebImageImageIOCoder: BBImageCoder {
     private var imageHeight: Int
     private var imageOrientation: UIImage.Orientation
     
-    init() {
+    public init() {
         imageWidth = 0
         imageHeight = 0
         imageOrientation = .up
     }
     
-    public func canDecode(imageData: Data) -> Bool {
-        switch imageData.bb_imageFormat {
+    public func canDecode(_ data: Data) -> Bool {
+        switch data.bb_imageFormat {
         case .JPEG, .PNG:
             return true
         default:
@@ -29,13 +29,13 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         }
     }
     
-    public func decode(imageData: Data) -> UIImage? {
-        let image = UIImage(data: imageData)
-        image?.bb_imageFormat = imageData.bb_imageFormat
+    public func decodedImage(with data: Data) -> UIImage? {
+        let image = UIImage(data: data)
+        image?.bb_imageFormat = data.bb_imageFormat
         return image
     }
     
-    public func decompressedImage(withImage image: UIImage, data: Data) -> UIImage? {
+    public func decompressedImage(with image: UIImage, data: Data) -> UIImage? {
         guard let sourceImage = image.cgImage,
             let cgimage = BBWebImageImageIOCoder.decompressedImage(sourceImage) else { return image }
         let finalImage = UIImage(cgImage: cgimage, scale: image.scale, orientation: image.imageOrientation)
@@ -68,7 +68,7 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         return true
     }
     
-    public func encode(_ image: UIImage, toFormat format: BBImageFormat) -> Data? {
+    public func encodedData(with image: UIImage, format: BBImageFormat) -> Data? {
         guard let sourceImage = image.cgImage,
             let data = CFDataCreateMutable(kCFAllocatorDefault, 0) else { return nil }
         var imageFormat = format
@@ -91,8 +91,8 @@ public class BBWebImageImageIOCoder: BBImageCoder {
 }
 
 extension BBWebImageImageIOCoder: BBImageProgressiveCoder {
-    public func canIncrementallyDecode(imageData: Data) -> Bool {
-        switch imageData.bb_imageFormat {
+    public func canIncrementallyDecode(_ data: Data) -> Bool {
+        switch data.bb_imageFormat {
         case .JPEG, .PNG:
             return true
         default:
@@ -100,7 +100,7 @@ extension BBWebImageImageIOCoder: BBImageProgressiveCoder {
         }
     }
     
-    public func incrementallyDecodedImage(withData data: Data, finished: Bool) -> UIImage? {
+    public func incrementallyDecodedImage(with data: Data, finished: Bool) -> UIImage? {
         if imageSource == nil {
             imageSource = CGImageSourceCreateIncremental(nil)
         }

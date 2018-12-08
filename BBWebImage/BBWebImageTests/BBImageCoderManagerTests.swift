@@ -28,34 +28,34 @@ class BBImageCoderManagerTests: XCTestCase {
     override func tearDown() {}
 
     func testCanDecode() {
-        XCTAssertFalse(coder.canDecode(imageData: Data()))
-        XCTAssertTrue(coder.canDecode(imageData: pngData))
-        XCTAssertTrue(coder.canDecode(imageData: jpgData))
+        XCTAssertFalse(coder.canDecode(Data()))
+        XCTAssertTrue(coder.canDecode(pngData))
+        XCTAssertTrue(coder.canDecode(jpgData))
     }
     
     func testDecode() {
-        XCTAssertNil(coder.decode(imageData: Data()))
+        XCTAssertNil(coder.decodedImage(with: Data()))
         
-        let pngImage = coder.decode(imageData: pngData)
+        let pngImage = coder.decodedImage(with: pngData)
         XCTAssertNotNil(pngImage)
         XCTAssertEqual(pngImage?.bb_imageFormat, .PNG)
         
-        let jpgImage = coder.decode(imageData: jpgData)
+        let jpgImage = coder.decodedImage(with: jpgData)
         XCTAssertNotNil(jpgImage)
         XCTAssertEqual(jpgImage?.bb_imageFormat, .JPEG)
     }
     
     func testDecompress() {
         let pngData = self.pngData
-        let pngImage = coder.decode(imageData: pngData)!
-        let pngDecompressedImage = coder.decompressedImage(withImage: pngImage, data: pngData)
+        let pngImage = coder.decodedImage(with: pngData)!
+        let pngDecompressedImage = coder.decompressedImage(with: pngImage, data: pngData)
         XCTAssertNotNil(pngDecompressedImage)
         XCTAssertNotEqual(pngImage, pngDecompressedImage)
         XCTAssertEqual(pngDecompressedImage?.bb_imageFormat, .PNG)
         
         let jpgData = self.jpgData
-        let jpgImage = coder.decode(imageData: jpgData)!
-        let jpgDecompressedImage = coder.decompressedImage(withImage: jpgImage, data: jpgData)
+        let jpgImage = coder.decodedImage(with: jpgData)!
+        let jpgDecompressedImage = coder.decompressedImage(with: jpgImage, data: jpgData)
         XCTAssertNotNil(jpgDecompressedImage)
         XCTAssertNotEqual(jpgImage, jpgDecompressedImage)
         XCTAssertEqual(jpgDecompressedImage?.bb_imageFormat, .JPEG)
@@ -68,17 +68,17 @@ class BBImageCoderManagerTests: XCTestCase {
     }
     
     func testEncode() {
-        let images: [UIImage] = [coder.decode(imageData: pngData)!, coder.decode(imageData: jpgData)!]
+        let images: [UIImage] = [coder.decodedImage(with: pngData)!, coder.decodedImage(with: jpgData)!]
         for image in images {
-            XCTAssertNotNil(coder.encode(image, toFormat: .PNG))
-            XCTAssertNotNil(coder.encode(image, toFormat: .JPEG))
-            XCTAssertNotNil(coder.encode(image, toFormat: .unknown))
+            XCTAssertNotNil(coder.encodedData(with: image, format: .PNG))
+            XCTAssertNotNil(coder.encodedData(with: image, format: .JPEG))
+            XCTAssertNotNil(coder.encodedData(with: image, format: .unknown))
         }
     }
     
     func testCanIncrementallyDecode() {
-        XCTAssertTrue(coder.canIncrementallyDecode(imageData: pngData))
-        XCTAssertTrue(coder.canIncrementallyDecode(imageData: jpgData))
+        XCTAssertTrue(coder.canIncrementallyDecode(pngData))
+        XCTAssertTrue(coder.canIncrementallyDecode(jpgData))
     }
     
     func testIncrementallyDecodedImage() {
@@ -87,7 +87,7 @@ class BBImageCoderManagerTests: XCTestCase {
                 let finished = (i == total)
                 let end = Int((Double(i) / Double(total)) * Double(data.count))
                 let subdata = data.subdata(in: 0..<end)
-                XCTAssertNotNil(self.coder.incrementallyDecodedImage(withData: subdata, finished: finished))
+                XCTAssertNotNil(self.coder.incrementallyDecodedImage(with: subdata, finished: finished))
             }
         }
         test(pngData, 10)
