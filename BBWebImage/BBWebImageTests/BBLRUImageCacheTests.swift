@@ -36,7 +36,7 @@ class BBLRUImageCacheTests: XCTestCase {
         cache = BBLRUImageCache(path: "com.Kaibo.BBWebImage.cache.test", sizeThreshold: 20 * 1024)
         fileCache = BBLRUImageCache(path: "com.Kaibo.BBWebImage.fileCache.test", sizeThreshold: 0)
         dbCache = BBLRUImageCache(path: "com.Kaibo.BBWebImage.dbCache.test", sizeThreshold: .max)
-        imageNames = ["placeholder.png", "sunflower.jpg"]
+        imageNames = ["mew_baseline.png", "mew_baseline.jpg"]
     }
 
     override func tearDown() {
