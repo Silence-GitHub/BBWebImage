@@ -32,5 +32,5 @@ extension CALayer: BBWebCache {
         bb_webCacheOperation.task(forKey: imageLoadTaskKey)?.cancel()
     }
     
-    private var imageLoadTaskKey: String { return classForCoder.description() }
+    public var imageLoadTaskKey: String { return classForCoder.description() }
 }

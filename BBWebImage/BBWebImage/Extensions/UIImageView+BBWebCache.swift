@@ -32,7 +32,7 @@ extension UIImageView: BBWebCache {
         bb_webCacheOperation.task(forKey: imageLoadTaskKey)?.cancel()
     }
     
-    private var imageLoadTaskKey: String { return classForCoder.description() }
+    public var imageLoadTaskKey: String { return classForCoder.description() }
     
     public func bb_setHighlightedImage(with url: URL,
                                        placeholder: UIImage? = nil,
@@ -57,5 +57,5 @@ extension UIImageView: BBWebCache {
         bb_webCacheOperation.task(forKey: highlightedImageLoadTaskKey)?.cancel()
     }
     
-    private var highlightedImageLoadTaskKey: String { return classForCoder.description() + "Highlighted" }
+    public var highlightedImageLoadTaskKey: String { return classForCoder.description() + "Highlighted" }
 }

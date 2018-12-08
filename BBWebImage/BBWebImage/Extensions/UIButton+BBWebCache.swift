@@ -34,7 +34,7 @@ extension UIButton: BBWebCache {
         bb_webCacheOperation.task(forKey: key)?.cancel()
     }
     
-    private func imageLoadTaskKey(forState state: UIControl.State) -> String {
+    public func imageLoadTaskKey(forState state: UIControl.State) -> String {
         return classForCoder.description() + "Image\(state.rawValue)"
     }
     
@@ -63,7 +63,7 @@ extension UIButton: BBWebCache {
         bb_webCacheOperation.task(forKey: key)?.cancel()
     }
     
-    private func backgroundImageLoadTaskKey(forState state: UIControl.State) -> String {
+    public func backgroundImageLoadTaskKey(forState state: UIControl.State) -> String {
         return classForCoder.description() + "BackgroundImage\(state.rawValue)"
     }
 }
