@@ -85,8 +85,15 @@ public class BBWebImageManager: NSObject {
     public private(set) var imageCoder: BBImageCoder
     private let coderQueue: BBDispatchQueuePool
     private var tasks: Set<BBWebImageLoadTask>
-    private var taskSentinel: Int32
     private var taskLock: pthread_mutex_t
+    private var taskSentinel: Int32
+    
+    public var currentTaskCount: Int {
+        pthread_mutex_lock(&taskLock)
+        let c = tasks.count
+        pthread_mutex_unlock(&taskLock)
+        return c
+    }
     
     public init(cachePath: String, sizeThreshold: Int) {
         let cache = BBLRUImageCache(path: cachePath, sizeThreshold: sizeThreshold)
