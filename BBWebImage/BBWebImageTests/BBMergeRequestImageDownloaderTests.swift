@@ -402,6 +402,7 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
                 finish = true
                 lock.signal()
                 XCTAssertNotNil(data)
+                XCTAssertNil(error)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     expectation.fulfill()
                 }
@@ -441,6 +442,7 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
                 finish = true
                 lock.signal()
                 XCTAssertNotNil(data)
+                XCTAssertNil(error)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     expectation.fulfill()
                 }
