@@ -279,6 +279,29 @@ class BBWebImageManagerTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testCancelLoadDiskImageTask() {
+        let expectation = self.expectation(description: "Wait for loading image")
+        let url = urls.first!
+        let localUrl = Bundle(for: classForCoder).url(forResource: "mew_baseline", withExtension: "png")!
+        let data = try! Data(contentsOf: localUrl)
+        let image = UIImage(data: data)!
+        imageManager.imageCache.store(image, data: nil, forKey: url.cacheKey, cacheType: .disk) {
+            let task = self.imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                XCTFail()
+            }
+            task.cancel()
+            self.imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                XCTAssertNotNil(image)
+                XCTAssertNotNil(data)
+                XCTAssertNil(error)
+                XCTAssertTrue(cacheType == .disk)
+                XCTAssertTrue(Thread.isMainThread)
+                expectation.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testCancelLoadImageTasks() {
         let expectation = self.expectation(description: "Wait for loading image")
         var tasks: [BBWebImageLoadTask] = []
@@ -291,6 +314,120 @@ class BBWebImageManagerTests: XCTestCase {
         for task in tasks {
             task.cancel()
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            XCTAssertEqual(self.imageManager.currentTaskCount, 0)
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelLoadImageTasksAndLoad() {
+        for url in urls {
+            let expectation = self.expectation(description: "Wait for loading image")
+            let task = imageManager.loadImage(with: url) { (_, _, _, _) in
+                XCTFail()
+            }
+            task.cancel()
+            imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                XCTAssertNotNil(image)
+                XCTAssertNotNil(data)
+                XCTAssertNil(error)
+                XCTAssertTrue(cacheType == .none)
+                XCTAssertTrue(Thread.isMainThread)
+                expectation.fulfill()
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelLoadImageTasksAndLoadRepeatedly() {
+        for _ in 0..<10 {
+            for url in urls {
+                let expectation = self.expectation(description: "Wait for loading image")
+                let task = imageManager.loadImage(with: url) { (_, _, _, _) in
+                    XCTFail()
+                }
+                task.cancel()
+                imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                    XCTAssertNotNil(image)
+                    XCTAssertNotNil(data)
+                    XCTAssertNil(error)
+                    XCTAssertTrue(cacheType == .none)
+                    XCTAssertTrue(Thread.isMainThread)
+                    expectation.fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelSomeLoadImageTasks() {
+        var i = 0
+        for url in urls {
+            let shouldCancel = (i % 2 == 0)
+            let expectation: XCTestExpectation? = shouldCancel ? nil : self.expectation(description: "Wait for loading image")
+            let task = imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                if shouldCancel {
+                    XCTFail()
+                } else {
+                    XCTAssertNotNil(image)
+                    XCTAssertNotNil(data)
+                    XCTAssertNil(error)
+                    XCTAssertTrue(cacheType == .none)
+                    XCTAssertTrue(Thread.isMainThread)
+                    expectation!.fulfill()
+                }
+            }
+            if shouldCancel {
+                task.cancel()
+            }
+            i += 1
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelSomeLoadImageTasksAndLoad() {
+        var i = 0
+        for url in urls {
+            let shouldCancel = (i % 2 == 0)
+            let expectation: XCTestExpectation? = shouldCancel ? nil : self.expectation(description: "Wait for loading image")
+            let task = imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                if shouldCancel {
+                    XCTFail()
+                } else {
+                    XCTAssertNotNil(image)
+                    XCTAssertNotNil(data)
+                    XCTAssertNil(error)
+                    XCTAssertTrue(cacheType == .none)
+                    XCTAssertTrue(Thread.isMainThread)
+                    expectation!.fulfill()
+                }
+            }
+            if shouldCancel {
+                task.cancel()
+                let expectation2 = self.expectation(description: "Wait for loading image")
+                imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                    XCTAssertNotNil(image)
+                    XCTAssertNotNil(data)
+                    XCTAssertNil(error)
+                    XCTAssertTrue(cacheType == .none)
+                    XCTAssertTrue(Thread.isMainThread)
+                    expectation2.fulfill()
+                }
+            }
+            i += 1
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelAll() {
+        let expectation = self.expectation(description: "Wait for loading image")
+        for url in urls {
+            imageManager.loadImage(with: url) { (_, _, _, _) in
+                XCTFail()
+            }
+        }
+        imageManager.cancelAll()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             XCTAssertEqual(self.imageManager.currentTaskCount, 0)
             expectation.fulfill()

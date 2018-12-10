@@ -226,6 +226,15 @@ public class BBWebImageManager: NSObject {
         return task
     }
     
+    public func cancelAll() {
+        pthread_mutex_lock(&taskLock)
+        let currentTasks = tasks
+        pthread_mutex_unlock(&taskLock)
+        for task in currentTasks {
+            task.cancel()
+        }
+    }
+    
     private func newLoadTask() -> BBWebImageLoadTask {
         let task = BBWebImageLoadTask(sentinel: OSAtomicIncrement32(&taskSentinel))
         task.imageManager = self

@@ -38,6 +38,20 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testMergeRequest() {
+        let url = urls.first!
+        for _ in 0..<10 {
+            let expectation = self.expectation(description: "Wait for downloading image")
+            downloader.downloadImage(with: url, options: .none) { (data, error) in
+                XCTAssertNotNil(data)
+                XCTAssertNil(error)
+                expectation.fulfill()
+            }
+        }
+        XCTAssertEqual(downloader.currentDownloadCount, 1)
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testDownloadImages() {
         for url in urls {
             let expectation = self.expectation(description: "Wait for downloading image")
