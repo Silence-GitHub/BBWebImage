@@ -61,6 +61,7 @@
 		4AF3D1E9216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */; };
 		4AF3D1EB216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */; };
 		4AF3D1EC216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */; };
+		4AF401B921BEF10200485C96 /* BBWebImageManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF401B821BEF10200485C96 /* BBWebImageManagerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +109,7 @@
 		4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageURLProvider.swift; path = ../../BBWebImageDemo/BBWebImageDemo/ImageURLProvider.swift; sourceTree = "<group>"; };
 		4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+BBWebCache.swift"; sourceTree = "<group>"; };
 		4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+BBWebCache.swift"; sourceTree = "<group>"; };
+		4AF401B821BEF10200485C96 /* BBWebImageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +173,7 @@
 		4A53310D21657DC500C68080 /* BBWebImageTests */ = {
 			isa = PBXGroup;
 			children = (
+				4AF401B821BEF10200485C96 /* BBWebImageManagerTests.swift */,
 				4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */,
 				4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */,
 				4ACDDC5121B7636F003E364A /* BBImageCoderManagerTests.swift */,
@@ -378,6 +381,7 @@
 				4A87E912216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
 				4A29383821BB699000CB8DAD /* MKAnnotationView+BBWebCache.swift in Sources */,
 				4A29383221BB027500CB8DAD /* BBWebCache.swift in Sources */,
+				4AF401B921BEF10200485C96 /* BBWebImageManagerTests.swift in Sources */,
 				4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */,
 				4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */,

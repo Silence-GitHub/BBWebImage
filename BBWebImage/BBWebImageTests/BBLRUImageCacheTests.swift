@@ -41,9 +41,6 @@ class BBLRUImageCacheTests: XCTestCase {
 
     override func tearDown() {
         clearCaches([cache, fileCache, dbCache])
-        cache = nil
-        fileCache = nil
-        dbCache = nil
     }
     
     func clearCaches(_ caches: [BBLRUImageCache]) {
