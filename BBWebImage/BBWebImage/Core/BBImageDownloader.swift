@@ -76,6 +76,7 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
     public weak var imageCoder: BBImageCoder?
+    public var generateDownloadOperation: (URLRequest, URLSession) -> BBImageDownloadOperation
     
     public var currentDownloadCount: Int {
         lock.wait()
@@ -116,6 +117,7 @@ public class BBMergeRequestImageDownloader {
     
     public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
+        generateDownloadOperation = { BBMergeRequestImageDownloadOperation(request: $0, session: $1) }
         waitingQueue = BBLinkedListQueue()
         urlOperations = [:]
         maxRunningCount = 6
@@ -156,7 +158,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
             request.httpShouldHandleCookies = options.contains(.handleCookies)
             request.allHTTPHeaderFields = httpHeaders
             request.httpShouldUsePipelining = true
-            let newOperation = BBMergeRequestImageDownloadOperation(request: request, session: session)
+            var newOperation = generateDownloadOperation(request, session)
             if options.contains(.progressiveDownload) { newOperation.imageCoder = imageCoder }
             newOperation.completion = { [weak self] in
                 guard let self = self else { return }

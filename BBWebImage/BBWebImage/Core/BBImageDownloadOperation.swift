@@ -11,6 +11,8 @@ import UIKit
 public protocol BBImageDownloadOperation {
     var taskId: Int { get }
     var taskCount: Int { get }
+    var imageCoder: BBImageCoder? { get set }
+    var completion: (() -> Void)? { get set }
     
     init(request: URLRequest, session: URLSession)
     func add(task: BBImageDownloadTask)

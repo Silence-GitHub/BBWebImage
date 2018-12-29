@@ -388,6 +388,8 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    // TODO: Test custom download operation
+    
     func testProgressCallback() {
         for url in urls {
             let expectation = self.expectation(description: "Wait for downloading image")
