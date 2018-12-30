@@ -45,6 +45,7 @@
 		4A6E2D8A218787FB00CE1CD2 /* BBDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D88218787FA00CE1CD2 /* BBDiskCache.swift */; };
 		4A6E2D8C2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */; };
 		4A6E2D8D2187885C00CE1CD2 /* BBDiskStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */; };
+		4A7D8F9221D89A5C008AC2D6 /* TestImageDownloadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A7D8F9121D89A5C008AC2D6 /* TestImageDownloadOperation.swift */; };
 		4A87E908216BE4430073E53C /* Data+ImageFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E907216BE4430073E53C /* Data+ImageFormat.swift */; };
 		4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E907216BE4430073E53C /* Data+ImageFormat.swift */; };
 		4A87E911216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */; };
@@ -99,6 +100,7 @@
 		4A6E2D85218787C400CE1CD2 /* BBMemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBMemoryCache.swift; sourceTree = "<group>"; };
 		4A6E2D88218787FA00CE1CD2 /* BBDiskCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDiskCache.swift; sourceTree = "<group>"; };
 		4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBDiskStorage.swift; sourceTree = "<group>"; };
+		4A7D8F9121D89A5C008AC2D6 /* TestImageDownloadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestImageDownloadOperation.swift; sourceTree = "<group>"; };
 		4A87E907216BE4430073E53C /* Data+ImageFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+ImageFormat.swift"; sourceTree = "<group>"; };
 		4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageImageIOCoder.swift; sourceTree = "<group>"; };
 		4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ImageFormat.swift"; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 				4AF401B821BEF10200485C96 /* BBWebImageManagerTests.swift */,
 				4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */,
 				4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */,
+				4A7D8F9121D89A5C008AC2D6 /* TestImageDownloadOperation.swift */,
 				4ACDDC5121B7636F003E364A /* BBImageCoderManagerTests.swift */,
 				4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */,
 				4A22206821BA37BE0094F9FD /* mew_baseline.jpg */,
@@ -372,6 +375,7 @@
 				4ACFCDA321B61707004316A5 /* ImageURLProvider.swift in Sources */,
 				4A5331582165943100C68080 /* BBImageDownloadOperation.swift in Sources */,
 				4A5FF70521BBBDA60006B877 /* BBWebCacheResource.swift in Sources */,
+				4A7D8F9221D89A5C008AC2D6 /* TestImageDownloadOperation.swift in Sources */,
 				4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTests.swift in Sources */,
 				4A4819C421964EB00000B229 /* BBDispatchQueuePool.swift in Sources */,
 				4AF3D1E9216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */,

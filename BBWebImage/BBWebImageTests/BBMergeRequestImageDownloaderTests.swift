@@ -388,7 +388,22 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
-    // TODO: Test custom download operation
+    func testCustomDownloadOperation() {
+        let expectation = self.expectation(description: "Wait for downloading image")
+        let fileUrl = Bundle(for: classForCoder).url(forResource: "mew_baseline", withExtension: "png")!
+        let testImageData = try! Data(contentsOf: fileUrl)
+        downloader.generateDownloadOperation = {
+            let operation = TestImageDownloadOperation(request: $0, session: $1)
+            operation.testImageData = testImageData
+            return operation
+        }
+        let url = urls.first!
+        downloader.downloadImage(with: url) { (data, _) in
+            XCTAssertEqual(data, testImageData)
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
     
     func testProgressCallback() {
         for url in urls {
