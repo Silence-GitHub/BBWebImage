@@ -12,10 +12,10 @@ extension CALayer: BBWebCache {
     /// Sets image with resource, placeholder, custom opotions
     ///
     /// - Parameters:
-    ///   - resource: image resource defines how to download and cache image
+    ///   - resource: image resource specifying how to download and cache image
     ///   - placeholder: placeholder image displayed when loading image
     ///   - options: options for some behaviors
-    ///   - editor: editor defines how to edit and cache image in memory
+    ///   - editor: editor specifying how to edit and cache image in memory
     ///   - progress: a closure called while image is downloading
     ///   - completion: a closure called when image loading is finished
     public func bb_setImage(with resource: BBWebCacheResource,

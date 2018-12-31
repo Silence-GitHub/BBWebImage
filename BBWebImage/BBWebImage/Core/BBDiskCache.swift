@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// BBDiskCache is a key-value disk cache using least recently used algorithm
 public class BBDiskCache {
     private let storage: BBDiskStorage
     private let sizeThreshold: Int
@@ -16,6 +17,11 @@ public class BBDiskCache {
     private var countLimit: Int
     private var ageLimit: TimeInterval
     
+    /// Crreates a BBDiskCache object
+    ///
+    /// - Parameters:
+    ///   - path: directory storing image data
+    ///   - threshold: threshold specifying image data is store in sqlite (data.count <= threshold) or file (data.count > threshold)
     public init?(path: String, sizeThreshold threshold: Int) {
         if let currentStorage = BBDiskStorage(path: path) {
             storage = currentStorage
@@ -30,10 +36,19 @@ public class BBDiskCache {
         trimRecursively()
     }
     
+    /// Gets data with key synchronously
+    ///
+    /// - Parameter key: cache key
+    /// - Returns: data in disk, or nil if no data found
     public func data(forKey key: String) -> Data? {
         return storage.data(forKey: key)
     }
     
+    /// Gets data with key asynchronously
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    ///   - completion: a closure called when querying is finished
     public func data(forKey key: String, completion: @escaping (Data?) -> Void) {
         queue.async { [weak self] in
             guard let self = self else { return }
@@ -41,10 +56,21 @@ public class BBDiskCache {
         }
     }
     
+    /// Stores data with key synchronously
+    ///
+    /// - Parameters:
+    ///   - data: data to store
+    ///   - key: cache key
     public func store(_ data: Data, forKey key: String) {
         storage.store(data, forKey: key, type: (data.count > sizeThreshold ? .file : .sqlite))
     }
     
+    /// Stores data with key asynchronously
+    ///
+    /// - Parameters:
+    ///   - data: data to store
+    ///   - key: cache key
+    ///   - completion: a closure called when storing is finished
     public func store(_ data: Data, forKey key: String, completion: BBImageCacheStoreCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
@@ -53,6 +79,12 @@ public class BBDiskCache {
         }
     }
     
+    /// Stores data with data work closure and key asynchronously
+    ///
+    /// - Parameters:
+    ///   - dataWork: a closure called in a background thread, returning data
+    ///   - key: cache key
+    ///   - completion: a closure called when storing is finished
     public func store(_ dataWork: @escaping () -> Data?, forKey key: String, completion: BBImageCacheStoreCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
@@ -63,10 +95,18 @@ public class BBDiskCache {
         }
     }
     
+    /// Removes data with key synchronously
+    ///
+    /// - Parameter key: cache key
     public func removeData(forKey key: String) {
         storage.removeData(forKey: key)
     }
     
+    /// Removes data with key asynchronously
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    ///   - completion: a closure called when removing is finished
     public func removeData(forKey key: String, completion: BBImageCacheRemoveCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
@@ -75,10 +115,14 @@ public class BBDiskCache {
         }
     }
     
+    /// Removes all data synchronously
     public func clear() {
         storage.clear()
     }
     
+    /// Removes all data asynchronously
+    ///
+    /// - Parameter completion: a closure called when clearing is finished
     public func clear(_ completion: BBImageCacheRemoveCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }

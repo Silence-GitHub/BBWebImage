@@ -119,8 +119,8 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
     /// Creates a BBWebImageManager instance
     ///
     /// - Parameters:
-    ///   - cachePath: cache path of BBLRUImageCache
-    ///   - sizeThreshold: size threshold of BBLRUImageCache
+    ///   - cachePath: directory storing image data
+    ///   - sizeThreshold: threshold specifying image data is store in sqlite (data.count <= threshold) or file (data.count > threshold)
     public init(cachePath: String, sizeThreshold: Int) {
         let cache = BBLRUImageCache(path: cachePath, sizeThreshold: sizeThreshold)
         imageCache = cache
@@ -139,9 +139,9 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
     /// Gets image from cache or downloads image
     ///
     /// - Parameters:
-    ///   - resource: image resource defines how to download and cache image
+    ///   - resource: image resource specifying how to download and cache image
     ///   - options: options for some behaviors
-    ///   - editor: editor defines how to edit and cache image in memory
+    ///   - editor: editor specifying how to edit and cache image in memory
     ///   - progress: a closure called while image is downloading
     ///   - completion: a closure called when image loading is finished
     /// - Returns: BBWebImageLoadTask object
@@ -168,7 +168,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
         
         // Get memory image
         var memoryImage: UIImage?
-        imageCache.image(forKey: resource.cacheKey, cacheType: .memory) { (result: BBImageCachQueryCompletionResult) in
+        imageCache.image(forKey: resource.cacheKey, cacheType: .memory) { (result: BBImageCacheQueryCompletionResult) in
             switch result {
             case .memory(image: let image):
                 memoryImage = image
@@ -233,7 +233,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                           completion: completion)
         } else {
             // Get disk data
-            imageCache.image(forKey: resource.cacheKey, cacheType: .disk) { [weak self, weak task] (result: BBImageCachQueryCompletionResult) in
+            imageCache.image(forKey: resource.cacheKey, cacheType: .disk) { [weak self, weak task] (result: BBImageCacheQueryCompletionResult) in
                 guard let self = self, let task = task, !task.isCancelled else { return }
                 switch result {
                 case .disk(data: let data):

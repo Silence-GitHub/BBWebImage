@@ -80,6 +80,7 @@ private class BBLinkedMap {
     }
 }
 
+/// BBMemoryCache is a thread safe memory cache using least recently used algorithm
 public class BBMemoryCache {
     private let linkedMap: BBLinkedMap
     private var costLimit: Int
@@ -108,6 +109,10 @@ public class BBMemoryCache {
         pthread_mutex_destroy(&lock)
     }
     
+    /// Gets image with key
+    ///
+    /// - Parameter key: cache key
+    /// - Returns: image in memory cache, or nil if no image found
     public func image(forKey key: String) -> UIImage? {
         pthread_mutex_lock(&lock)
         var value: UIImage?
@@ -120,6 +125,12 @@ public class BBMemoryCache {
         return value
     }
     
+    /// Stores image with key and cost
+    ///
+    /// - Parameters:
+    ///   - image: image to store
+    ///   - key: cache key
+    ///   - cost: cost of memory
     public func store(_ image: UIImage, forKey key: String, cost: Int = 0) {
         pthread_mutex_lock(&lock)
         let realCost: Int = cost > 0 ? cost : Int(image.size.width * image.size.height * image.scale)
@@ -149,6 +160,9 @@ public class BBMemoryCache {
         pthread_mutex_unlock(&lock)
     }
     
+    /// Removes image with key
+    ///
+    /// - Parameter key: cache key
     public func removeImage(forKey key: String) {
         pthread_mutex_lock(&lock)
         if let node = linkedMap.dic[key] {
@@ -158,6 +172,7 @@ public class BBMemoryCache {
         pthread_mutex_unlock(&lock)
     }
     
+    /// Removes all images
     @objc public func clear() {
         pthread_mutex_lock(&lock)
         linkedMap.dic.removeAll()

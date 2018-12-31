@@ -17,16 +17,24 @@ private struct BBDiskStorageItem {
     let lastAccessTime: TimeInterval
 }
 
+/// BBDiskStorageType specifies how data is stored
 public enum BBDiskStorageType {
+    /// Data is stored in file
     case file
+    
+    /// Data is store in sqlite
     case sqlite
 }
 
+/// BBDiskStorage is a thread safe key-value disk cache using least recently used algorithm
 public class BBDiskStorage {
     private let ioLock: DispatchSemaphore
     private let baseDataPath: String
     private var database: OpaquePointer?
     
+    /// Creates a BBDiskStorage object
+    ///
+    /// - Parameter path: directory storing data
     public init?(path: String) {
         ioLock = DispatchSemaphore(value: 1)
         baseDataPath = path + "/Data"
@@ -63,6 +71,10 @@ public class BBDiskStorage {
         ioLock.signal()
     }
     
+    /// Gets data with key
+    ///
+    /// - Parameter key: cache key
+    /// - Returns: data in disk, or nil if no data found
     public func data(forKey key: String) -> Data? {
         if key.isEmpty { return nil }
         ioLock.wait()
@@ -97,6 +109,12 @@ public class BBDiskStorage {
         return data
     }
     
+    /// Stores data with key and type
+    ///
+    /// - Parameters:
+    ///   - data: data to store
+    ///   - key: cache key
+    ///   - type: storage type specifying how data is stored
     public func store(_ data: Data, forKey key: String, type: BBDiskStorageType) {
         if key.isEmpty { return }
         ioLock.wait()
@@ -124,6 +142,9 @@ public class BBDiskStorage {
         ioLock.signal()
     }
     
+    /// Removes data with key
+    ///
+    /// - Parameter key: cache key
     public func removeData(forKey key: String) {
         if key.isEmpty { return }
         ioLock.wait()
@@ -131,6 +152,7 @@ public class BBDiskStorage {
         ioLock.signal()
     }
     
+    /// Removes all data
     public func clear() {
         ioLock.wait()
         let sql = "DELETE FROM Storage_item;"
