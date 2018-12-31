@@ -25,17 +25,37 @@ public var bb_shareCIContext: CIContext {
 
 public func bb_clearCIContext() { _bb_shareCIContext = nil }
 
+/// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
     public var needData: Bool
     public var edit: BBWebImageEditMethod
     
+    /// Creates a BBWebImageEditor variable
+    ///
+    /// - Parameters:
+    ///   - key: identification of editor
+    ///   - needData: whether image data is necessary or not for editing
+    ///   - edit: an edit image closure
     public init(key: String, needData: Bool, edit: @escaping BBWebImageEditMethod) {
         self.key = key
         self.needData = needData
         self.edit = edit
     }
     
+    /// Creates a BBWebImageEditor for scaleAspectFill content mode.
+    /// This method can draw an image with corner, border and background color.
+    /// To prevent large image consuming too much memory, specify a positive value for maxResolution.
+    ///
+    /// - Parameters:
+    ///   - displaySize: size of view displaying image with scaleAspectFill content mode
+    ///   - maxResolution: an expected maximum resolution of decoded image
+    ///   - corner: how many image corners are drawn
+    ///   - cornerRadius: corner radius of image, in view's coordinate
+    ///   - borderWidth: border width of image, in view's coordinate
+    ///   - borderColor: border color of image
+    ///   - backgroundColor: background color of image
+    /// - Returns: a BBWebImageEditor variable
     public static func editorForScaleAspectFillContentMode(with displaySize: CGSize,
                                                            maxResolution: Int = 0,
                                                            corner: UIRectCorner = UIRectCorner(rawValue: 0),

@@ -8,17 +8,35 @@
 
 import UIKit
 
+/// BBWebImageOptions controls some behaviors of image downloading, caching, decoding and displaying
 public struct BBWebImageOptions: OptionSet {
     public let rawValue: Int
     
+    /// Default behavior
     public static let none = BBWebImageOptions(rawValue: 0)
+    
+    /// Query image data when memory image is gotten
     public static let queryDataWhenInMemory = BBWebImageOptions(rawValue: 1 << 0)
+    
+    /// Do not use image disk cache
     public static let ignoreDiskCache = BBWebImageOptions(rawValue: 1 << 1)
+    
+    /// Download image and update cache
     public static let refreshCache = BBWebImageOptions(rawValue: 1 << 2)
+    
+    /// URLRequest.cachePolicy = .useProtocolCachePolicy
     public static let useURLCache = BBWebImageOptions(rawValue: 1 << 3)
+    
+    /// URLRequest.httpShouldHandleCookies = true
     public static let handleCookies = BBWebImageOptions(rawValue: 1 << 4)
+    
+    /// Image is displayed progressively when downloading
     public static let progressiveDownload = BBWebImageOptions(rawValue: 1 << 5)
+    
+    /// Do not display placeholder image
     public static let ignorePlaceholder = BBWebImageOptions(rawValue: 1 << 6)
+    
+    /// Do not decode image
     public static let ignoreImageDecoding = BBWebImageOptions(rawValue: 1 << 7)
     
     public init(rawValue: Int) { self.rawValue = rawValue }
@@ -27,6 +45,7 @@ public struct BBWebImageOptions: OptionSet {
 public let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
 public typealias BBWebImageManagerCompletion = (UIImage?, Data?, Error?, BBImageCacheType) -> Void
 
+/// BBWebImageLoadTask defines an image loading task
 public class BBWebImageLoadTask {
     public var isCancelled: Bool {
         pthread_mutex_lock(&lock)
@@ -47,6 +66,7 @@ public class BBWebImageLoadTask {
         pthread_mutex_init(&lock, nil)
     }
     
+    /// Cancels current image loading task
     public func cancel() {
         pthread_mutex_lock(&lock)
         if cancelled {
@@ -73,8 +93,9 @@ extension BBWebImageLoadTask: Hashable {
     }
 }
 
-// If not subclass NSObject, there is memory leak (unknown reason)
-public class BBWebImageManager: NSObject {
+/// BBWebImageManager downloads and caches image asynchronously
+public class BBWebImageManager: NSObject { // If not subclass NSObject, there is memory leak (unknown reason)
+    /// BBWebImageManager shared instance
     public static let shared: BBWebImageManager = { () -> BBWebImageManager in
         let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
         return BBWebImageManager(cachePath: path, sizeThreshold: 20 * 1024)
@@ -95,6 +116,11 @@ public class BBWebImageManager: NSObject {
         return c
     }
     
+    /// Creates a BBWebImageManager instance
+    ///
+    /// - Parameters:
+    ///   - cachePath: cache path of BBLRUImageCache
+    ///   - sizeThreshold: size threshold of BBLRUImageCache
     public init(cachePath: String, sizeThreshold: Int) {
         let cache = BBLRUImageCache(path: cachePath, sizeThreshold: sizeThreshold)
         imageCache = cache
@@ -110,6 +136,15 @@ public class BBWebImageManager: NSObject {
         pthread_mutex_init(&taskLock, nil)
     }
     
+    /// Gets image from cache or downloads image
+    ///
+    /// - Parameters:
+    ///   - resource: image resource defines how to download and cache image
+    ///   - options: options for some behaviors
+    ///   - editor: editor defines how to edit and cache image in memory
+    ///   - progress: a closure called while image is downloading
+    ///   - completion: a closure called when image loading is finished
+    /// - Returns: BBWebImageLoadTask object
     @discardableResult
     public func loadImage(with resource: BBWebCacheResource,
                           options: BBWebImageOptions = .none,
@@ -226,6 +261,7 @@ public class BBWebImageManager: NSObject {
         return task
     }
     
+    /// Cancels all image loading tasks
     public func cancelAll() {
         pthread_mutex_lock(&taskLock)
         let currentTasks = tasks

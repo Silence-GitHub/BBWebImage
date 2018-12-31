@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// BBWebCacheResource defines how to download and cache image
 public protocol BBWebCacheResource {
     var cacheKey: String { get }
     var downloadUrl: URL { get }

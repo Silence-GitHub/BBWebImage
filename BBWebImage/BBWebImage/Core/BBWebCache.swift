@@ -12,6 +12,7 @@ public typealias BBSetImage = (UIImage?) -> Void
 
 private var webCacheOperationKey: Void?
 
+/// BBWebCache defines image loading, editing and setting behaivor
 public protocol BBWebCache: AnyObject {
     func bb_setImage(with resource: BBWebCacheResource,
                      placeholder: UIImage?,
@@ -23,6 +24,7 @@ public protocol BBWebCache: AnyObject {
                      completion: BBWebImageManagerCompletion?)
 }
 
+/// BBWebCacheOperation contains image loading tasks (BBWebImageLoadTask) for BBWebCache object
 public class BBWebCacheOperation {
     private let weakTaskMap: NSMapTable<NSString, BBWebImageLoadTask>
     private var downloadProgressDic: [String : Double]
@@ -62,6 +64,7 @@ public class BBWebCacheOperation {
     }
 }
 
+/// Default behaivor of BBWebCache
 public extension BBWebCache {
     public var bb_webCacheOperation: BBWebCacheOperation {
         if let operation = objc_getAssociatedObject(self, &webCacheOperationKey) as? BBWebCacheOperation { return operation }

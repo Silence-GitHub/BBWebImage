@@ -9,6 +9,16 @@
 import UIKit
 
 extension UIButton: BBWebCache {
+    /// Sets image with resource, placeholder, custom opotions
+    ///
+    /// - Parameters:
+    ///   - resource: image resource defines how to download and cache image
+    ///   - state: button state to set image
+    ///   - placeholder: placeholder image displayed when loading image
+    ///   - options: options for some behaviors
+    ///   - editor: editor defines how to edit and cache image in memory
+    ///   - progress: a closure called while image is downloading
+    ///   - completion: a closure called when image loading is finished
     public func bb_setImage(with resource: BBWebCacheResource,
                             forState state: UIControl.State,
                             placeholder: UIImage? = nil,
@@ -29,6 +39,9 @@ extension UIButton: BBWebCache {
                     completion: completion)
     }
     
+    /// Cancels image loading task
+    ///
+    /// - Parameter state: button state to set image
     public func bb_cancelImageLoadTask(forState state: UIControl.State) {
         let key = imageLoadTaskKey(forState: state)
         bb_webCacheOperation.task(forKey: key)?.cancel()
@@ -38,6 +51,16 @@ extension UIButton: BBWebCache {
         return classForCoder.description() + "Image\(state.rawValue)"
     }
     
+    /// Sets background image with resource, placeholder, custom opotions
+    ///
+    /// - Parameters:
+    ///   - resource: image resource defines how to download and cache image
+    ///   - state: button state to set background image
+    ///   - placeholder: placeholder image displayed when loading image
+    ///   - options: options for some behaviors
+    ///   - editor: editor defines how to edit and cache image in memory
+    ///   - progress: a closure called while image is downloading
+    ///   - completion: a closure called when image loading is finished
     public func bb_setBackgroundImage(with resource: BBWebCacheResource,
                                       forState state: UIControl.State,
                                       placeholder: UIImage? = nil,
@@ -58,6 +81,9 @@ extension UIButton: BBWebCache {
                     completion: completion)
     }
     
+    /// Cancels background image loading task
+    ///
+    /// - Parameter state: button state to set background image
     public func bb_cancelBackgroundImageLoadTask(forState state: UIControl.State) {
         let key = backgroundImageLoadTaskKey(forState: state)
         bb_webCacheOperation.task(forKey: key)?.cancel()
