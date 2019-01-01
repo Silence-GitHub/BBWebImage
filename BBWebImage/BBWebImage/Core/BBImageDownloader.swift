@@ -44,16 +44,32 @@ public protocol BBImageDownloadTask {
     func cancel()
 }
 
+/// BBImageDownloader defines downloading and canceling behaviors
 public protocol BBImageDownloader: AnyObject {
-    // Donwload
+    /// Downloads image with url and custom options
+    ///
+    /// - Parameters:
+    ///   - url: image url
+    ///   - options: options for some behaviors
+    ///   - progress: a closure called while image is downloading
+    ///   - completion: a closure called when downloading is finished
+    /// - Returns: BBImageDownloadTask object
     func downloadImage(with url: URL,
                        options: BBWebImageOptions,
                        progress: BBImageDownloaderProgress?,
                        completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
-    // Cancel
+    /// Cancels image download task
+    ///
+    /// - Parameter task: task to cancel
     func cancel(task: BBImageDownloadTask)
+    
+    /// Cancels image download with url
+    ///
+    /// - Parameter url: url to cancel
     func cancel(url: URL)
+    
+    /// Cancels all download tasks
     func cancelAll()
 }
 
@@ -73,9 +89,15 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
     func cancel() { isCancelled = true }
 }
 
+/// BBMergeRequestImageDownloader manages download tasks.
+/// Download tasks with the same url are merge into one download operation which sending one url request.
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
     public weak var imageCoder: BBImageCoder?
+    
+    /// A closure generating download operation.
+    /// The closure returns BBMergeRequestImageDownloadOperation by default.
+    /// Set this property for custom download operation.
     public var generateDownloadOperation: (URLRequest, URLSession) -> BBImageDownloadOperation
     
     public var currentDownloadCount: Int {
@@ -115,6 +137,9 @@ public class BBMergeRequestImageDownloader {
         return URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: queue)
     }()
     
+    /// Creates a BBMergeRequestImageDownloader object
+    ///
+    /// - Parameter sessionConfiguration: url session configuration for sending request
     public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
         generateDownloadOperation = { BBMergeRequestImageDownloadOperation(request: $0, session: $1) }
@@ -127,6 +152,11 @@ public class BBMergeRequestImageDownloader {
         self.sessionConfiguration = sessionConfiguration
     }
     
+    /// Updates HTTP header with value and field
+    ///
+    /// - Parameters:
+    ///   - value: value of HTTP header field to update
+    ///   - field: HTTP header field to update
     public func update(value: String?, forHTTPHeaderField field: String) {
         lock.wait()
         httpHeaders[field] = value
@@ -142,7 +172,6 @@ public class BBMergeRequestImageDownloader {
 }
 
 extension BBMergeRequestImageDownloader: BBImageDownloader {
-    // Donwload
     @discardableResult
     public func downloadImage(with url: URL,
                               options: BBWebImageOptions = .none,
@@ -191,7 +220,6 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         return task
     }
     
-    // Cancel
     public func cancel(task: BBImageDownloadTask) {
         task.cancel()
         lock.wait()

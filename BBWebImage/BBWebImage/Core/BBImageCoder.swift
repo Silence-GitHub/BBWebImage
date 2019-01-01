@@ -8,17 +8,62 @@
 
 import UIKit
 
+/// BBImageCoder defines image decoding and encoding behaviors
 public protocol BBImageCoder: AnyObject {
+    /// Image coder can decode data or not
+    ///
+    /// - Parameter data: data to decode
+    /// - Returns: true if coder can decode data, or false if can not
     func canDecode(_ data: Data) -> Bool
+    
+    /// Decodes image with data
+    ///
+    /// - Parameter data: data to decode
+    /// - Returns: decoded image, or nil if decoding fails
     func decodedImage(with data: Data) -> UIImage?
+    
+    /// Decompresses image with data
+    ///
+    /// - Parameters:
+    ///   - image: image to decompress
+    ///   - data: image data
+    /// - Returns: decompressed image, or nil if decompressing fails
     func decompressedImage(with image: UIImage, data: Data) -> UIImage?
+    
+    /// Image coder can encode image format or not
+    ///
+    /// - Parameter format: image format to encode
+    /// - Returns: true if coder can encode image format, or false if can not
     func canEncode(_ format: BBImageFormat) -> Bool
+    
+    /// Encodes image to specified format
+    ///
+    /// - Parameters:
+    ///   - image: image to encode
+    ///   - format: image format to encode
+    /// - Returns: encoded data, or nil if encoding fails
     func encodedData(with image: UIImage, format: BBImageFormat) -> Data?
+    
+    /// Copies image coder
+    ///
+    /// - Returns: new image coder
     func copy() -> BBImageCoder
 }
 
+/// BBImageProgressiveCoder defines image incremental decoding behaviors
 public protocol BBImageProgressiveCoder: BBImageCoder {
+    /// Image coder can decode data incrementally or not
+    ///
+    /// - Parameter data: data to decode
+    /// - Returns: true if image coder can decode data incrementally, or false if can not
     func canIncrementallyDecode(_ data: Data) -> Bool
+    
+    /// Decodes data incrementally
+    ///
+    /// - Parameters:
+    ///   - data: data to decode
+    ///   - finished: whether downloading is finished
+    /// - Returns: decoded image, or nil if decoding fails
     func incrementallyDecodedImage(with data: Data, finished: Bool) -> UIImage?
 }
 
@@ -38,7 +83,11 @@ extension CGImagePropertyOrientation {
     }
 }
 
+/// BBImageCoderManager manages image coders for diffent image formats
 public class BBImageCoderManager {
+    /// Image coders.
+    /// Getting and setting are thread safe.
+    /// Set this property with custom image coders to custom image encoding and decoding.
     public var coders: [BBImageCoder] {
         get {
             pthread_mutex_lock(&coderLock)

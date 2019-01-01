@@ -12,7 +12,7 @@ public typealias BBSetImage = (UIImage?) -> Void
 
 private var webCacheOperationKey: Void?
 
-/// BBWebCache defines image loading, editing and setting behaivor
+/// BBWebCache defines image loading, editing and setting behaivors
 public protocol BBWebCache: AnyObject {
     func bb_setImage(with resource: BBWebCacheResource,
                      placeholder: UIImage?,

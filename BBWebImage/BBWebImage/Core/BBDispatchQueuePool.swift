@@ -8,6 +8,8 @@
 
 import UIKit
 
+/// BBDispatchQueuePool holds mutiple serial queues.
+/// To prevent concurrent queue increasing thread count, use this class to control thread count.
 public class BBDispatchQueuePool {
     public static let userInteractive = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.userInteractive", qos: .userInteractive)
     public static let userInitiated = BBDispatchQueuePool(label: "com.Kaibo.BBWebImage.QueuePool.userInitiated", qos: .userInitiated)
@@ -18,12 +20,19 @@ public class BBDispatchQueuePool {
     private let queues: [DispatchQueue]
     private var index: Int32
     
+    /// Gets a dispatch queue from pool
     public var currentQueue: DispatchQueue {
         var currentIndex = OSAtomicIncrement32(&index)
         if currentIndex < 0 { currentIndex = -currentIndex }
         return queues[Int(currentIndex) % queues.count]
     }
     
+    /// Creates a BBDispatchQueuePool object
+    ///
+    /// - Parameters:
+    ///   - label: dispatch queue label
+    ///   - qos: quality of service for dispatch queue
+    ///   - queueCount: dispatch queue count
     public init(label: String, qos: DispatchQoS, queueCount: Int = 0) {
         let count = queueCount > 0 ? queueCount : min(16, max(1, ProcessInfo.processInfo.activeProcessorCount))
         var pool: [DispatchQueue] = []
@@ -35,6 +44,9 @@ public class BBDispatchQueuePool {
         index = -1
     }
     
+    /// Dispatches an asynchronous work to a dispatch queue from pool
+    ///
+    /// - Parameter work: work to dispatch
     public func async(work: @escaping () -> Void) {
         currentQueue.async(execute: work)
     }

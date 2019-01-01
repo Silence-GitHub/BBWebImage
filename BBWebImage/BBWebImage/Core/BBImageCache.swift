@@ -46,21 +46,43 @@ public typealias BBImageCacheQueryCompletion = (BBImageCacheQueryCompletionResul
 public typealias BBImageCacheStoreCompletion = () -> Void
 public typealias BBImageCacheRemoveCompletion = () -> Void
 
+/// BBImageCache defines image querying, storing and removing behaviors
 public protocol BBImageCache: AnyObject {
-    // Get image
+    /// Gets image with key and cache type
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    ///   - cacheType: cache type specifying how image is cached
+    ///   - completion: a closure called when querying is finished
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)
     
-    // Store image
+    /// Stores image and/or data with key and cache type
+    ///
+    /// - Parameters:
+    ///   - image: image to store
+    ///   - data: data to store
+    ///   - key: cache key
+    ///   - cacheType: cache type specifying how image is cached
+    ///   - completion: a closure called when storing is finished
     func store(_ image: UIImage?,
                data: Data?,
                forKey key: String,
                cacheType: BBImageCacheType,
                completion: BBImageCacheStoreCompletion?)
     
-    // Remove image
+    /// Removes value with key and cache type
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    ///   - cacheType: cache type specifying how image is cached
+    ///   - completion: a closure called when removing is finished
     func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
     
-    // Clear image
+    /// Removes all values with cache type
+    ///
+    /// - Parameters:
+    ///   - type: cache type specifying how image is cached
+    ///   - completion: a closure called when clearing is finished
     func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion?)
 }
 
@@ -80,12 +102,6 @@ public class BBLRUImageCache: BBImageCache {
         diskCache = BBDiskCache(path: path, sizeThreshold: sizeThreshold)
     }
     
-    /// Gets image with key and cache type
-    ///
-    /// - Parameters:
-    ///   - key: cache key
-    ///   - cacheType: cache type specifying how image is cached
-    ///   - completion: a closure called when querying is finished
     public func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion) {
         var memoryImage: UIImage?
         if cacheType.contains(.memory),
@@ -117,15 +133,6 @@ public class BBLRUImageCache: BBImageCache {
         completion(.none)
     }
     
-    
-    /// Stores image and/or data with key and cache type
-    ///
-    /// - Parameters:
-    ///   - image: image to store
-    ///   - data: data to store
-    ///   - key: cache key
-    ///   - cacheType: cache type specifying how image is cached
-    ///   - completion: a closure called when storing is finished
     public func store(_ image: UIImage?,
                       data: Data?,
                       forKey key: String,
@@ -153,12 +160,6 @@ public class BBLRUImageCache: BBImageCache {
         completion?()
     }
     
-    /// Removes value with key and cache type
-    ///
-    /// - Parameters:
-    ///   - key: cache key
-    ///   - cacheType: cache type specifying how image is cached
-    ///   - completion: a closure called when removing is finished
     public func removeImage(forKey key: String, cacheType: BBImageCacheType, completion: BBImageCacheRemoveCompletion?) {
         if cacheType.contains(.memory) { memoryCache.removeImage(forKey: key) }
         if cacheType.contains(.disk),
@@ -168,11 +169,6 @@ public class BBLRUImageCache: BBImageCache {
         completion?()
     }
     
-    /// Removes all values with cache type
-    ///
-    /// - Parameters:
-    ///   - type: cache type specifying how image is cached
-    ///   - completion: a closure called when clearing is finished
     public func clear(_ type: BBImageCacheType, completion: BBImageCacheRemoveCompletion?) {
         if type.contains(.memory) { memoryCache.clear() }
         if type.contains(.disk),
