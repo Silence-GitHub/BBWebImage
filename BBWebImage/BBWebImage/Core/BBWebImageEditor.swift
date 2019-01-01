@@ -64,73 +64,75 @@ public struct BBWebImageEditor {
                                                            borderColor: UIColor? = nil,
                                                            backgroundColor: UIColor? = nil) -> BBWebImageEditor {
         let edit: BBWebImageEditMethod = { (image: UIImage?, data: Data?) in
-            guard displaySize.width > 0,
-                displaySize.height > 0,
-                let currentData = data,
-                let currentImage = UIImage(data: currentData),
-                let sourceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
-            var bitmapInfo = sourceImage.bitmapInfo
-            bitmapInfo.remove(.alphaInfoMask)
-            if sourceImage.bb_containsAlpha {
-                bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
-            } else {
-                bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+            autoreleasepool { () -> UIImage? in
+                guard displaySize.width > 0,
+                    displaySize.height > 0,
+                    let currentData = data,
+                    let currentImage = UIImage(data: currentData),
+                    let sourceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
+                var bitmapInfo = sourceImage.bitmapInfo
+                bitmapInfo.remove(.alphaInfoMask)
+                if sourceImage.bb_containsAlpha {
+                    bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
+                } else {
+                    bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+                }
+                // Make sure resolution is not too small
+                let currentMaxResolution = max(maxResolution, Int(displaySize.width * displaySize.height * 7))
+                let resolutionRatio = sqrt(CGFloat(sourceImage.width * sourceImage.height) / CGFloat(currentMaxResolution))
+                let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
+                var width = sourceImage.width
+                var height = sourceImage.height
+                if shouldScaleDown {
+                    width = Int(CGFloat(sourceImage.width) / resolutionRatio)
+                    height = Int(CGFloat(sourceImage.height) / resolutionRatio)
+                } else if CGFloat(width) < displaySize.width * bb_ScreenScale {
+                    width = Int(displaySize.width * bb_ScreenScale)
+                    height = Int(displaySize.height * bb_ScreenScale)
+                }
+                guard let context = CGContext(data: nil,
+                                              width: width,
+                                              height: height,
+                                              bitsPerComponent: sourceImage.bitsPerComponent,
+                                              bytesPerRow: 0,
+                                              space: bb_shareColorSpace,
+                                              bitmapInfo: bitmapInfo.rawValue) else { return nil }
+                context.scaleBy(x: 1, y: -1)
+                context.translateBy(x: 0, y: CGFloat(-height))
+                context.interpolationQuality = .high
+                context.saveGState()
+                
+                let ratio = CGFloat(width) / displaySize.width
+                let currentCornerRadius = cornerRadius * ratio
+                let currentBorderWidth = borderWidth * ratio
+                
+                if let fillColor = backgroundColor?.cgColor {
+                    context.setFillColor(fillColor)
+                    context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+                }
+                if cornerRadius > 0 && corner.isSubset(of: .allCorners) && !corner.isEmpty {
+                    let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
+                    context.addPath(clipPath.cgPath)
+                    context.clip()
+                }
+                context.scaleBy(x: 1, y: -1)
+                context.translateBy(x: 0, y: CGFloat(-height))
+                if shouldScaleDown {
+                    drawForScaleDown(context, sourceImage: sourceImage)
+                } else {
+                    context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                }
+                context.restoreGState()
+                if let strokeColor = borderColor?.cgColor,
+                    borderWidth > 0 {
+                    let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
+                    context.addPath(strokePath.cgPath)
+                    context.setLineWidth(currentBorderWidth)
+                    context.setStrokeColor(strokeColor)
+                    context.strokePath()
+                }
+                return context.makeImage().flatMap { UIImage(cgImage: $0) }
             }
-            // Make sure resolution is not too small
-            let currentMaxResolution = max(maxResolution, Int(displaySize.width * displaySize.height * 7))
-            let resolutionRatio = sqrt(CGFloat(sourceImage.width * sourceImage.height) / CGFloat(currentMaxResolution))
-            let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
-            var width = sourceImage.width
-            var height = sourceImage.height
-            if shouldScaleDown {
-                width = Int(CGFloat(sourceImage.width) / resolutionRatio)
-                height = Int(CGFloat(sourceImage.height) / resolutionRatio)
-            } else if CGFloat(width) < displaySize.width * bb_ScreenScale {
-                width = Int(displaySize.width * bb_ScreenScale)
-                height = Int(displaySize.height * bb_ScreenScale)
-            }
-            guard let context = CGContext(data: nil,
-                                          width: width,
-                                          height: height,
-                                          bitsPerComponent: sourceImage.bitsPerComponent,
-                                          bytesPerRow: 0,
-                                          space: bb_shareColorSpace,
-                                          bitmapInfo: bitmapInfo.rawValue) else { return nil }
-            context.scaleBy(x: 1, y: -1)
-            context.translateBy(x: 0, y: CGFloat(-height))
-            context.interpolationQuality = .high
-            context.saveGState()
-            
-            let ratio = CGFloat(width) / displaySize.width
-            let currentCornerRadius = cornerRadius * ratio
-            let currentBorderWidth = borderWidth * ratio
-            
-            if let fillColor = backgroundColor?.cgColor {
-                context.setFillColor(fillColor)
-                context.fill(CGRect(x: 0, y: 0, width: width, height: height))
-            }
-            if cornerRadius > 0 && corner.isSubset(of: .allCorners) && !corner.isEmpty {
-                let clipPath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
-                context.addPath(clipPath.cgPath)
-                context.clip()
-            }
-            context.scaleBy(x: 1, y: -1)
-            context.translateBy(x: 0, y: CGFloat(-height))
-            if shouldScaleDown {
-                drawForScaleDown(context, sourceImage: sourceImage)
-            } else {
-                context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-            }
-            context.restoreGState()
-            if let strokeColor = borderColor?.cgColor,
-                borderWidth > 0 {
-                let strokePath = borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
-                context.addPath(strokePath.cgPath)
-                context.setLineWidth(currentBorderWidth)
-                context.setStrokeColor(strokeColor)
-                context.strokePath()
-            }
-            return context.makeImage().flatMap { UIImage(cgImage: $0) }
         }
         let cornerKey = corner.intersection([.topLeft, .topRight, .bottomLeft, .bottomRight]).rawValue
         let borderColorKey = borderColor?.cgColor.components ?? []
@@ -203,16 +205,18 @@ public struct BBWebImageEditor {
         sourceTile.size.height += sourceSeemOverlap
         destTile.size.height += destSeemOverlap
         for y in 0..<iterations {
-            sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap // + sourceSeemOverlap
-            destTile.origin.y = CGFloat(context.height) - ceil(CGFloat(y + 1) * destTileHeightMinusOverlap + destSeemOverlap)
-            if let sourceTileImage = sourceImage.cropping(to: sourceTile) {
-                if y == iterations - 1 && remainder != 0 {
-                    var dify = destTile.height
-                    destTile.size.height = ceil(CGFloat(sourceTileImage.height) * imageScale)
-                    dify -= destTile.height
-                    destTile.origin.y += dify
+            autoreleasepool {
+                sourceTile.origin.y = CGFloat(y) * sourceTileHeightMinusOverlap // + sourceSeemOverlap
+                destTile.origin.y = CGFloat(context.height) - ceil(CGFloat(y + 1) * destTileHeightMinusOverlap + destSeemOverlap)
+                if let sourceTileImage = sourceImage.cropping(to: sourceTile) {
+                    if y == iterations - 1 && remainder != 0 {
+                        var dify = destTile.height
+                        destTile.size.height = ceil(CGFloat(sourceTileImage.height) * imageScale)
+                        dify -= destTile.height
+                        destTile.origin.y += dify
+                    }
+                    context.draw(sourceTileImage, in: destTile)
                 }
-                context.draw(sourceTileImage, in: destTile)
             }
         }
     }
