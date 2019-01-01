@@ -116,19 +116,30 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
         return c
     }
     
-    /// Creates a BBWebImageManager instance
+    /// Creates a BBWebImageManager object with default image cache, downloader and coder
     ///
     /// - Parameters:
     ///   - cachePath: directory storing image data
     ///   - sizeThreshold: threshold specifying image data is store in sqlite (data.count <= threshold) or file (data.count > threshold)
-    public init(cachePath: String, sizeThreshold: Int) {
+    public convenience init(cachePath: String, sizeThreshold: Int) {
         let cache = BBLRUImageCache(path: cachePath, sizeThreshold: sizeThreshold)
-        imageCache = cache
         let downloader = BBMergeRequestImageDownloader(sessionConfiguration: .default)
+        let coder = BBImageCoderManager()
+        cache.imageCoder = coder
+        downloader.imageCoder = coder
+        self.init(cache: cache, downloader: downloader, coder: coder)
+    }
+    
+    /// Creates a BBWebImageManager object with image cache, downloader and coder
+    ///
+    /// - Parameters:
+    ///   - cache: cache conforming to BBImageCache
+    ///   - downloader: downloader conforming to BBImageDownloader
+    ///   - coder: coder conforming to BBImageCoder
+    public init(cache: BBImageCache, downloader: BBImageDownloader, coder: BBImageCoder) {
+        imageCache = cache
         imageDownloader = downloader
-        imageCoder = BBImageCoderManager()
-        cache.imageCoder = imageCoder
-        downloader.imageCoder = imageCoder
+        imageCoder = coder
         coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
         taskSentinel = 0
