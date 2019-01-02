@@ -21,9 +21,13 @@ Pod::Spec.new do |s|
 
   s.platform     = :ios, "8.0"
 
+  s.swift_version = "4.2"
+
   s.source       = { :git => "https://github.com/Silence-GitHub/BBWebImage.git", :tag => s.version }
 
-  s.source_files  = "BBWebImage/BBWebImage/BBWebImage.h", "BBWebImage/**/*.swift", "BBWebImage/**/*.cikernel"
+  s.source_files  = "BBWebImage/BBWebImage/BBWebImage.h", "BBWebImage/BBWebImage/**/*.swift"
+
+  s.resources = "BBWebImage/BBWebImage/**/*.cikernel"
 
   s.public_header_files = "BBWebImage/BBWebImage/BBWebImage.h"
 

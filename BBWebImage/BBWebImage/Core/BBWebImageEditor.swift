@@ -237,7 +237,7 @@ public extension UIImage {
                 return CGRect(x: (size.width - w) / 2, y: 0, width: w, height: size.height)
             }
         default:
-            #warning ("Other content mode")
+            // TODO: Other content mode
             return CGRect(origin: .zero, size: size)
         }
     }

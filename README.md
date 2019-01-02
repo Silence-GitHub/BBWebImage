@@ -15,7 +15,7 @@ BBWebImage is a Swift library for downloading, caching and editing web images as
 ## Requirements
 
 - iOS 8.0+
-- Swift 4.0+
+- Swift 4.2
 
 ## How To Use
 
