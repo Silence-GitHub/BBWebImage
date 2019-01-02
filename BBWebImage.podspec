@@ -23,13 +23,9 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/Silence-GitHub/BBWebImage.git", :tag => s.version }
 
-  s.source_files  = "BBWebImage/BBWebImage/BBWebImage.h", "BBWebImage/BBWebImage/*.swift", "BBWebImage/BBWebImage/*.cikernel"
-  # s.exclude_files = "Classes/Exclude"
+  s.source_files  = "BBWebImage/BBWebImage/BBWebImage.h", "BBWebImage/**/*.swift", "BBWebImage/**/*.cikernel"
 
   s.public_header_files = "BBWebImage/BBWebImage/BBWebImage.h"
-
-  # s.framework  = "SomeFramework"
-  # s.frameworks = "SomeFramework", "AnotherFramework"
 
   s.requires_arc = true
 
