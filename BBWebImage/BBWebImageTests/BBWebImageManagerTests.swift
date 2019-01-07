@@ -504,4 +504,26 @@ class BBWebImageManagerTests: XCTestCase {
         }
         waitForExpectations(timeout: 10, handler: nil)
     }
+    
+    func testOptionRetryFailedUrl() {
+        let expectation = self.expectation(description: "Wait for loading image")
+        let url = URL(string: "http://www.qq.com")!
+        imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+            let currentError = error! as NSError
+            XCTAssertEqual(currentError.domain, BBWebImageErrorDomain)
+            XCTAssertEqual(currentError.code, 0)
+            self.imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                let currentError = error! as NSError
+                XCTAssertEqual(currentError.domain, NSURLErrorDomain)
+                XCTAssertEqual(currentError.code, NSURLErrorFileDoesNotExist)
+                self.imageManager.loadImage(with: url, options: .retryFailedUrl) { (image, data, error, cacheType) in
+                    let currentError = error! as NSError
+                    XCTAssertEqual(currentError.domain, BBWebImageErrorDomain)
+                    XCTAssertEqual(currentError.code, 0)
+                    expectation.fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
 }
