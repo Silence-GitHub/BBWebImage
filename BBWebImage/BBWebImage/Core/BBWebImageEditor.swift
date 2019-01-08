@@ -57,6 +57,14 @@ public func bb_imageEditorRotate(withAngle angle: CGFloat, fitSize: Bool) -> BBW
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.rotate.angle=\(angle),fitSize=\(fitSize)", needData: false, edit: edit)
 }
 
+public func bb_imageEditorFlip(withHorizontal horizontal: Bool, vertical: Bool) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_flippedImage(withHorizontal: horizontal, vertical: vertical) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.flip.horizontal=\(horizontal),vertical=\(vertical)", needData: false, edit: edit)
+}
+
 /// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
@@ -307,6 +315,23 @@ public extension UIImage {
         let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return rotatedImage
+    }
+    
+    public func bb_flippedImage(withHorizontal horizontal: Bool, vertical: Bool) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        if horizontal {
+            context.translateBy(x: size.width, y: 0)
+            context.scaleBy(x: -1, y: 1)
+        }
+        if vertical {
+            context.translateBy(x: 0, y: size.height)
+            context.scaleBy(x: 1, y: -1)
+        }
+        draw(at: .zero)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
     }
     
     /// Calculates image rect to display with view size and content mode.
