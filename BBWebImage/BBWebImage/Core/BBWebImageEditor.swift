@@ -49,6 +49,14 @@ public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.C
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
 }
 
+public func bb_imageEditorRotate(withAngle angle: CGFloat, fitSize: Bool) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_rotatedImage(withAngle: angle, fitSize: fitSize) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.rotate.angle=\(angle),fitSize=\(fitSize)", needData: false, edit: edit)
+}
+
 /// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
@@ -283,6 +291,22 @@ public extension UIImage {
             return UIImage(cgImage: sourceImage, scale: scale, orientation: imageOrientation)
         }
         return nil
+    }
+    
+    public func bb_rotatedImage(withAngle angle: CGFloat, fitSize: Bool) -> UIImage? {
+        if angle.truncatingRemainder(dividingBy: 360) == 0 { return self }
+        let radian = angle / 180 * CGFloat.pi
+        var rect = CGRect(origin: .zero, size: size)
+        if fitSize { rect = rect.applying(CGAffineTransform(rotationAngle: radian)) }
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, scale)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        context.translateBy(x: rect.width / 2, y: rect.height / 2)
+        context.rotate(by: radian)
+        context.translateBy(x: -size.width / 2, y: -size.height / 2)
+        draw(at: .zero)
+        let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return rotatedImage
     }
     
     /// Calculates image rect to display with view size and content mode.
