@@ -27,10 +27,10 @@ public func bb_clearCIContext() { _bb_shareCIContext = nil }
 
 public func bb_imageEditor(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
     let edit: BBWebImageEditMethod = { (image, _) in
-        guard let currentImage = image else { return image }
-        let rect = currentImage.rectToDisplay(with: displaySize, contentMode: contentMode)
-        guard let sourceImage = currentImage.cgImage?.cropping(to: rect) else { return image }
-        return UIImage(cgImage: sourceImage, scale: currentImage.scale, orientation: currentImage.imageOrientation)
+        if let currentImage = image?.resizedImage(with: displaySize, contentMode: contentMode) {
+            return currentImage
+        }
+        return image
     }
     return BBWebImageEditor(key: "size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
 }
@@ -233,7 +233,26 @@ public struct BBWebImageEditor {
 }
 
 public extension UIImage {
-    // Image rect to display in image coordinate
+    public func resizedImage(with displaySize: CGSize, contentMode: UIView.ContentMode) -> UIImage? {
+        if displaySize.width <= 0 || displaySize.height <= 0 { return nil }
+        let rect = rectToDisplay(with: displaySize, contentMode: contentMode)
+        if let sourceImage = cgImage?.cropping(to: rect) {
+            return UIImage(cgImage: sourceImage, scale: scale, orientation: imageOrientation)
+        }
+        if let ciimage = ciImage?.cropped(to: rect),
+            let sourceImage = bb_shareCIContext.createCGImage(ciimage, from: ciimage.extent) {
+            return UIImage(cgImage: sourceImage, scale: scale, orientation: imageOrientation)
+        }
+        return nil
+    }
+    
+    /// Calculates image rect to display with view size and content mode.
+    /// Use the rect to crop image to fit view size and content mode.
+    ///
+    /// - Parameters:
+    ///   - displaySize: view size
+    ///   - contentMode: view content mode
+    /// - Returns: image rect to display in image coordinate
     public func rectToDisplay(with displaySize: CGSize, contentMode: UIView.ContentMode) -> CGRect {
         var rect = CGRect(origin: .zero, size: size)
         switch contentMode {
@@ -326,5 +345,21 @@ public extension UIImage {
             return rect
         }
         return rect
+    }
+}
+
+public extension UIView {
+    /// BBFillContentMode specifies how content fills its view
+    public enum BBFillContentMode {
+        case scale
+        case center
+        case top
+        case bottom
+        case left
+        case right
+        case topLeft
+        case topRight
+        case bottomLeft
+        case bottomRight
     }
 }
