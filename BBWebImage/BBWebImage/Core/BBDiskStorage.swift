@@ -62,7 +62,6 @@ public class BBDiskStorage {
             try? FileManager.default.removeItem(atPath: databasePath)
             return nil
         }
-        // TODO: Create index
     }
     
     deinit {
