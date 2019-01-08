@@ -235,19 +235,19 @@ public struct BBWebImageEditor {
 public extension UIImage {
     // Image rect to display in image coordinate
     public func rectToDisplay(with displaySize: CGSize, contentMode: UIView.ContentMode) -> CGRect {
-        let sourceRatio = size.width / size.height
-        let displayRatio = displaySize.width / displaySize.height
+        var rect = CGRect(origin: .zero, size: size)
         switch contentMode {
         case .scaleAspectFill:
+            let sourceRatio = size.width / size.height
+            let displayRatio = displaySize.width / displaySize.height
             if sourceRatio < displayRatio {
-                let h = size.width / displayRatio
-                return CGRect(x: 0, y: (size.height - h) / 2, width: size.width, height: h)
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = (size.height - rect.height) / 2
             } else {
-                let w = size.height * displayRatio
-                return CGRect(x: (size.width - w) / 2, y: 0, width: w, height: size.height)
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = (size.width - rect.width) / 2
             }
         case .center:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.origin.x = (size.width - displaySize.width) / 2
                 rect.size.width = displaySize.width
@@ -256,9 +256,7 @@ public extension UIImage {
                 rect.origin.y = (size.height - displaySize.height) / 2
                 rect.size.height = displaySize.height
             }
-            return rect
         case .top:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.origin.x = (size.width - displaySize.width) / 2
                 rect.size.width = displaySize.width
@@ -266,9 +264,7 @@ public extension UIImage {
             if size.height > displaySize.height {
                 rect.size.height = displaySize.height
             }
-            return rect
         case .bottom:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.origin.x = (size.width - displaySize.width) / 2
                 rect.size.width = displaySize.width
@@ -277,9 +273,7 @@ public extension UIImage {
                 rect.origin.y = size.height - displaySize.height
                 rect.size.height = displaySize.height
             }
-            return rect
         case .left:
-            var rect = CGRect(origin: .zero, size: size)
             if size.height > displaySize.height {
                 rect.origin.y = (size.height - displaySize.height) / 2
                 rect.size.height = displaySize.height
@@ -287,9 +281,7 @@ public extension UIImage {
             if size.width > displaySize.width {
                 rect.size.width = displaySize.width
             }
-            return rect
         case .right:
-            var rect = CGRect(origin: .zero, size: size)
             if size.height > displaySize.height {
                 rect.origin.y = (size.height - displaySize.height) / 2
                 rect.size.height = displaySize.height
@@ -298,18 +290,14 @@ public extension UIImage {
                 rect.origin.x = size.width - displaySize.width
                 rect.size.width = displaySize.width
             }
-            return rect
         case .topLeft:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.size.width = displaySize.width
             }
             if size.height > displaySize.height {
                 rect.size.height = displaySize.height
             }
-            return rect
         case .topRight:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.origin.x = size.width - displaySize.width
                 rect.size.width = displaySize.width
@@ -317,9 +305,7 @@ public extension UIImage {
             if size.height > displaySize.height {
                 rect.size.height = displaySize.height
             }
-            return rect
         case .bottomLeft:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.size.width = displaySize.width
             }
@@ -327,9 +313,7 @@ public extension UIImage {
                 rect.origin.y = size.height - displaySize.height
                 rect.size.height = displaySize.height
             }
-            return rect
         case .bottomRight:
-            var rect = CGRect(origin: .zero, size: size)
             if size.width > displaySize.width {
                 rect.origin.x = size.width - displaySize.width
                 rect.size.width = displaySize.width
@@ -338,10 +322,9 @@ public extension UIImage {
                 rect.origin.y = size.height - displaySize.height
                 rect.size.height = displaySize.height
             }
-            return rect
         default:
-            // TODO: Other content mode
-            return CGRect(origin: .zero, size: size)
+            return rect
         }
+        return rect
     }
 }
