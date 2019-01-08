@@ -25,14 +25,20 @@ public var bb_shareCIContext: CIContext {
 
 public func bb_clearCIContext() { _bb_shareCIContext = nil }
 
-public func bb_imageEditor(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
+public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
     let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.resizedImage(with: displaySize, contentMode: contentMode) {
-            return currentImage
-        }
+        if let currentImage = image?.bb_resizedImage(with: displaySize, contentMode: contentMode) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
+}
+
+public func bb_imageEditorCrop(with rect: CGRect) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_croppedImage(with: rect) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.crop.rect=\(rect)", needData: false, edit: edit)
 }
 
 /// BBWebImageEditor defines how to edit and cache image in memory
@@ -79,7 +85,7 @@ public struct BBWebImageEditor {
                     displaySize.height > 0,
                     let currentData = data,
                     let currentImage = UIImage(data: currentData),
-                    let sourceImage = currentImage.cgImage?.cropping(to: currentImage.rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
+                    let sourceImage = currentImage.cgImage?.cropping(to: currentImage.bb_rectToDisplay(with: displaySize, contentMode: .scaleAspectFill)) else { return image }
                 var bitmapInfo = sourceImage.bitmapInfo
                 bitmapInfo.remove(.alphaInfoMask)
                 if sourceImage.bb_containsAlpha {
@@ -233,9 +239,25 @@ public struct BBWebImageEditor {
 }
 
 public extension UIImage {
-    public func resizedImage(with displaySize: CGSize, contentMode: UIView.ContentMode) -> UIImage? {
+    public func bb_croppedImage(with originalRect: CGRect) -> UIImage? {
+        if originalRect.width <= 0 || originalRect.height <= 0 { return nil }
+        var rect = originalRect
+        if scale != 1 {
+            rect.origin.x *= scale
+            rect.origin.y *= scale
+            rect.size.width *= scale
+            rect.size.height *= scale
+        }
+        return _bb_croppedImage(with: rect)
+    }
+    
+    public func bb_resizedImage(with displaySize: CGSize, contentMode: UIView.ContentMode) -> UIImage? {
         if displaySize.width <= 0 || displaySize.height <= 0 { return nil }
-        let rect = rectToDisplay(with: displaySize, contentMode: contentMode)
+        let rect = bb_rectToDisplay(with: displaySize, contentMode: contentMode)
+        return _bb_croppedImage(with: rect)
+    }
+    
+    private func _bb_croppedImage(with rect: CGRect) -> UIImage? {
         if let sourceImage = cgImage?.cropping(to: rect) {
             return UIImage(cgImage: sourceImage, scale: scale, orientation: imageOrientation)
         }
@@ -253,7 +275,7 @@ public extension UIImage {
     ///   - displaySize: view size
     ///   - contentMode: view content mode
     /// - Returns: image rect to display in image coordinate
-    public func rectToDisplay(with displaySize: CGSize, contentMode: UIView.ContentMode) -> CGRect {
+    public func bb_rectToDisplay(with displaySize: CGSize, contentMode: UIView.ContentMode) -> CGRect {
         var rect = CGRect(origin: .zero, size: size)
         switch contentMode {
         case .scaleAspectFill:
@@ -342,7 +364,13 @@ public extension UIImage {
                 rect.size.height = displaySize.height
             }
         default:
-            return rect
+            break
+        }
+        if scale != 1 {
+            rect.origin.x *= scale
+            rect.origin.y *= scale
+            rect.size.width *= scale
+            rect.size.height *= scale
         }
         return rect
     }
