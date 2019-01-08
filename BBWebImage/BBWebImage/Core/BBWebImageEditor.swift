@@ -25,20 +25,28 @@ public var bb_shareCIContext: CIContext {
 
 public func bb_clearCIContext() { _bb_shareCIContext = nil }
 
-public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_resizedImage(with: displaySize, contentMode: contentMode) { return currentImage }
-        return image
-    }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
-}
-
 public func bb_imageEditorCrop(with rect: CGRect) -> BBWebImageEditor {
     let edit: BBWebImageEditMethod = { (image, _) in
         if let currentImage = image?.bb_croppedImage(with: rect) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.crop.rect=\(rect)", needData: false, edit: edit)
+}
+
+public func bb_imageEditorResize(with size: CGSize) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_resizedImage(with: size) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(size)", needData: false, edit: edit)
+}
+
+public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_resizedImage(with: displaySize, contentMode: contentMode) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
 }
 
 /// BBWebImageEditor defines how to edit and cache image in memory
@@ -249,6 +257,15 @@ public extension UIImage {
             rect.size.height *= scale
         }
         return _bb_croppedImage(with: rect)
+    }
+    
+    public func bb_resizedImage(with size: CGSize) -> UIImage? {
+        if size.width <= 0 || size.height <= 0 { return nil }
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(in: CGRect(origin: .zero, size: size))
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
     }
     
     public func bb_resizedImage(with displaySize: CGSize, contentMode: UIView.ContentMode) -> UIImage? {
