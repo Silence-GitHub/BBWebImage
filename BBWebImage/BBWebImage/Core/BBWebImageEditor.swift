@@ -25,6 +25,16 @@ public var bb_shareCIContext: CIContext {
 
 public func bb_clearCIContext() { _bb_shareCIContext = nil }
 
+public func bb_imageEditor(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        guard let currentImage = image else { return image }
+        let rect = currentImage.rectToDisplay(with: displaySize, contentMode: contentMode)
+        guard let sourceImage = currentImage.cgImage?.cropping(to: rect) else { return image }
+        return UIImage(cgImage: sourceImage, scale: currentImage.scale, orientation: currentImage.imageOrientation)
+    }
+    return BBWebImageEditor(key: "size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
+}
+
 /// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
@@ -236,6 +246,99 @@ public extension UIImage {
                 let w = size.height * displayRatio
                 return CGRect(x: (size.width - w) / 2, y: 0, width: w, height: size.height)
             }
+        case .center:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.origin.x = (size.width - displaySize.width) / 2
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.origin.y = (size.height - displaySize.height) / 2
+                rect.size.height = displaySize.height
+            }
+            return rect
+        case .top:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.origin.x = (size.width - displaySize.width) / 2
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.size.height = displaySize.height
+            }
+            return rect
+        case .bottom:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.origin.x = (size.width - displaySize.width) / 2
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.origin.y = size.height - displaySize.height
+                rect.size.height = displaySize.height
+            }
+            return rect
+        case .left:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.height > displaySize.height {
+                rect.origin.y = (size.height - displaySize.height) / 2
+                rect.size.height = displaySize.height
+            }
+            if size.width > displaySize.width {
+                rect.size.width = displaySize.width
+            }
+            return rect
+        case .right:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.height > displaySize.height {
+                rect.origin.y = (size.height - displaySize.height) / 2
+                rect.size.height = displaySize.height
+            }
+            if size.width > displaySize.width {
+                rect.origin.x = size.width - displaySize.width
+                rect.size.width = displaySize.width
+            }
+            return rect
+        case .topLeft:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.size.height = displaySize.height
+            }
+            return rect
+        case .topRight:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.origin.x = size.width - displaySize.width
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.size.height = displaySize.height
+            }
+            return rect
+        case .bottomLeft:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.origin.y = size.height - displaySize.height
+                rect.size.height = displaySize.height
+            }
+            return rect
+        case .bottomRight:
+            var rect = CGRect(origin: .zero, size: size)
+            if size.width > displaySize.width {
+                rect.origin.x = size.width - displaySize.width
+                rect.size.width = displaySize.width
+            }
+            if size.height > displaySize.height {
+                rect.origin.y = size.height - displaySize.height
+                rect.size.height = displaySize.height
+            }
+            return rect
         default:
             // TODO: Other content mode
             return CGRect(origin: .zero, size: size)
