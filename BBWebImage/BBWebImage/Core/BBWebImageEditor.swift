@@ -49,6 +49,14 @@ public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.C
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
 }
 
+public func bb_imageEditorResize(with displaySize: CGSize, fillContentMode: UIView.BBFillContentMode) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_resizedImage(with: displaySize, fillContentMode: fillContentMode) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),fillContentMode=\(fillContentMode)", needData: false, edit: edit)
+}
+
 public func bb_imageEditorRotate(withAngle angle: CGFloat, fitSize: Bool) -> BBWebImageEditor {
     let edit: BBWebImageEditMethod = { (image, _) in
         if let currentImage = image?.bb_rotatedImage(withAngle: angle, fitSize: fitSize) { return currentImage }
@@ -324,6 +332,12 @@ public extension UIImage {
         return _bb_croppedImage(with: rect)
     }
     
+    public func bb_resizedImage(with displaySize: CGSize, fillContentMode: UIView.BBFillContentMode) -> UIImage? {
+        if displaySize.width <= 0 || displaySize.height <= 0 { return nil }
+        let rect = bb_rectToDisplay(with: displaySize, fillContentMode: fillContentMode)
+        return _bb_croppedImage(with: rect)
+    }
+    
     private func _bb_croppedImage(with rect: CGRect) -> UIImage? {
         if let sourceImage = cgImage?.cropping(to: rect) {
             return UIImage(cgImage: sourceImage, scale: scale, orientation: imageOrientation)
@@ -514,6 +528,89 @@ public extension UIImage {
             if size.height > displaySize.height {
                 rect.origin.y = size.height - displaySize.height
                 rect.size.height = displaySize.height
+            }
+        default:
+            break
+        }
+        if scale != 1 {
+            rect.origin.x *= scale
+            rect.origin.y *= scale
+            rect.size.width *= scale
+            rect.size.height *= scale
+        }
+        return rect
+    }
+    
+    public func bb_rectToDisplay(with displaySize: CGSize, fillContentMode: UIView.BBFillContentMode) -> CGRect {
+        var rect = CGRect(origin: .zero, size: size)
+        let sourceRatio = size.width / size.height
+        let displayRatio = displaySize.width / displaySize.height
+        switch fillContentMode {
+        case .center:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = (size.height - rect.height) / 2
+            } else {
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = (size.width - rect.width) / 2
+            }
+        case .top:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+            } else {
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = (size.width - rect.width) / 2
+            }
+        case .bottom:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = size.height - rect.height
+            } else {
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = (size.width - rect.width) / 2
+            }
+        case .left:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = (size.height - rect.height) / 2
+            } else {
+                rect.size.width = size.height * displayRatio
+            }
+        case .right:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = (size.height - rect.height) / 2
+            } else {
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = size.width - rect.width
+            }
+        case .topLeft:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+            } else {
+                rect.size.width = size.height * displayRatio
+            }
+        case .topRight:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+            } else {
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = size.width - rect.width
+            }
+        case .bottomLeft:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = size.height - rect.height
+            } else {
+                rect.size.width = size.height * displayRatio
+            }
+        case .bottomRight:
+            if sourceRatio < displayRatio {
+                rect.size.height = size.width / displayRatio
+                rect.origin.y = size.height - rect.height
+            } else {
+                rect.size.width = size.height * displayRatio
+                rect.origin.x = size.width - rect.width
             }
         default:
             break
