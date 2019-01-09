@@ -73,6 +73,14 @@ public func bb_imageEditorTint(with color: UIColor, blendMode: CGBlendMode = .no
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.tint.color=\(color),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
 }
 
+public func bb_imageEditorOverlay(with overlayImage: UIImage, blendMode: CGBlendMode = .normal, alpha: CGFloat) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_overlaidImage(with: overlayImage, blendMode: blendMode, alpha: alpha) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.overlay.image=\(overlayImage),blendMode=\(blendMode.rawValue),alpha=\(alpha)", needData: false, edit: edit)
+}
+
 /// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
@@ -347,6 +355,15 @@ public extension UIImage {
         draw(at: .zero)
         color.setFill()
         UIRectFillUsingBlendMode(CGRect(origin: .zero, size: size), blendMode)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+    
+    public func bb_overlaidImage(with overlayImage: UIImage, blendMode: CGBlendMode = .normal, alpha: CGFloat) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(at: .zero)
+        overlayImage.draw(in: CGRect(origin: .zero, size: size), blendMode: blendMode, alpha: alpha)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image
