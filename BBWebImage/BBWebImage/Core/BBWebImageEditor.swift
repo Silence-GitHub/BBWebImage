@@ -65,6 +65,14 @@ public func bb_imageEditorFlip(withHorizontal horizontal: Bool, vertical: Bool) 
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.flip.horizontal=\(horizontal),vertical=\(vertical)", needData: false, edit: edit)
 }
 
+public func bb_imageEditorTint(with color: UIColor, blendMode: CGBlendMode = .normal) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_tintedImage(with: color, blendMode: blendMode) { return currentImage }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.tint.color=\(color),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
+}
+
 /// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
@@ -329,6 +337,16 @@ public extension UIImage {
             context.scaleBy(x: 1, y: -1)
         }
         draw(at: .zero)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+    
+    public func bb_tintedImage(with color: UIColor, blendMode: CGBlendMode = .normal) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(at: .zero)
+        color.setFill()
+        UIRectFillUsingBlendMode(CGRect(origin: .zero, size: size), blendMode)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image
