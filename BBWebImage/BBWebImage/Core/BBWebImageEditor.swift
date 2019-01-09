@@ -73,6 +73,24 @@ public func bb_imageEditorTint(with color: UIColor, blendMode: CGBlendMode = .no
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.tint.color=\(color),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
 }
 
+public func bb_imageEditorGradientlyTint(with colors: [UIColor],
+                                         locations: [CGFloat],
+                                         start: CGPoint = CGPoint(x: 0.5, y: 0),
+                                         end: CGPoint = CGPoint(x: 0.5, y: 1),
+                                         blendMode: CGBlendMode = .normal) -> BBWebImageEditor {
+    let edit: BBWebImageEditMethod = { (image, _) in
+        if let currentImage = image?.bb_gradientlyTintedImage(with: colors,
+                                                              locations: locations,
+                                                              start: start,
+                                                              end: end,
+                                                              blendMode: blendMode) {
+            return currentImage
+        }
+        return image
+    }
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.gradientlyTint.colors=\(colors),locations=\(locations),start=\(start),end=\(end),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
+}
+
 public func bb_imageEditorOverlay(with overlayImage: UIImage, blendMode: CGBlendMode = .normal, alpha: CGFloat) -> BBWebImageEditor {
     let edit: BBWebImageEditMethod = { (image, _) in
         if let currentImage = image?.bb_overlaidImage(with: overlayImage, blendMode: blendMode, alpha: alpha) { return currentImage }
@@ -323,7 +341,10 @@ public extension UIImage {
         var rect = CGRect(origin: .zero, size: size)
         if fitSize { rect = rect.applying(CGAffineTransform(rotationAngle: radian)) }
         UIGraphicsBeginImageContextWithOptions(rect.size, false, scale)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        guard let context = UIGraphicsGetCurrentContext() else {
+            UIGraphicsEndImageContext()
+            return nil
+        }
         context.translateBy(x: rect.width / 2, y: rect.height / 2)
         context.rotate(by: radian)
         context.translateBy(x: -size.width / 2, y: -size.height / 2)
@@ -335,7 +356,10 @@ public extension UIImage {
     
     public func bb_flippedImage(withHorizontal horizontal: Bool, vertical: Bool) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        guard let context = UIGraphicsGetCurrentContext() else {
+            UIGraphicsEndImageContext()
+            return nil
+        }
         if horizontal {
             context.translateBy(x: size.width, y: 0)
             context.scaleBy(x: -1, y: 1)
@@ -355,6 +379,33 @@ public extension UIImage {
         draw(at: .zero)
         color.setFill()
         UIRectFillUsingBlendMode(CGRect(origin: .zero, size: size), blendMode)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+    
+    public func bb_gradientlyTintedImage(with colors: [UIColor],
+                                         locations: [CGFloat],
+                                         start: CGPoint = CGPoint(x: 0.5, y: 0),
+                                         end: CGPoint = CGPoint(x: 0.5, y: 1),
+                                         blendMode: CGBlendMode = .normal) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(at: .zero)
+        guard let context = UIGraphicsGetCurrentContext(),
+            let gradient = CGGradient(colorsSpace: bb_shareColorSpace,
+                                      colors: colors.map { $0.cgColor } as CFArray,
+                                      locations: locations) else
+        {
+            UIGraphicsEndImageContext()
+            return nil
+        }
+        context.setBlendMode(blendMode)
+        let startLoc = CGPoint(x: start.x * size.width, y: start.y * size.height)
+        let endLoc = CGPoint(x: end.x * size.width, y: end.y * size.height)
+        context.drawLinearGradient(gradient,
+                                   start: startLoc,
+                                   end: endLoc,
+                                   options: CGGradientDrawingOptions(rawValue: 0))
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image
