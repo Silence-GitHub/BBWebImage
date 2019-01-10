@@ -244,6 +244,10 @@ public struct BBWebImageEditor {
 }
 
 public extension UIImage {
+    /// Creates an image cropped to the specific rect
+    ///
+    /// - Parameter originalRect: rect to crop, mesured in points
+    /// - Returns: a cropped image
     public func bb_croppedImage(with originalRect: CGRect) -> UIImage? {
         if originalRect.width <= 0 || originalRect.height <= 0 { return nil }
         var rect = originalRect
@@ -256,6 +260,11 @@ public extension UIImage {
         return _bb_croppedImage(with: rect)
     }
     
+    /// Creates an image resized to the specific size.
+    /// The image will be scaled.
+    ///
+    /// - Parameter size: size to resize
+    /// - Returns: a resized image
     public func bb_resizedImage(with size: CGSize) -> UIImage? {
         if size.width <= 0 || size.height <= 0 { return nil }
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
@@ -265,12 +274,28 @@ public extension UIImage {
         return image
     }
     
+    /// Creates an image resized with view size and content mode.
+    /// Some portion of the image may be clipped.
+    /// Use the method to display the valid portion of image to save memory.
+    ///
+    /// - Parameters:
+    ///   - displaySize: view size
+    ///   - contentMode: view content mode
+    /// - Returns: a resized image
     public func bb_resizedImage(with displaySize: CGSize, contentMode: UIView.ContentMode) -> UIImage? {
         if displaySize.width <= 0 || displaySize.height <= 0 { return nil }
         let rect = bb_rectToDisplay(with: displaySize, contentMode: contentMode)
         return _bb_croppedImage(with: rect)
     }
     
+    /// Creates an image resized with view size and fill content mode.
+    /// Some portion of the image may be clipped.
+    /// Use the method to display the valid portion of image to save memory.
+    ///
+    /// - Parameters:
+    ///   - displaySize: view size
+    ///   - fillContentMode: fill content mode specifying how content fills its view
+    /// - Returns: a resized image
     public func bb_resizedImage(with displaySize: CGSize, fillContentMode: UIView.BBFillContentMode) -> UIImage? {
         if displaySize.width <= 0 || displaySize.height <= 0 { return nil }
         let rect = bb_rectToDisplay(with: displaySize, fillContentMode: fillContentMode)
@@ -288,6 +313,12 @@ public extension UIImage {
         return nil
     }
     
+    /// Creates an image rotated with given angle
+    ///
+    /// - Parameters:
+    ///   - angle: angle (degree) to rotate
+    ///   - fitSize: true to change image size to fit rotated image, false to keep image size
+    /// - Returns: a rotated image
     public func bb_rotatedImage(withAngle angle: CGFloat, fitSize: Bool) -> UIImage? {
         if angle.truncatingRemainder(dividingBy: 360) == 0 { return self }
         let radian = angle / 180 * CGFloat.pi
@@ -307,6 +338,12 @@ public extension UIImage {
         return rotatedImage
     }
     
+    /// Creates an image flipped horizontally and/or vertically
+    ///
+    /// - Parameters:
+    ///   - horizontal: whether to flip horizontally or not
+    ///   - vertical: whether to flip vertically or not
+    /// - Returns: a flipped image
     public func bb_flippedImage(withHorizontal horizontal: Bool, vertical: Bool) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         guard let context = UIGraphicsGetCurrentContext() else {
@@ -327,6 +364,12 @@ public extension UIImage {
         return image
     }
     
+    /// Creates an image tinted with color
+    ///
+    /// - Parameters:
+    ///   - color: color to draw
+    ///   - blendMode: blend mode to use when compositing the image
+    /// - Returns: a tinted image
     public func bb_tintedImage(with color: UIColor, blendMode: CGBlendMode = .normal) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         draw(at: .zero)
@@ -337,6 +380,15 @@ public extension UIImage {
         return image
     }
     
+    /// Creates an image tinted with gradient color
+    ///
+    /// - Parameters:
+    ///   - colors: colors to draw
+    ///   - locations: location of each color provided in colors. Each location must be a CGFloat value in the range of 0 to 1
+    ///   - start: starting point (x and y are in the range of 0 to 1) of the gradient
+    ///   - end: ending point (x and y are in the range of 0 to 1) of the gradient
+    ///   - blendMode: blend mode to use when compositing the image
+    /// - Returns: a gradiently tinted image
     public func bb_gradientlyTintedImage(with colors: [UIColor],
                                          locations: [CGFloat],
                                          start: CGPoint = CGPoint(x: 0.5, y: 0),
@@ -364,6 +416,13 @@ public extension UIImage {
         return image
     }
     
+    /// Creates an image overlaid by another image
+    ///
+    /// - Parameters:
+    ///   - overlayImage: image at the top as an overlay
+    ///   - blendMode: blend mode to use when compositing the image
+    ///   - alpha: opacity of overlay image, specified as a value between 0 (totally transparent) and 1 (fully opaque)
+    /// - Returns: an overlaid image
     public func bb_overlaidImage(with overlayImage: UIImage, blendMode: CGBlendMode = .normal, alpha: CGFloat) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         draw(at: .zero)
@@ -645,8 +704,6 @@ public extension UIImage {
                 rect.size.width = size.height * displayRatio
                 rect.origin.x = size.width - rect.width
             }
-        default:
-            break
         }
         if scale != 1 {
             rect.origin.x *= scale
@@ -661,14 +718,31 @@ public extension UIImage {
 public extension UIView {
     /// BBFillContentMode specifies how content fills its view
     public enum BBFillContentMode {
+        /// Aligns center and aspect fill
         case center
+        
+        /// Aligns top and aspect fill
         case top
+        
+        /// Aligns bottom and aspect fill
         case bottom
+        
+        /// Aligns left and aspect fill
         case left
+        
+        /// Aligns right and aspect fill
         case right
+        
+        /// Aligns top left and aspect fill
         case topLeft
+        
+        /// Aligns top right and aspect fill
         case topRight
+        
+        /// Aligns bottom left and aspect fill
         case bottomLeft
+        
+        /// Aligns bottom right and aspect fill
         case bottomRight
     }
 }
