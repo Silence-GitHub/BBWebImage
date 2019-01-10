@@ -37,7 +37,7 @@ class TestFilterVC: UIViewController {
     @objc private func clickButton() {
         filtered = !filtered
         if filtered {
-            let editor = BBWebImageEditor.editorForCILookupTestFilter()
+            let editor = bb_imageEditorCILookupTestFilter()
             imageView.image = editor.edit(imageView.image, nil)
         } else {
             imageView.image = UIImage(named: "sunflower.jpg")
