@@ -49,7 +49,7 @@ imageView.bb_setImage(with: url)
 The code below:
 
 1. Downloads a high-resolution image
-2. Downsamples it to match an expected maximum resolution and image view size
+2. Downsamples and crops it to match an expected maximum resolution and image view size
 3. Draws it with round corner, border and background color
 4. Displays edited image after downloading and editing
 5. Displays a placeholder image before downloading
@@ -58,13 +58,13 @@ The code below:
 8. Do something when loading is finished
 
 ```swift
-let editor = BBWebImageEditor.editorForScaleAspectFillContentMode(with: imageView.frame.size,
-                                                                  maxResolution: 1024 * 1024,
-                                                                  corner: .allCorners,
-                                                                  cornerRadius: 5,
-                                                                  borderWidth: 1,
-                                                                  borderColor: .yellow,
-                                                                  backgroundColor: .gray)
+let editor = bb_imageEditorCommon(with: imageView.frame.size,
+                                  maxResolution: 1024 * 1024,
+                                  corner: .allCorners,
+                                  cornerRadius: 5,
+                                  borderWidth: 1,
+                                  borderColor: .yellow,
+                                  backgroundColor: .gray)
 imageView.bb_setImage(with: url,
                       placeholder: UIImage(named: "placeholder"),
                       options: .progressiveDownload,
