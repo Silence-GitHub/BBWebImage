@@ -11,6 +11,7 @@ import UIKit
 public typealias BBImageDownloaderProgress = (Data?, Int, UIImage?) -> Void
 public typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
 
+/// Linked list node with any value
 private class BBLinkedListNode {
     fileprivate let value: Any
     fileprivate var next: BBLinkedListNode?
@@ -18,6 +19,7 @@ private class BBLinkedListNode {
     fileprivate init(value: Any) { self.value = value }
 }
 
+/// First-in, first out linked list queue
 private class BBLinkedListQueue {
     fileprivate var head: BBLinkedListNode?
     fileprivate var tail: BBLinkedListNode?
@@ -35,6 +37,7 @@ private class BBLinkedListQueue {
     }
 }
 
+/// BBImageDownloadTask defines an image download task
 public protocol BBImageDownloadTask {
     var url: URL { get }
     var isCancelled: Bool { get }
@@ -73,6 +76,7 @@ public protocol BBImageDownloader: AnyObject {
     func cancelAll()
 }
 
+/// BBImageDefaultDownloadTask is a default image download task
 private class BBImageDefaultDownloadTask: BBImageDownloadTask {
     private(set) var url: URL
     private(set) var isCancelled: Bool
@@ -94,6 +98,11 @@ private class BBImageDefaultDownloadTask: BBImageDownloadTask {
 public class BBMergeRequestImageDownloader {
     public var donwloadTimeout: TimeInterval
     public weak var imageCoder: BBImageCoder?
+    
+    /// A closure generating download task.
+    /// The closure returns BBImageDefaultDownloadTask by default.
+    /// Set this property for custom download task.
+    public var generateDownloadTask: (URL, BBImageDownloaderProgress?, @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
     
     /// A closure generating download operation.
     /// The closure returns BBMergeRequestImageDownloadOperation by default.
@@ -142,6 +151,7 @@ public class BBMergeRequestImageDownloader {
     /// - Parameter sessionConfiguration: url session configuration for sending request
     public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
+        generateDownloadTask = { BBImageDefaultDownloadTask(url: $0, progress: $1, completion: $2) }
         generateDownloadOperation = { BBMergeRequestImageDownloadOperation(request: $0, session: $1) }
         waitingQueue = BBLinkedListQueue()
         urlOperations = [:]
@@ -177,7 +187,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
                               options: BBWebImageOptions = .none,
                               progress: BBImageDownloaderProgress? = nil,
                               completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
-        let task = BBImageDefaultDownloadTask(url: url, progress: progress, completion: completion)
+        let task = generateDownloadTask(url, progress, completion)
         lock.wait()
         var operation: BBImageDownloadOperation? = urlOperations[url]
         if operation == nil {

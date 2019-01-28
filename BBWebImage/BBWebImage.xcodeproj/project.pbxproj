@@ -54,6 +54,7 @@
 		4A87E915216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */; };
 		4A87E917216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */; };
 		4A87E918216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */; };
+		4ACCC50A21FFC583005497B1 /* TestImageDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACCC50921FFC583005497B1 /* TestImageDownloadTask.swift */; };
 		4ACDDC5221B7636F003E364A /* BBImageCoderManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACDDC5121B7636F003E364A /* BBImageCoderManagerTests.swift */; };
 		4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */; };
 		4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */; };
@@ -105,6 +106,7 @@
 		4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageImageIOCoder.swift; sourceTree = "<group>"; };
 		4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ImageFormat.swift"; sourceTree = "<group>"; };
 		4A87E916216C12E40073E53C /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
+		4ACCC50921FFC583005497B1 /* TestImageDownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestImageDownloadTask.swift; sourceTree = "<group>"; };
 		4ACDDC5121B7636F003E364A /* BBImageCoderManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCoderManagerTests.swift; sourceTree = "<group>"; };
 		4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBLRUImageCacheTests.swift; sourceTree = "<group>"; };
 		4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBMergeRequestImageDownloaderTests.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				4AF401B821BEF10200485C96 /* BBWebImageManagerTests.swift */,
 				4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */,
 				4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */,
+				4ACCC50921FFC583005497B1 /* TestImageDownloadTask.swift */,
 				4A7D8F9121D89A5C008AC2D6 /* TestImageDownloadOperation.swift */,
 				4ACDDC5121B7636F003E364A /* BBImageCoderManagerTests.swift */,
 				4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */,
@@ -387,6 +390,7 @@
 				4A29383221BB027500CB8DAD /* BBWebCache.swift in Sources */,
 				4AF401B921BEF10200485C96 /* BBWebImageManagerTests.swift in Sources */,
 				4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */,
+				4ACCC50A21FFC583005497B1 /* TestImageDownloadTask.swift in Sources */,
 				4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,
 				4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */,
 				4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
