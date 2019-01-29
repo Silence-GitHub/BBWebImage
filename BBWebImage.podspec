@@ -1,6 +1,6 @@
 Pod::Spec.new do |s| 
   s.name         = "BBWebImage"
-  s.version      = "0.1.0"
+  s.version      = "0.1.1"
   s.summary      = "BBWebImage is a Swift library for downloading, caching and editing web images asynchronously."
 
   s.description  = <<-DESC
@@ -25,12 +25,24 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/Silence-GitHub/BBWebImage.git", :tag => s.version }
 
-  s.source_files  = "BBWebImage/BBWebImage/BBWebImage.h", "BBWebImage/BBWebImage/**/*.swift"
-
-  s.resources = "BBWebImage/BBWebImage/**/*.cikernel"
-
-  s.public_header_files = "BBWebImage/BBWebImage/BBWebImage.h"
-
   s.requires_arc = true
+
+  s.default_subspec = "Core"
+
+  s.subspec "Core" do |core|
+    core.source_files = "BBWebImage/BBWebImage/BBWebImage.h", "BBWebImage/BBWebImage/**/*.swift"
+    core.exclude_files = "BBWebImage/BBWebImage/Extensions/MKAnnotationView+BBWebCache.swift", "BBWebImage/BBWebImage/Filter/*"
+  end
+
+  s.subspec "MapKit" do |mk|
+    mk.source_files = "BBWebImage/BBWebImage/Extensions/MKAnnotationView+BBWebCache.swift"
+    mk.dependency "BBWebImage/Core"
+  end
+
+  s.subspec "Filter" do |filter|
+    filter.source_files = "BBWebImage/BBWebImage/Filter"
+    filter.resources = "BBWebImage/BBWebImage/**/*.cikernel"
+    filter.dependency "BBWebImage/Core"
+  end 
 
 end
