@@ -34,9 +34,9 @@ BBWebImage is born to solve the problems.
 
 Install with CocoaPods:
 
-1. Add `pod 'BBWebImage'` to your Podfile
-2. Run `pod install` or `pod update`
-3. Add `import BBWebImage` to the Swift source file
+1. Add `pod 'BBWebImage'` to your Podfile. Add `pod 'BBWebImage/MapKit'` for MKAnnotationView extension. Add `pod 'BBWebImage/Filter'` for image filter.
+2. Run `pod install` or `pod update`.
+3. Add `import BBWebImage` to the Swift source file.
 
 ## How To Use
 
