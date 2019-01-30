@@ -108,6 +108,24 @@ public class BBDiskStorage {
         return data
     }
     
+    public func dataExists(forKey key: String) -> Bool {
+        if key.isEmpty { return false }
+        ioLock.wait()
+        var exists = false
+        let sql = "SELECT count(*) FROM Storage_item WHERE key = '\(key)';"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                if sqlite3_column_int(stmt, 0) >= 1 { exists = true }
+            }
+            sqlite3_finalize(stmt)
+        } else {
+            print("Can not select data when checking whether data is in disk cache")
+        }
+        ioLock.signal()
+        return exists
+    }
+    
     /// Stores data with key and type
     ///
     /// - Parameters:

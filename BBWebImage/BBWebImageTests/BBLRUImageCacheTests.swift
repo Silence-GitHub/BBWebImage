@@ -139,6 +139,27 @@ class BBLRUImageCacheTests: XCTestCase {
         waitForExpectations(timeout: 5, handler: nil)
     }
     
+    func testStoreAndCheckDiskImage() {
+        let item = testImageItems.first!
+        let data = item.data
+        let key = item.key
+        let expectation = { () -> XCTestExpectation in
+            return self.expectation(description: "Wait for storing and getting image")
+        }
+        let test = { (cache: BBLRUImageCache, expectation: XCTestExpectation) -> Void in
+            cache.store(nil, data: data, forKey: key, cacheType: .disk) {
+                cache.diskDataExists(forKey: key) { (exists) in
+                    XCTAssertTrue(exists)
+                    expectation.fulfill()
+                }
+            }
+        }
+        test(cache, expectation())
+        test(fileCache, expectation())
+        test(dbCache, expectation())
+        waitForExpectations(timeout: 5, handler: nil)
+    }
+    
     func testStoreAndGetImages() {
         let items = testImageItems
         let expectations = { () -> [XCTestExpectation] in
@@ -260,6 +281,43 @@ class BBLRUImageCacheTests: XCTestCase {
                         default:
                             break
                         }
+                    }
+                }
+            }
+        }
+        test(cache, expectations())
+        test(fileCache, expectations())
+        test(dbCache, expectations())
+        waitForExpectations(timeout: 5, handler: nil)
+    }
+    
+    func testStoreAndCheckDiskImages() {
+        let items = testImageItems
+        let expectations = { () -> [XCTestExpectation] in
+            var list: [XCTestExpectation] = []
+            for _ in items {
+                list.append(self.expectation(description: "Wait for storing and getting image"))
+            }
+            return list
+        }
+        let test = { (cache: BBLRUImageCache, expectations: [XCTestExpectation]) -> Void in
+            let group = DispatchGroup()
+            for i in 0..<items.count {
+                let image = items[i].image
+                let data = items[i].data
+                let key = items[i].key
+                group.enter()
+                cache.store(image, data: data, forKey: key, cacheType: .disk) {
+                    group.leave()
+                }
+            }
+            group.notify(queue: .main) {
+                for i in 0..<items.count {
+                    let key = items[i].key
+                    let expectation = expectations[i]
+                    cache.diskDataExists(forKey: key) { (exists) in
+                        XCTAssertTrue(exists)
+                        expectation.fulfill()
                     }
                 }
             }

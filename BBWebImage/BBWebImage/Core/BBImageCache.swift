@@ -43,6 +43,7 @@ public enum BBImageCacheQueryCompletionResult {
 }
 
 public typealias BBImageCacheQueryCompletion = (BBImageCacheQueryCompletionResult) -> Void
+public typealias BBImageCacheCheckDiskCompletion = (Bool) -> Void
 public typealias BBImageCacheStoreCompletion = () -> Void
 public typealias BBImageCacheRemoveCompletion = () -> Void
 
@@ -55,6 +56,13 @@ public protocol BBImageCache: AnyObject {
     ///   - cacheType: cache type specifying how image is cached
     ///   - completion: a closure called when querying is finished
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)
+    
+    /// Checks whether image data is in disk cache
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    ///   - completion: a closure called when checking is finished
+    func diskDataExists(forKey key: String, completion: @escaping BBImageCacheCheckDiskCompletion)
     
     /// Stores image and/or data with key and cache type
     ///
@@ -131,6 +139,11 @@ public class BBLRUImageCache: BBImageCache {
             }
         }
         completion(.none)
+    }
+    
+    public func diskDataExists(forKey key: String, completion: @escaping BBImageCacheCheckDiskCompletion) {
+        guard let currentDiskCache = diskCache else { return completion(false) }
+        currentDiskCache.dataExists(forKey: key, completion: completion)
     }
     
     public func store(_ image: UIImage?,

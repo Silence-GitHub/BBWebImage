@@ -56,6 +56,17 @@ public class BBDiskCache {
         }
     }
     
+    public func dataExists(forKey key: String) -> Bool {
+        return storage.dataExists(forKey: key)
+    }
+    
+    public func dataExists(forKey key: String, completion: @escaping BBImageCacheCheckDiskCompletion) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            completion(self.dataExists(forKey: key))
+        }
+    }
+    
     /// Stores data with key synchronously
     ///
     /// - Parameters:
