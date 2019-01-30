@@ -9,12 +9,14 @@
 import UIKit
 
 class TestImageDownloadTask: BBImageDownloadTask {
+    private(set) var sentinel: Int32
     private(set) var url: URL
     private(set) var isCancelled: Bool
     private(set) var progress: BBImageDownloaderProgress?
     private(set) var completion: BBImageDownloaderCompletion
     
-    init(url: URL, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) {
+    init(sentinel: Int32, url: URL, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) {
+        self.sentinel = sentinel
         self.url = url
         self.isCancelled = false
         self.progress = progress

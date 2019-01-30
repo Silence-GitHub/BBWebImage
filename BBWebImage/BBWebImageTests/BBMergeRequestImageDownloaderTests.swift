@@ -388,9 +388,105 @@ class BBMergeRequestImageDownloaderTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testCancelPreloading() {
+        let expectation = self.expectation(description: "Wait for downloading image")
+        for url in urls {
+            downloader.downloadImage(with: url, options: .preload) { (data, error) in
+                XCTFail()
+            }
+        }
+        downloader.cancelPreloading()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            XCTAssertEqual(self.downloader.currentPreloadTaskCount, 0)
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelPreloading2() {
+        var count = urls.count
+        for url in urls {
+            let expectation = self.expectation(description: "Wait for downloading image")
+            downloader.downloadImage(with: url, options: .preload) { (data, error) in
+                XCTFail()
+            }
+            downloader.downloadImage(with: url, options: .none) { (data, error) in
+                XCTAssertNotNil(data)
+                XCTAssertNil(error)
+                count -= 1
+                if count > 0 {
+                    expectation.fulfill()
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        XCTAssertEqual(self.downloader.currentPreloadTaskCount, 0)
+                        expectation.fulfill()
+                    }
+                }
+            }
+        }
+        downloader.cancelPreloading()
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelPreloading3() {
+        var count = urls.count
+        for url in urls {
+            let expectation = self.expectation(description: "Wait for downloading image")
+            downloader.downloadImage(with: url, options: .none) { (data, error) in
+                XCTAssertNotNil(data)
+                XCTAssertNil(error)
+                count -= 1
+                if count > 0 {
+                    expectation.fulfill()
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        XCTAssertEqual(self.downloader.currentPreloadTaskCount, 0)
+                        expectation.fulfill()
+                    }
+                }
+            }
+            downloader.downloadImage(with: url, options: .preload) { (data, error) in
+                XCTFail()
+            }
+        }
+        downloader.cancelPreloading()
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelPreloading4() {
+        var i = 0
+        var count = urls.count
+        for url in urls {
+            if i % 2 == 0 {
+                let expectation = self.expectation(description: "Wait for downloading image")
+                downloader.downloadImage(with: url, options: .none) { (data, error) in
+                    XCTAssertNotNil(data)
+                    XCTAssertNil(error)
+                    count -= 1
+                    if count > 0 {
+                        expectation.fulfill()
+                    } else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            XCTAssertEqual(self.downloader.currentPreloadTaskCount, 0)
+                            expectation.fulfill()
+                        }
+                    }
+                }
+            } else {
+                count -= 1
+                downloader.downloadImage(with: url, options: .preload) { (data, error) in
+                    XCTFail()
+                }
+            }
+            i += 1
+        }
+        downloader.cancelPreloading()
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testCustomDownloadTask() {
         let expectation = self.expectation(description: "Wait for downloading image")
-        downloader.generateDownloadTask = { TestImageDownloadTask(url: $0, progress: $1, completion: $2) }
+        downloader.generateDownloadTask = { TestImageDownloadTask(sentinel: 0, url: $0, progress: $1, completion: $2) }
         let url = urls.first!
         downloader.downloadImage(with: url) { (_, error) in
             XCTAssertEqual((error! as NSError).code, 0)

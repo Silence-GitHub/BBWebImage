@@ -39,6 +39,7 @@ private class BBLinkedListQueue {
 
 /// BBImageDownloadTask defines an image download task
 public protocol BBImageDownloadTask {
+    var sentinel: Int32 { get }
     var url: URL { get }
     var isCancelled: Bool { get }
     var progress: BBImageDownloaderProgress? { get }
@@ -72,18 +73,23 @@ public protocol BBImageDownloader: AnyObject {
     /// - Parameter url: url to cancel
     func cancel(url: URL)
     
+    /// Cancels all preload tasks
+    func cancelPreloading()
+    
     /// Cancels all download tasks
     func cancelAll()
 }
 
 /// BBImageDefaultDownloadTask is a default image download task
 private class BBImageDefaultDownloadTask: BBImageDownloadTask {
+    private(set) var sentinel: Int32
     private(set) var url: URL
     private(set) var isCancelled: Bool
     private(set) var progress: BBImageDownloaderProgress?
     private(set) var completion: BBImageDownloaderCompletion
     
-    init(url: URL, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) {
+    init(sentinel: Int32, url: URL, progress: BBImageDownloaderProgress?, completion: @escaping BBImageDownloaderCompletion) {
+        self.sentinel = sentinel
         self.url = url
         self.isCancelled = false
         self.progress = progress
@@ -102,7 +108,7 @@ public class BBMergeRequestImageDownloader {
     /// A closure generating download task.
     /// The closure returns BBImageDefaultDownloadTask by default.
     /// Set this property for custom download task.
-    public var generateDownloadTask: (URL, BBImageDownloaderProgress?, @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask
+    public lazy var generateDownloadTask: (URL, BBImageDownloaderProgress?, @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask = { BBImageDefaultDownloadTask(sentinel: OSAtomicIncrement32(&self.taskSentinel), url: $0, progress: $1, completion: $2) }
     
     /// A closure generating download operation.
     /// The closure returns BBMergeRequestImageDownloadOperation by default.
@@ -112,6 +118,13 @@ public class BBMergeRequestImageDownloader {
     public var currentDownloadCount: Int {
         lock.wait()
         let count = urlOperations.count
+        lock.signal()
+        return count
+    }
+    
+    public var currentPreloadTaskCount: Int {
+        lock.wait()
+        let count = preloadTasks.count
         lock.signal()
         return count
     }
@@ -131,7 +144,9 @@ public class BBMergeRequestImageDownloader {
     }
     
     private let waitingQueue: BBLinkedListQueue
+    private var taskSentinel: Int32
     private var urlOperations: [URL : BBImageDownloadOperation]
+    private var preloadTasks: [Int32 : BBImageDownloadTask]
     private var maxRunningCount: Int
     private var currentRunningCount: Int
     private var httpHeaders: [String : String]
@@ -151,10 +166,11 @@ public class BBMergeRequestImageDownloader {
     /// - Parameter sessionConfiguration: url session configuration for sending request
     public init(sessionConfiguration: URLSessionConfiguration) {
         donwloadTimeout = 15
-        generateDownloadTask = { BBImageDefaultDownloadTask(url: $0, progress: $1, completion: $2) }
+        taskSentinel = 0
         generateDownloadOperation = { BBMergeRequestImageDownloadOperation(request: $0, session: $1) }
         waitingQueue = BBLinkedListQueue()
         urlOperations = [:]
+        preloadTasks = [:]
         maxRunningCount = 6
         currentRunningCount = 0
         httpHeaders = ["Accept" : "image/*;q=0.8"]
@@ -189,6 +205,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
                               completion: @escaping BBImageDownloaderCompletion) -> BBImageDownloadTask {
         let task = generateDownloadTask(url, progress, completion)
         lock.wait()
+        if options.contains(.preload) { preloadTasks[task.sentinel] = task }
         var operation: BBImageDownloadOperation? = urlOperations[url]
         if operation == nil {
             let timeout = donwloadTimeout > 0 ? donwloadTimeout : 15
@@ -197,12 +214,17 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
             request.httpShouldHandleCookies = options.contains(.handleCookies)
             request.allHTTPHeaderFields = httpHeaders
             request.httpShouldUsePipelining = true
-            var newOperation = generateDownloadOperation(request, session)
+            let newOperation = generateDownloadOperation(request, session)
             if options.contains(.progressiveDownload) { newOperation.imageCoder = imageCoder }
-            newOperation.completion = { [weak self] in
+            newOperation.completion = { [weak self, weak newOperation] in
                 guard let self = self else { return }
                 self.lock.wait()
                 self.urlOperations.removeValue(forKey: url)
+                if let tasks = newOperation?.downloadTasks {
+                    for task in tasks {
+                        self.preloadTasks.removeValue(forKey: task.sentinel)
+                    }
+                }
                 if let next = self.waitingQueue.dequeue()?.value as? BBImageDownloadOperation {
                     BBDispatchQueuePool.background.async {
                         next.start()
@@ -236,7 +258,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         let operation = urlOperations[task.url]
         lock.signal()
         if let operation = operation,
-            operation.taskCount <= 1 {
+            operation.downloadTasks.count <= 1 {
             operation.cancel()
         }
     }
@@ -246,6 +268,15 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         let operation = urlOperations[url]
         lock.signal()
         operation?.cancel()
+    }
+    
+    public func cancelPreloading() {
+        lock.wait()
+        let tasks = preloadTasks
+        lock.signal()
+        for (_, task) in tasks {
+            cancel(task: task)
+        }
     }
     
     public func cancelAll() {
@@ -268,7 +299,7 @@ private class BBImageDownloadSessionDelegate: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let url = task.originalRequest?.url,
             let operation = downloader?.operation(for: url),
-            operation.taskId == task.taskIdentifier,
+            operation.dataTaskId == task.taskIdentifier,
             let taskDelegate = operation as? URLSessionTaskDelegate {
             taskDelegate.urlSession?(session, task: task, didCompleteWithError: error)
         }
@@ -282,7 +313,7 @@ extension BBImageDownloadSessionDelegate: URLSessionDataDelegate {
                     completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         if let url = dataTask.originalRequest?.url,
             let operation = downloader?.operation(for: url),
-            operation.taskId == dataTask.taskIdentifier,
+            operation.dataTaskId == dataTask.taskIdentifier,
             let dataDelegate = operation as? URLSessionDataDelegate {
             dataDelegate.urlSession?(session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler)
         } else {
@@ -293,7 +324,7 @@ extension BBImageDownloadSessionDelegate: URLSessionDataDelegate {
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if let url = dataTask.originalRequest?.url,
             let operation = downloader?.operation(for: url),
-            operation.taskId == dataTask.taskIdentifier,
+            operation.dataTaskId == dataTask.taskIdentifier,
             let dataDelegate = operation as? URLSessionDataDelegate {
             dataDelegate.urlSession?(session, dataTask: dataTask, didReceive: data)
         }

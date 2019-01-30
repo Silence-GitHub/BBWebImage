@@ -8,9 +8,9 @@
 
 import UIKit
 
-public protocol BBImageDownloadOperation {
-    var taskId: Int { get }
-    var taskCount: Int { get }
+public protocol BBImageDownloadOperation: AnyObject {
+    var dataTaskId: Int { get }
+    var downloadTasks: [BBImageDownloadTask] { get }
     var imageCoder: BBImageCoder? { get set }
     var completion: (() -> Void)? { get set }
     
@@ -21,7 +21,7 @@ public protocol BBImageDownloadOperation {
 }
 
 class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
-    var taskId: Int {
+    var dataTaskId: Int {
         stateLock.wait()
         let tid = dataTask?.taskIdentifier ?? 0
         stateLock.signal()
@@ -44,16 +44,17 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     
     private var cancelled: Bool
     private var finished: Bool
+    private var downloadFinished: Bool
     
     private lazy var coderQueue: DispatchQueue = {
         return BBDispatchQueuePool.userInitiated.currentQueue
     }()
     
-    var taskCount: Int {
+    var downloadTasks: [BBImageDownloadTask] {
         taskLock.wait()
-        let count = tasks.count
+        let currentTasks = tasks
         taskLock.signal()
-        return count
+        return currentTasks
     }
     
     required init(request: URLRequest, session: URLSession) {
@@ -65,6 +66,7 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
         expectedSize = 0
         cancelled = false
         finished = false
+        downloadFinished = false
     }
     
     func add(task: BBImageDownloadTask) {
@@ -92,9 +94,6 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
     
     private func done() {
         finished = true
-        taskLock.wait()
-        tasks.removeAll()
-        taskLock.signal()
         dataTask = nil
         completion?()
         completion = nil
@@ -103,6 +102,8 @@ class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
 
 extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        stateLock.wait()
+        downloadFinished = true
         if error != nil {
             complete(withData: nil, error: error)
         } else {
@@ -113,6 +114,7 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
                 complete(withData: nil, error: noDataError)
             }
         }
+        stateLock.signal()
         stateLock.wait()
         done()
         stateLock.signal()
@@ -121,7 +123,6 @@ extension BBMergeRequestImageDownloadOperation: URLSessionTaskDelegate {
     private func complete(withData data: Data?, error: Error?) {
         taskLock.wait()
         let currentTasks = tasks
-        tasks.removeAll()
         taskLock.signal()
         for task in currentTasks where !task.isCancelled {
             task.completion(data, error)
@@ -181,6 +182,9 @@ extension BBMergeRequestImageDownloadOperation: URLSessionDataDelegate {
         taskLock.wait()
         let currentTasks = tasks
         taskLock.signal()
+        stateLock.wait()
+        defer { stateLock.signal() }
+        if downloadFinished { return }
         for task in currentTasks where !task.isCancelled {
             task.progress?(data, expectedSize, image)
         }
