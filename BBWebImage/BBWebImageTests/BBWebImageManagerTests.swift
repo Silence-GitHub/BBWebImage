@@ -105,6 +105,75 @@ class BBWebImageManagerTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testPreloadImagesFromNetwork() {
+        var expectations: [XCTestExpectation] = []
+        for _ in urls {
+            expectations.append(expectation(description: "Wait for loading image"))
+        }
+        imageManager.preload(urls, progress: { (successCount, finishCount, total) in
+            XCTAssertGreaterThan(successCount, 0)
+            XCTAssertGreaterThan(finishCount, 0)
+            XCTAssertEqual(total, self.urls.count)
+        }) { (successCount, total) in
+            XCTAssertEqual(successCount, total)
+            XCTAssertEqual(total, self.urls.count)
+            for i in 0..<self.urls.count {
+                var sentinel = false
+                self.imageManager.imageCache.image(forKey: self.urls[i].absoluteString, cacheType: .memory) { (result) in
+                    switch result {
+                    case .none:
+                        sentinel = true
+                    default:
+                        XCTFail()
+                    }
+                }
+                self.imageManager.imageCache.diskDataExists(forKey: self.urls[i].absoluteString) { (exists) in
+                    XCTAssertTrue(sentinel)
+                    XCTAssertTrue(exists)
+                    expectations[i].fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testPreloadImagesFromNetwork2() {
+        var expectations: [XCTestExpectation] = []
+        for _ in urls {
+            expectations.append(expectation(description: "Wait for loading image"))
+        }
+        imageManager.preload(urls, progress: { (_, _, _) in
+            XCTFail()
+        }) { (_, _) in
+            XCTFail()
+        }
+        imageManager.preload(urls, progress: { (successCount, finishCount, total) in
+            XCTAssertGreaterThan(successCount, 0)
+            XCTAssertGreaterThan(finishCount, 0)
+            XCTAssertEqual(total, self.urls.count)
+        }) { (successCount, total) in
+            XCTAssertEqual(successCount, total)
+            XCTAssertEqual(total, self.urls.count)
+            for i in 0..<self.urls.count {
+                var sentinel = false
+                self.imageManager.imageCache.image(forKey: self.urls[i].absoluteString, cacheType: .memory) { (result) in
+                    switch result {
+                    case .none:
+                        sentinel = true
+                    default:
+                        XCTFail()
+                    }
+                }
+                self.imageManager.imageCache.diskDataExists(forKey: self.urls[i].absoluteString) { (exists) in
+                    XCTAssertTrue(sentinel)
+                    XCTAssertTrue(exists)
+                    expectations[i].fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testLoadImageFromMemory() {
         let expectation = self.expectation(description: "Wait for loading image")
         let url = urls.first!
@@ -154,6 +223,45 @@ class BBWebImageManagerTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
     
+    func testPreloadImagesFromMemory() {
+        var expectations: [XCTestExpectation] = []
+        let group = DispatchGroup()
+        for url in urls {
+            expectations.append(expectation(description: "Wait for loading image"))
+            group.enter()
+            imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                group.leave()
+            }
+        }
+        group.notify(queue: .main) {
+            self.imageManager.preload(self.urls, progress: { (successCount, finishCount, total) in
+                XCTAssertGreaterThan(successCount, 0)
+                XCTAssertGreaterThan(finishCount, 0)
+                XCTAssertEqual(total, self.urls.count)
+            }) { (successCount, total) in
+                XCTAssertEqual(successCount, total)
+                XCTAssertEqual(total, self.urls.count)
+                for i in 0..<self.urls.count {
+                    var sentinel = false
+                    self.imageManager.imageCache.image(forKey: self.urls[i].absoluteString, cacheType: .memory) { (result) in
+                        switch result {
+                        case .memory(image: _):
+                            sentinel = true
+                        default:
+                            XCTFail()
+                        }
+                    }
+                    self.imageManager.imageCache.diskDataExists(forKey: self.urls[i].absoluteString) { (exists) in
+                        XCTAssertTrue(sentinel)
+                        XCTAssertTrue(exists)
+                        expectations[i].fulfill()
+                    }
+                }
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
     func testLoadImageFromDisk() {
         let expectation = self.expectation(description: "Wait for loading image")
         let url = urls.first!
@@ -189,18 +297,57 @@ class BBWebImageManagerTests: XCTestCase {
                 XCTAssertNil(error)
                 XCTAssertTrue(cacheType == .none)
                 XCTAssertTrue(Thread.isMainThread)
-                self.imageManager.imageCache.clear(.memory) {
+                self.imageManager.imageCache.clear(.memory, completion: nil)
+                var sentinel = false
+                self.imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                    XCTAssertNotNil(image)
+                    XCTAssertNotNil(data)
+                    XCTAssertNil(error)
+                    XCTAssertTrue(cacheType == .disk)
+                    XCTAssertTrue(Thread.isMainThread)
+                    expectation.fulfill()
+                    sentinel = true
+                }
+                XCTAssertFalse(sentinel)
+            }
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testPreloadImagesFromDisk() {
+        var expectations: [XCTestExpectation] = []
+        let group = DispatchGroup()
+        for url in urls {
+            expectations.append(expectation(description: "Wait for loading image"))
+            group.enter()
+            imageManager.loadImage(with: url) { (image, data, error, cacheType) in
+                group.leave()
+            }
+        }
+        group.notify(queue: .main) {
+            self.imageManager.imageCache.clear(.memory, completion: nil)
+            self.imageManager.preload(self.urls, progress: { (successCount, finishCount, total) in
+                XCTAssertGreaterThan(successCount, 0)
+                XCTAssertGreaterThan(finishCount, 0)
+                XCTAssertEqual(total, self.urls.count)
+            }) { (successCount, total) in
+                XCTAssertEqual(successCount, total)
+                XCTAssertEqual(total, self.urls.count)
+                for i in 0..<self.urls.count {
                     var sentinel = false
-                    self.imageManager.loadImage(with: url) { (image, data, error, cacheType) in
-                        XCTAssertNotNil(image)
-                        XCTAssertNotNil(data)
-                        XCTAssertNil(error)
-                        XCTAssertTrue(cacheType == .disk)
-                        XCTAssertTrue(Thread.isMainThread)
-                        expectation.fulfill()
-                        sentinel = true
+                    self.imageManager.imageCache.image(forKey: self.urls[i].absoluteString, cacheType: .memory) { (result) in
+                        switch result {
+                        case .none:
+                            sentinel = true
+                        default:
+                            XCTFail()
+                        }
                     }
-                    XCTAssertFalse(sentinel)
+                    self.imageManager.imageCache.diskDataExists(forKey: self.urls[i].absoluteString) { (exists) in
+                        XCTAssertTrue(sentinel)
+                        XCTAssertTrue(exists)
+                        expectations[i].fulfill()
+                    }
                 }
             }
         }
@@ -213,9 +360,10 @@ class BBWebImageManagerTests: XCTestCase {
         let task = imageManager.loadImage(with: url) { (_, _, _, _) in
             XCTFail()
         }
+        XCTAssertEqual(imageManager.currentTaskCount, 1)
         task.cancel()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(self.imageManager.currentTaskCount, 0)
+        XCTAssertEqual(imageManager.currentTaskCount, 0)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 10, handler: nil)
@@ -311,11 +459,12 @@ class BBWebImageManagerTests: XCTestCase {
             }
             tasks.append(task)
         }
+        XCTAssertEqual(imageManager.currentTaskCount, urls.count)
         for task in tasks {
             task.cancel()
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(self.imageManager.currentTaskCount, 0)
+        XCTAssertEqual(imageManager.currentTaskCount, 0)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 10, handler: nil)
@@ -427,9 +576,26 @@ class BBWebImageManagerTests: XCTestCase {
                 XCTFail()
             }
         }
+        XCTAssertEqual(imageManager.currentTaskCount, urls.count)
         imageManager.cancelAll()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(self.imageManager.currentTaskCount, 0)
+        XCTAssertEqual(imageManager.currentTaskCount, 0)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+    
+    func testCancelPreloading() {
+        let expectation = self.expectation(description: "Wait for loading image")
+        imageManager.preload(urls, progress: { (_, _, _) in
+            XCTFail()
+        }) { (_, _) in
+            XCTFail()
+        }
+        XCTAssertEqual(imageManager.currentPreloadTaskCount, urls.count)
+        imageManager.cancelPreloading()
+        XCTAssertEqual(imageManager.currentPreloadTaskCount, 0)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             expectation.fulfill()
         }
         waitForExpectations(timeout: 10, handler: nil)

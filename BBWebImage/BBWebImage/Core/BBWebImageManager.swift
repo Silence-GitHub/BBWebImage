@@ -42,11 +42,16 @@ public struct BBWebImageOptions: OptionSet {
     /// Do not decode image
     public static let ignoreImageDecoding = BBWebImageOptions(rawValue: 1 << 8)
     
+    /// Preload image data and cache to disk
+    internal static let preload = BBWebImageOptions(rawValue: 1 << 32)
+    
     public init(rawValue: Int) { self.rawValue = rawValue }
 }
 
 public let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
 public typealias BBWebImageManagerCompletion = (UIImage?, Data?, Error?, BBImageCacheType) -> Void
+public typealias BBWebImagePreloadProgress = (Int, Int, Int) -> Void
+public typealias BBWebImagePreloadCompletion = (Int, Int) -> Void
 
 /// BBWebImageLoadTask defines an image loading task
 public class BBWebImageLoadTask {
@@ -109,6 +114,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
     public private(set) var imageCoder: BBImageCoder
     private let coderQueue: BBDispatchQueuePool
     private var tasks: Set<BBWebImageLoadTask>
+    private var preloadTasks: Set<BBWebImageLoadTask>
     private var taskLock: pthread_mutex_t
     private var taskSentinel: Int32
     private var urlBlacklist: Set<URL>
@@ -117,6 +123,13 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
     public var currentTaskCount: Int {
         pthread_mutex_lock(&taskLock)
         let c = tasks.count
+        pthread_mutex_unlock(&taskLock)
+        return c
+    }
+    
+    public var currentPreloadTaskCount: Int {
+        pthread_mutex_lock(&taskLock)
+        let c = preloadTasks.count
         pthread_mutex_unlock(&taskLock)
         return c
     }
@@ -147,6 +160,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
         imageCoder = coder
         coderQueue = BBDispatchQueuePool.userInitiated
         tasks = Set()
+        preloadTasks = Set()
         taskSentinel = 0
         taskLock = pthread_mutex_t()
         pthread_mutex_init(&taskLock, nil)
@@ -173,6 +187,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
         let task = newLoadTask()
         pthread_mutex_lock(&taskLock)
         tasks.insert(task)
+        if options.contains(.preload) { preloadTasks.insert(task) }
         pthread_mutex_unlock(&taskLock)
         
         if !options.contains(.retryFailedUrl) {
@@ -208,43 +223,8 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
             }
         }
         var finished = false
-        if let currentImage = memoryImage,
-            !options.contains(.queryDataWhenInMemory) {
-            if let currentEditor = editor {
-                if currentEditor.key == currentImage.bb_imageEditKey {
-                    complete(with: task,
-                             completion: completion,
-                             image: currentImage,
-                             data: nil,
-                             cacheType: .memory)
-                    remove(loadTask: task)
-                    finished = true
-                } else if !currentEditor.needData,
-                    currentImage.bb_imageEditKey == nil {
-                    coderQueue.async { [weak self, weak task] in
-                        guard let self = self, let task = task, !task.isCancelled else { return }
-                        if let image = currentEditor.edit(currentImage, nil) {
-                            guard !task.isCancelled else { return }
-                            image.bb_imageEditKey = currentEditor.key
-                            image.bb_imageFormat = currentImage.bb_imageFormat
-                            self.complete(with: task,
-                                          completion: completion,
-                                          image: image,
-                                          data: nil,
-                                          cacheType: .memory)
-                            self.imageCache.store(image,
-                                                  data: nil,
-                                                  forKey: resource.cacheKey,
-                                                  cacheType: .memory,
-                                                  completion: nil)
-                        } else {
-                            self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
-                        }
-                        self.remove(loadTask: task)
-                    }
-                    finished = true
-                }
-            } else if currentImage.bb_imageEditKey == nil {
+        if let currentImage = memoryImage {
+            if options.contains(.preload) {
                 complete(with: task,
                          completion: completion,
                          image: currentImage,
@@ -252,6 +232,50 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                          cacheType: .memory)
                 remove(loadTask: task)
                 finished = true
+            } else if !options.contains(.queryDataWhenInMemory) {
+                if let currentEditor = editor {
+                    if currentEditor.key == currentImage.bb_imageEditKey {
+                        complete(with: task,
+                                 completion: completion,
+                                 image: currentImage,
+                                 data: nil,
+                                 cacheType: .memory)
+                        remove(loadTask: task)
+                        finished = true
+                    } else if !currentEditor.needData,
+                        currentImage.bb_imageEditKey == nil {
+                        coderQueue.async { [weak self, weak task] in
+                            guard let self = self, let task = task, !task.isCancelled else { return }
+                            if let image = currentEditor.edit(currentImage, nil) {
+                                guard !task.isCancelled else { return }
+                                image.bb_imageEditKey = currentEditor.key
+                                image.bb_imageFormat = currentImage.bb_imageFormat
+                                self.complete(with: task,
+                                              completion: completion,
+                                              image: image,
+                                              data: nil,
+                                              cacheType: .memory)
+                                self.imageCache.store(image,
+                                                      data: nil,
+                                                      forKey: resource.cacheKey,
+                                                      cacheType: .memory,
+                                                      completion: nil)
+                            } else {
+                                self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
+                            }
+                            self.remove(loadTask: task)
+                        }
+                        finished = true
+                    }
+                } else if currentImage.bb_imageEditKey == nil {
+                    complete(with: task,
+                             completion: completion,
+                             image: currentImage,
+                             data: nil,
+                             cacheType: .memory)
+                    remove(loadTask: task)
+                    finished = true
+                }
             }
         }
         if finished { return task }
@@ -263,7 +287,28 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                           editor: editor,
                           progress: progress,
                           completion: completion)
-        } else {
+        }
+        else if options.contains(.preload) {
+            // Check whether disk data exists
+            imageCache.diskDataExists(forKey: resource.cacheKey) { (exists) in
+                if exists {
+                    self.complete(with: task,
+                                  completion: completion,
+                                  image: nil,
+                                  data: nil,
+                                  cacheType: .disk)
+                    self.remove(loadTask: task)
+                } else {
+                    self.downloadImage(with: resource,
+                                       options: options,
+                                       task: task,
+                                       editor: editor,
+                                       progress: progress,
+                                       completion: completion)
+                }
+            }
+        }
+        else {
             // Get disk data
             imageCache.image(forKey: resource.cacheKey, cacheType: .disk) { [weak self, weak task] (result: BBImageCacheQueryCompletionResult) in
                 guard let self = self, let task = task, !task.isCancelled else { return }
@@ -293,6 +338,55 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
         return task
     }
     
+    /// Preloads image from network if not in cache.
+    /// This method checks cache, downloads image data and stores data to disk, without storing to memory, decoding or editing.
+    /// Any previous preloading tasks are cancelled.
+    ///
+    /// - Parameters:
+    ///   - resource: image resource specifying how to download and cache image
+    ///   - options: options for some behaviors
+    ///   - editor: editor specifying how to edit and cache image in memory
+    ///   - progress: a closure called while image is downloading
+    ///   - completion: a closure called when image loading is finished
+    /// - Returns: BBWebImageLoadTask array
+    @discardableResult
+    public func preload(_ resources: [BBWebCacheResource],
+                        options: BBWebImageOptions = .none,
+                        progress: BBWebImagePreloadProgress? = nil,
+                        completion: BBWebImagePreloadCompletion? = nil) -> [BBWebImageLoadTask] {
+        cancelPreloading()
+        let total = resources.count
+        if total <= 0 { return [] }
+        var finishCount = 0
+        var successCount = 0
+        var tasks: [BBWebImageLoadTask] = []
+        for resource in resources {
+            var currentOptions: BBWebImageOptions = .preload
+            if options.contains(.useURLCache) { currentOptions.insert(.useURLCache) }
+            if options.contains(.handleCookies) { currentOptions.insert(.handleCookies) }
+            let task = loadImage(with: resource, options: currentOptions) { (_, _, error, _) in
+                finishCount += 1
+                if error == nil { successCount += 1 }
+                progress?(successCount, finishCount, total)
+                if finishCount >= total {
+                    completion?(successCount, total)
+                }
+            }
+            tasks.append(task)
+        }
+        return tasks
+    }
+    
+    /// Cancels image preloading tasks
+    public func cancelPreloading() {
+        pthread_mutex_lock(&taskLock)
+        let currentTasks = preloadTasks
+        pthread_mutex_unlock(&taskLock)
+        for task in currentTasks {
+            task.cancel()
+        }
+    }
+    
     /// Cancels all image loading tasks
     public func cancelAll() {
         pthread_mutex_lock(&taskLock)
@@ -312,6 +406,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
     fileprivate func remove(loadTask: BBWebImageLoadTask) {
         pthread_mutex_lock(&taskLock)
         tasks.remove(loadTask)
+        preloadTasks.remove(loadTask)
         pthread_mutex_unlock(&taskLock)
     }
     
@@ -322,6 +417,22 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                         resource: BBWebCacheResource,
                         editor: BBWebImageEditor?,
                         completion: @escaping BBWebImageManagerCompletion) {
+        if options.contains(.preload) {
+            complete(with: task,
+                     completion: completion,
+                     image: nil,
+                     data: data,
+                     cacheType: cacheType)
+            if cacheType == .none {
+                imageCache.store(nil,
+                                 data: data,
+                                 forKey: resource.cacheKey,
+                                 cacheType: .disk,
+                                 completion: nil)
+            }
+            remove(loadTask: task)
+            return
+        }
         self.coderQueue.async { [weak self, weak task] in
             guard let self = self, let task = task, !task.isCancelled else { return }
             if let currentEditor = editor {
