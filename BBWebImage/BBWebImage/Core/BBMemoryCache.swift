@@ -11,11 +11,13 @@ import UIKit
 private class BBLinkedMapNode {
     fileprivate weak var prev: BBLinkedMapNode?
     fileprivate weak var next: BBLinkedMapNode?
+    fileprivate var key: String
     fileprivate var value: Any
     fileprivate var cost: Int
     fileprivate var lastAccessTime: TimeInterval
     
-    fileprivate init(value: Any) {
+    fileprivate init(key: String, value: Any) {
+        self.key = key
         self.value = value
         self.cost = 0
         self.lastAccessTime = CACurrentMediaTime()
@@ -24,10 +26,10 @@ private class BBLinkedMapNode {
 
 private class BBLinkedMap {
     fileprivate var dic: [String : BBLinkedMapNode]
-    fileprivate var totalCost: Int
-    fileprivate var totalCount: Int
     fileprivate var head: BBLinkedMapNode?
     fileprivate var tail: BBLinkedMapNode?
+    fileprivate var totalCost: Int
+    fileprivate var totalCount: Int
     
     init() {
         dic = [:]
@@ -51,6 +53,7 @@ private class BBLinkedMap {
     }
     
     fileprivate func insertNodeAtHead(_ node: BBLinkedMapNode) {
+        dic[node.key] = node
         if head == nil {
             head = node
             tail = node
@@ -64,6 +67,7 @@ private class BBLinkedMap {
     }
     
     fileprivate func remove(_ node: BBLinkedMapNode) {
+        dic[node.key] = nil
         node.prev?.next = node.next
         node.next?.prev = node.prev
         if head === node { head = node.next }
@@ -73,6 +77,7 @@ private class BBLinkedMap {
     }
     
     fileprivate func removeAll() {
+        dic.removeAll()
         head = nil
         tail = nil
         totalCost = 0
@@ -141,9 +146,8 @@ public class BBMemoryCache {
             node.lastAccessTime = CACurrentMediaTime()
             linkedMap.bringNodeToHead(node)
         } else {
-            let node = BBLinkedMapNode(value: image)
+            let node = BBLinkedMapNode(key: key, value: image)
             node.cost = realCost
-            linkedMap.dic[key] = node
             linkedMap.insertNodeAtHead(node)
             
             if linkedMap.totalCount > countLimit,
@@ -166,7 +170,6 @@ public class BBMemoryCache {
     public func removeImage(forKey key: String) {
         pthread_mutex_lock(&lock)
         if let node = linkedMap.dic[key] {
-            linkedMap.dic[key] = nil
             linkedMap.remove(node)
         }
         pthread_mutex_unlock(&lock)
@@ -175,7 +178,6 @@ public class BBMemoryCache {
     /// Removes all images
     @objc public func clear() {
         pthread_mutex_lock(&lock)
-        linkedMap.dic.removeAll()
         linkedMap.removeAll()
         pthread_mutex_unlock(&lock)
     }
@@ -214,7 +216,6 @@ public class BBMemoryCache {
         pthread_mutex_lock(&lock)
         let unlock: () -> Void = { pthread_mutex_unlock(&self.lock) }
         if cost <= 0 {
-            linkedMap.dic.removeAll()
             linkedMap.removeAll()
             return unlock()
         } else if linkedMap.totalCost <= cost {
@@ -241,7 +242,6 @@ public class BBMemoryCache {
         pthread_mutex_lock(&lock)
         let unlock: () -> Void = { pthread_mutex_unlock(&self.lock) }
         if count <= 0 {
-            linkedMap.dic.removeAll()
             linkedMap.removeAll()
             return unlock()
         } else if linkedMap.totalCount <= count {
@@ -269,7 +269,6 @@ public class BBMemoryCache {
         let unlock: () -> Void = { pthread_mutex_unlock(&self.lock) }
         let now = CACurrentMediaTime()
         if age <= 0 {
-            linkedMap.dic.removeAll()
             linkedMap.removeAll()
             return unlock()
         } else if linkedMap.tail == nil || now - linkedMap.tail!.lastAccessTime <= age {
