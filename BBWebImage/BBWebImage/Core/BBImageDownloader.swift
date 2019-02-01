@@ -11,32 +11,6 @@ import UIKit
 public typealias BBImageDownloaderProgress = (Data?, Int, UIImage?) -> Void
 public typealias BBImageDownloaderCompletion = (Data?, Error?) -> Void
 
-/// Linked list node with any value
-private class BBLinkedListNode {
-    fileprivate let value: Any
-    fileprivate var next: BBLinkedListNode?
-    
-    fileprivate init(value: Any) { self.value = value }
-}
-
-/// First-in, first out linked list queue
-private class BBLinkedListQueue {
-    fileprivate var head: BBLinkedListNode?
-    fileprivate var tail: BBLinkedListNode?
-    
-    fileprivate func enqueue(_ node: BBLinkedListNode) {
-        if head == nil { head = node }
-        tail?.next = node
-        tail = node
-    }
-    
-    fileprivate func dequeue() -> BBLinkedListNode? {
-        let node = head
-        head = head?.next
-        return node
-    }
-}
-
 /// BBImageDownloadTask defines an image download task
 public protocol BBImageDownloadTask {
     var sentinel: Int32 { get }
@@ -132,23 +106,21 @@ public class BBMergeRequestImageDownloader {
     public var maxConcurrentDownloadCount: Int {
         get {
             lock.wait()
-            let count = maxRunningCount
+            let count = operationQueue.maxRunningCount
             lock.signal()
             return count
         }
         set {
             lock.wait()
-            maxRunningCount = newValue
+            operationQueue.maxRunningCount = newValue
             lock.signal()
         }
     }
     
-    private let waitingQueue: BBLinkedListQueue
+    private let operationQueue: BBOperationQueue
     private var taskSentinel: Int32
     private var urlOperations: [URL : BBImageDownloadOperation]
     private var preloadTasks: [Int32 : BBImageDownloadTask]
-    private var maxRunningCount: Int
-    private var currentRunningCount: Int
     private var httpHeaders: [String : String]
     private let lock: DispatchSemaphore
     private let sessionConfiguration: URLSessionConfiguration
@@ -168,11 +140,10 @@ public class BBMergeRequestImageDownloader {
         donwloadTimeout = 15
         taskSentinel = 0
         generateDownloadOperation = { BBMergeRequestImageDownloadOperation(request: $0, session: $1) }
-        waitingQueue = BBLinkedListQueue()
+        operationQueue = BBOperationQueue()
+        operationQueue.maxRunningCount = 6
         urlOperations = [:]
         preloadTasks = [:]
-        maxRunningCount = 6
-        currentRunningCount = 0
         httpHeaders = ["Accept" : "image/*;q=0.8"]
         lock = DispatchSemaphore(value: 1)
         self.sessionConfiguration = sessionConfiguration
@@ -221,30 +192,13 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
                 self.lock.wait()
                 self.urlOperations.removeValue(forKey: url)
                 if let tasks = newOperation?.downloadTasks {
-                    for task in tasks {
-                        self.preloadTasks.removeValue(forKey: task.sentinel)
-                    }
+                    for task in tasks { self.preloadTasks.removeValue(forKey: task.sentinel) }
                 }
-                if let next = self.waitingQueue.dequeue()?.value as? BBImageDownloadOperation {
-                    BBDispatchQueuePool.background.async {
-                        next.start()
-                    }
-                } else if self.currentRunningCount > 0 {
-                    self.currentRunningCount -= 1
-                }
+                self.operationQueue.operationComplete()
                 self.lock.signal()
             }
             urlOperations[url] = newOperation
-            if currentRunningCount < maxRunningCount {
-                currentRunningCount += 1
-                BBDispatchQueuePool.background.async { [weak self] in
-                    guard self != nil else { return }
-                    newOperation.start()
-                }
-            } else {
-                let node = BBLinkedListNode(value: newOperation)
-                waitingQueue.enqueue(node)
-            }
+            operationQueue.add(newOperation)
             operation = newOperation
         }
         operation?.add(task: task)
