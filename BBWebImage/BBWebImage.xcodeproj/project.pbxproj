@@ -35,8 +35,8 @@
 		4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53315A2165BC8500C68080 /* BBImageCoder.swift */; };
 		4A5DE8FC217191EE0074EEFD /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5DE8FB217191EE0074EEFD /* String+MD5.swift */; };
 		4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5DE8FB217191EE0074EEFD /* String+MD5.swift */; };
-		4A5F131A2204D71E00657835 /* BBOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5F13192204D71E00657835 /* BBOperationQueue.swift */; };
-		4A5F131B2204D71E00657835 /* BBOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5F13192204D71E00657835 /* BBOperationQueue.swift */; };
+		4A5F131A2204D71E00657835 /* BBImageDownloadOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5F13192204D71E00657835 /* BBImageDownloadOperationQueue.swift */; };
+		4A5F131B2204D71E00657835 /* BBImageDownloadOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5F13192204D71E00657835 /* BBImageDownloadOperationQueue.swift */; };
 		4A5FF70421BBBDA60006B877 /* BBWebCacheResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5FF70321BBBDA60006B877 /* BBWebCacheResource.swift */; };
 		4A5FF70521BBBDA60006B877 /* BBWebCacheResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5FF70321BBBDA60006B877 /* BBWebCacheResource.swift */; };
 		4A62CAA2216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */; };
@@ -98,7 +98,7 @@
 		4A5331562165943100C68080 /* BBImageDownloadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloadOperation.swift; sourceTree = "<group>"; };
 		4A53315A2165BC8500C68080 /* BBImageCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCoder.swift; sourceTree = "<group>"; };
 		4A5DE8FB217191EE0074EEFD /* String+MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
-		4A5F13192204D71E00657835 /* BBOperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBOperationQueue.swift; sourceTree = "<group>"; };
+		4A5F13192204D71E00657835 /* BBImageDownloadOperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloadOperationQueue.swift; sourceTree = "<group>"; };
 		4A5FF70321BBBDA60006B877 /* BBWebCacheResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebCacheResource.swift; sourceTree = "<group>"; };
 		4A62CAA1216E6F4D0038FF71 /* BBWebImageEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageEditor.swift; sourceTree = "<group>"; };
 		4A6E2D85218787C400CE1CD2 /* BBMemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBMemoryCache.swift; sourceTree = "<group>"; };
@@ -207,7 +207,7 @@
 				4A6E2D8B2187885C00CE1CD2 /* BBDiskStorage.swift */,
 				4A5331522165902A00C68080 /* BBImageDownloader.swift */,
 				4A5331562165943100C68080 /* BBImageDownloadOperation.swift */,
-				4A5F13192204D71E00657835 /* BBOperationQueue.swift */,
+				4A5F13192204D71E00657835 /* BBImageDownloadOperationQueue.swift */,
 				4A53315A2165BC8500C68080 /* BBImageCoder.swift */,
 				4A87E910216C00770073E53C /* BBWebImageImageIOCoder.swift */,
 				4A4819C221964EB00000B229 /* BBDispatchQueuePool.swift */,
@@ -363,7 +363,7 @@
 				4A53315021658F9F00C68080 /* BBImageCache.swift in Sources */,
 				4A62CAA2216E6F4D0038FF71 /* BBWebImageEditor.swift in Sources */,
 				4A5331492165828300C68080 /* BBWebImageManager.swift in Sources */,
-				4A5F131A2204D71E00657835 /* BBOperationQueue.swift in Sources */,
+				4A5F131A2204D71E00657835 /* BBImageDownloadOperationQueue.swift in Sources */,
 				4A87E917216C12E40073E53C /* DispatchQueue+Safe.swift in Sources */,
 				4A6E2D86218787C400CE1CD2 /* BBMemoryCache.swift in Sources */,
 			);
@@ -402,7 +402,7 @@
 				4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */,
 				4A87E915216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */,
 				4A6E2D8A218787FB00CE1CD2 /* BBDiskCache.swift in Sources */,
-				4A5F131B2204D71E00657835 /* BBOperationQueue.swift in Sources */,
+				4A5F131B2204D71E00657835 /* BBImageDownloadOperationQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

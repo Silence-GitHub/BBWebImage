@@ -9,6 +9,7 @@
 import UIKit
 
 public protocol BBImageDownloadOperation: AnyObject {
+    var url: URL { get }
     var dataTaskId: Int { get }
     var downloadTasks: [BBImageDownloadTask] { get }
     var imageCoder: BBImageCoder? { get set }
@@ -21,6 +22,8 @@ public protocol BBImageDownloadOperation: AnyObject {
 }
 
 class BBMergeRequestImageDownloadOperation: NSObject, BBImageDownloadOperation {
+    var url: URL { return request.url! }
+    
     var dataTaskId: Int {
         stateLock.wait()
         let tid = dataTask?.taskIdentifier ?? 0

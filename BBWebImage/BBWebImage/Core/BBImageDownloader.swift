@@ -117,7 +117,7 @@ public class BBMergeRequestImageDownloader {
         }
     }
     
-    private let operationQueue: BBOperationQueue
+    private let operationQueue: BBImageDownloadOperationQueue
     private var taskSentinel: Int32
     private var urlOperations: [URL : BBImageDownloadOperation]
     private var preloadTasks: [Int32 : BBImageDownloadTask]
@@ -140,7 +140,7 @@ public class BBMergeRequestImageDownloader {
         donwloadTimeout = 15
         taskSentinel = 0
         generateDownloadOperation = { BBMergeRequestImageDownloadOperation(request: $0, session: $1) }
-        operationQueue = BBOperationQueue()
+        operationQueue = BBImageDownloadOperationQueue()
         operationQueue.maxRunningCount = 6
         urlOperations = [:]
         preloadTasks = [:]
@@ -194,7 +194,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
                 if let tasks = newOperation?.downloadTasks {
                     for task in tasks { self.preloadTasks.removeValue(forKey: task.sentinel) }
                 }
-                self.operationQueue.operationComplete()
+                self.operationQueue.removeOperation(forKey: url)
                 self.lock.signal()
             }
             urlOperations[url] = newOperation
