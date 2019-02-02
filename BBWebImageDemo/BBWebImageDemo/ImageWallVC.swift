@@ -55,9 +55,9 @@ extension ImageWallVC: UICollectionViewDataSourcePrefetching {
             }
         }
         let tasks = BBWebImageManager.shared.preload(urls, options: .none, progress: { (successCount, finishCount, total) in
-            print("Preload progress. success count = \(successCount), finish count = \(finishCount), total = \(total)")
+//            print("Preload progress. success count = \(successCount), finish count = \(finishCount), total = \(total)")
         }) { (successCount, total) in
-            print("Preload completion. success count = \(successCount), total = \(total)")
+//            print("Preload completion. success count = \(successCount), total = \(total)")
         }
         for i in 0..<tasks.count {
             preloadTasks[indexPaths[i].item] = tasks[i]

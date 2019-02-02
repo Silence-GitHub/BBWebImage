@@ -13,4 +13,9 @@ class ImageURLProvider {
         if index < 1 || index > 4000 { return nil }
         return URL(string: "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/origin/\(index).jpg")
     }
+    
+    static func thumbnailURL(forIndex index: Int) -> URL? {
+        if index < 1 || index > 4000 { return nil }
+        return URL(string: "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/64/\(index).jpg")
+    }
 }
