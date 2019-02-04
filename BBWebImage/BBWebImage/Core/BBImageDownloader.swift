@@ -178,7 +178,11 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         lock.wait()
         if options.contains(.preload) { preloadTasks[task.sentinel] = task }
         var operation: BBImageDownloadOperation? = urlOperations[url]
-        if operation == nil {
+        if operation != nil {
+            if !options.contains(.preload) {
+                operationQueue.upgradePreloadOperation(for: url)
+            }
+        } else {
             let timeout = donwloadTimeout > 0 ? donwloadTimeout : 15
             let cachePolicy: URLRequest.CachePolicy = options.contains(.useURLCache) ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
             var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
@@ -198,7 +202,7 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
                 self.lock.signal()
             }
             urlOperations[url] = newOperation
-            operationQueue.add(newOperation)
+            operationQueue.add(newOperation, preload: options.contains(.preload))
             operation = newOperation
         }
         operation?.add(task: task)
@@ -211,9 +215,14 @@ extension BBMergeRequestImageDownloader: BBImageDownloader {
         lock.wait()
         let operation = urlOperations[task.url]
         lock.signal()
-        if let operation = operation,
-            operation.downloadTasks.count <= 1 {
-            operation.cancel()
+        if let operation = operation {
+            var allCancelled = true
+            let tasks = operation.downloadTasks
+            for task in tasks where !task.isCancelled {
+                allCancelled = false
+                break
+            }
+            if allCancelled { operation.cancel() }
         }
     }
     

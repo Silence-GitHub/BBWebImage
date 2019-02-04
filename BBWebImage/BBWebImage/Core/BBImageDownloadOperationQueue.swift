@@ -62,16 +62,18 @@ private class BBImageDownloadLinkedMap {
 
 class BBImageDownloadOperationQueue {
     private let waitingQueue: BBImageDownloadLinkedMap
+    private let preloadWaitingQueue: BBImageDownloadLinkedMap
     var maxRunningCount: Int
     private(set) var currentRunningCount: Int
     
     init() {
         waitingQueue = BBImageDownloadLinkedMap()
+        preloadWaitingQueue = BBImageDownloadLinkedMap()
         maxRunningCount = 1
         currentRunningCount = 0
     }
     
-    func add(_ operation: BBImageDownloadOperation) {
+    func add(_ operation: BBImageDownloadOperation, preload: Bool) {
         if currentRunningCount < maxRunningCount {
             currentRunningCount += 1
             BBDispatchQueuePool.background.async { [weak self] in
@@ -80,19 +82,37 @@ class BBImageDownloadOperationQueue {
             }
         } else {
             let node = BBImageDownloadLinkedMapNode(key: operation.url, value: operation)
-            waitingQueue.enqueue(node)
+            if preload { preloadWaitingQueue.enqueue(node) }
+            else { waitingQueue.enqueue(node) }
         }
     }
     
     func removeOperation(forKey key: URL) {
         if let node = waitingQueue.dic[key] {
             waitingQueue.remove(node)
+        } else if let node = preloadWaitingQueue.dic[key] {
+            preloadWaitingQueue.remove(node)
         } else if let next = waitingQueue.dequeue()?.value {
-            BBDispatchQueuePool.background.async {
+            BBDispatchQueuePool.background.async { [weak self] in
+                guard self != nil else { return }
                 next.start()
             }
-        } else if currentRunningCount > 0 {
+        } else if let next = preloadWaitingQueue.dequeue()?.value {
+            BBDispatchQueuePool.background.async { [weak self] in
+                guard self != nil else { return }
+                next.start()
+            }
+        } else {
             currentRunningCount -= 1
+            assert(currentRunningCount >= 0, "currentRunningCount must >= 0")
         }
+    }
+    
+    func upgradePreloadOperation(for key: URL) {
+        // TODO: upgradePreloadOperation
+//        if let node = preloadWaitingQueue.dic[key] {
+//            preloadWaitingQueue.remove(node)
+//            waitingQueue.enqueue(node)
+//        }
     }
 }
