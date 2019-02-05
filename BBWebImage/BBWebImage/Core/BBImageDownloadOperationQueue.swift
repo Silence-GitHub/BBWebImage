@@ -21,11 +21,7 @@ private class BBImageDownloadLinkedMapNode {
 }
 
 private class BBImageDownloadLinkedMap {
-    fileprivate var dic: [URL : BBImageDownloadLinkedMapNode] {
-        didSet {
-            print("Waiting count = \(dic.count)")
-        }
-    }
+    fileprivate var dic: [URL : BBImageDownloadLinkedMapNode]
     fileprivate var head: BBImageDownloadLinkedMapNode?
     fileprivate var tail: BBImageDownloadLinkedMapNode?
     
