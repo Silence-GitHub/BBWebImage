@@ -9,6 +9,8 @@
 import UIKit
 
 class TestImageDownloadOperation: NSObject, BBImageDownloadOperation {
+    var url: URL { return request.url! }
+    
     var dataTaskId: Int {
         stateLock.wait()
         let tid = dataTask?.taskIdentifier ?? 0
