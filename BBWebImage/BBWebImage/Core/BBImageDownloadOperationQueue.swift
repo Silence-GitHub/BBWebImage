@@ -109,10 +109,11 @@ class BBImageDownloadOperationQueue {
     }
     
     func upgradePreloadOperation(for key: URL) {
-        // TODO: upgradePreloadOperation
-//        if let node = preloadWaitingQueue.dic[key] {
-//            preloadWaitingQueue.remove(node)
-//            waitingQueue.enqueue(node)
-//        }
+        if let node = preloadWaitingQueue.dic[key] {
+            preloadWaitingQueue.remove(node)
+            node.prev = nil
+            node.next = nil
+            waitingQueue.enqueue(node)
+        }
     }
 }
