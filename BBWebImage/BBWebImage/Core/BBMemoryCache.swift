@@ -8,9 +8,9 @@
 
 import UIKit
 
-private class BBLinkedMapNode {
-    fileprivate weak var prev: BBLinkedMapNode?
-    fileprivate weak var next: BBLinkedMapNode?
+private class BBMemoryCacheLinkedMapNode {
+    fileprivate weak var prev: BBMemoryCacheLinkedMapNode?
+    fileprivate weak var next: BBMemoryCacheLinkedMapNode?
     fileprivate var key: String
     fileprivate var value: Any
     fileprivate var cost: Int
@@ -24,10 +24,10 @@ private class BBLinkedMapNode {
     }
 }
 
-private class BBLinkedMap {
-    fileprivate var dic: [String : BBLinkedMapNode]
-    fileprivate var head: BBLinkedMapNode?
-    fileprivate var tail: BBLinkedMapNode?
+private class BBMemoryCacheLinkedMap {
+    fileprivate var dic: [String : BBMemoryCacheLinkedMapNode]
+    fileprivate var head: BBMemoryCacheLinkedMapNode?
+    fileprivate var tail: BBMemoryCacheLinkedMapNode?
     fileprivate var totalCost: Int
     fileprivate var totalCount: Int
     
@@ -37,7 +37,7 @@ private class BBLinkedMap {
         totalCount = 0
     }
     
-    fileprivate func bringNodeToHead(_ node: BBLinkedMapNode) {
+    fileprivate func bringNodeToHead(_ node: BBMemoryCacheLinkedMapNode) {
         if head === node { return }
         if tail === node {
             tail = node.prev
@@ -52,7 +52,7 @@ private class BBLinkedMap {
         head = node
     }
     
-    fileprivate func insertNodeAtHead(_ node: BBLinkedMapNode) {
+    fileprivate func insertNodeAtHead(_ node: BBMemoryCacheLinkedMapNode) {
         dic[node.key] = node
         if head == nil {
             head = node
@@ -66,7 +66,7 @@ private class BBLinkedMap {
         totalCount += 1
     }
     
-    fileprivate func remove(_ node: BBLinkedMapNode) {
+    fileprivate func remove(_ node: BBMemoryCacheLinkedMapNode) {
         dic[node.key] = nil
         node.prev?.next = node.next
         node.next?.prev = node.prev
@@ -87,7 +87,7 @@ private class BBLinkedMap {
 
 /// BBMemoryCache is a thread safe memory cache using least recently used algorithm
 public class BBMemoryCache {
-    private let linkedMap: BBLinkedMap
+    private let linkedMap: BBMemoryCacheLinkedMap
     private var costLimit: Int
     private var countLimit: Int
     private var ageLimit: TimeInterval
@@ -95,7 +95,7 @@ public class BBMemoryCache {
     private var queue: DispatchQueue
     
     init() {
-        linkedMap = BBLinkedMap()
+        linkedMap = BBMemoryCacheLinkedMap()
         costLimit = .max
         countLimit = .max
         ageLimit = .greatestFiniteMagnitude
@@ -146,7 +146,7 @@ public class BBMemoryCache {
             node.lastAccessTime = CACurrentMediaTime()
             linkedMap.bringNodeToHead(node)
         } else {
-            let node = BBLinkedMapNode(key: key, value: image)
+            let node = BBMemoryCacheLinkedMapNode(key: key, value: image)
             node.cost = realCost
             linkedMap.insertNodeAtHead(node)
             

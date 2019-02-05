@@ -50,8 +50,8 @@ public struct BBWebImageOptions: OptionSet {
 
 public let BBWebImageErrorDomain: String = "BBWebImageErrorDomain"
 public typealias BBWebImageManagerCompletion = (UIImage?, Data?, Error?, BBImageCacheType) -> Void
-public typealias BBWebImagePreloadProgress = (Int, Int, Int) -> Void
-public typealias BBWebImagePreloadCompletion = (Int, Int) -> Void
+public typealias BBWebImagePreloadProgress = (_ successCount: Int, _ finishCount: Int, _ total: Int) -> Void
+public typealias BBWebImagePreloadCompletion = (_ successCount: Int, _ total: Int) -> Void
 
 /// BBWebImageLoadTask defines an image loading task
 public class BBWebImageLoadTask {
@@ -343,10 +343,9 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
     /// Any previous preloading tasks are cancelled.
     ///
     /// - Parameters:
-    ///   - resource: image resource specifying how to download and cache image
+    ///   - resources: image resources specifying how to download and cache image
     ///   - options: options for some behaviors
-    ///   - editor: editor specifying how to edit and cache image in memory
-    ///   - progress: a closure called while image is downloading
+    ///   - progress: a closure called while images are loading
     ///   - completion: a closure called when image loading is finished
     /// - Returns: BBWebImageLoadTask array
     @discardableResult
