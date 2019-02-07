@@ -26,13 +26,20 @@ class MainMenuVC: UIViewController {
         let filter = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(TestFilterVC(), animated: true) }
         }
+        let gif = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(TestGIFVC(), animated: true) }
+        }
         let imageWall = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(ImageWallVC(), animated: true) }
         }
         let clearCache = { [weak self] in
             if self != nil { BBWebImageManager.shared.imageCache.clear(.all, completion: nil) }
         }
-        list = [("Test", test), ("Test filter", filter), ("Image wall", imageWall), ("Clear cache", clearCache)]
+        list = [("Test", test),
+                ("Test filter", filter),
+                ("Test GIF", gif),
+                ("Image wall", imageWall),
+                ("Clear cache", clearCache)]
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: UITableViewCell.description())
         tableView.dataSource = self

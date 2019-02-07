@@ -67,6 +67,14 @@ public protocol BBImageProgressiveCoder: BBImageCoder {
     func incrementallyDecodedImage(with data: Data, finished: Bool) -> UIImage?
 }
 
+public protocol BBAnimatedImageCoder: BBImageCoder {
+    var imageData: Data? { get set }
+    var frameCount: Int? { get }
+    var loopCount: Int? { get }
+    func imageFrame(at index: Int) -> UIImage?
+    func duration(at index: Int) -> TimeInterval?
+}
+
 extension CGImagePropertyOrientation {
     var toUIImageOrientation: UIImage.Orientation {
         switch self {
@@ -105,7 +113,7 @@ public class BBImageCoderManager {
     private var coderLock: pthread_mutex_t
     
     init() {
-        _coders = [BBWebImageImageIOCoder()]
+        _coders = [BBWebImageImageIOCoder(), BBWebImageGIFCoder()]
         coderLock = pthread_mutex_t()
         pthread_mutex_init(&coderLock, nil)
     }

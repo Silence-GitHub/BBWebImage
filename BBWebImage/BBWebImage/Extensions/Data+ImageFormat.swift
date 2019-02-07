@@ -13,6 +13,7 @@ public enum BBImageFormat {
     case unknown
     case JPEG
     case PNG
+    case GIF
     
     var UTType: CFString {
         switch self {
@@ -30,6 +31,7 @@ public extension Data {
             switch firstByte {
             case 0xFF: return .JPEG // https://en.wikipedia.org/wiki/JPEG
             case 0x89: return .PNG // https://en.wikipedia.org/wiki/Portable_Network_Graphics
+            case 0x47: return .GIF // https://en.wikipedia.org/wiki/GIF
             default: return .unknown
             }
         }
