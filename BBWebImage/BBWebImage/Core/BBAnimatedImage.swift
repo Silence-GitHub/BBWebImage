@@ -19,6 +19,7 @@ public class BBAnimatedImage: UIImage {
     
     private var frames: [BBAnimatedImageFrame]!
     private var decoder: BBAnimatedImageCoder!
+    private var lock: DispatchSemaphore!
     
     public convenience init?(bb_data data: Data, decoder aDecoder: BBAnimatedImageCoder? = nil) {
         var tempDecoder = aDecoder
@@ -53,5 +54,23 @@ public class BBAnimatedImage: UIImage {
         loopCount = currentDecoder.loopCount ?? 0
         frames = imageFrames
         decoder = currentDecoder
+        lock = DispatchSemaphore(value: 1)
+    }
+    
+    public func imageFrame(at index: Int) -> UIImage? {
+        if index >= frameCount { return nil }
+        lock.wait()
+        let image = frames[index].image
+        lock.signal()
+        if image != nil { return image }
+        return decoder.imageFrame(at: index)
+    }
+    
+    public func duration(at index: Int) -> TimeInterval? {
+        if index >= frameCount { return nil }
+        lock.wait()
+        let duration = frames[index].duration
+        lock.signal()
+        return duration
     }
 }
