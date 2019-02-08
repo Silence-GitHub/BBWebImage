@@ -72,6 +72,7 @@ public class BBAnimatedImageView: UIImageView {
             layer.contents = cgimage
             CATransaction.commit()
         }
+        currentImage.preloadImageFrames(with: [(currentFrameIndex + 1) % currentImage.frameCount])
         accumulatedTime += link.duration * Double(link.frameInterval)
         if let duration = currentImage.duration(at: currentFrameIndex),
             accumulatedTime >= duration {
