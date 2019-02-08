@@ -76,6 +76,18 @@ public class BBWebImageGIFCoder: BBAnimatedImageCoder {
         }
         return nil
     }
+    
+    public func imageFrameSize(at index: Int) -> CGSize? {
+        if let source = imageSource,
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString : Any],
+            let width = properties[kCGImagePropertyPixelWidth] as? Int,
+            width > 0,
+            let height = properties[kCGImagePropertyPixelHeight] as? Int,
+            height > 0 {
+            return CGSize(width: width, height: height)
+        }
+        return nil
+    }
 }
 
 extension BBWebImageGIFCoder: BBImageCoder {

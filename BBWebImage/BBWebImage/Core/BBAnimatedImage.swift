@@ -9,8 +9,21 @@
 import UIKit
 
 private struct BBAnimatedImageFrame {
-    fileprivate var image: UIImage?
+    fileprivate var image: UIImage? {
+        didSet {
+            if let currentImage = image {
+                size = currentImage.size
+            }
+        }
+    }
+    fileprivate var size: CGSize?
     fileprivate var duration: TimeInterval
+    
+    fileprivate var bytes: Int? {
+        if let currentSize = size { return Int(currentSize.width * currentSize.height) }
+        if let currentImage = image { return Int(currentImage.size.width * currentImage.size.height) }
+        return nil
+    }
 }
 
 public class BBAnimatedImage: UIImage {
@@ -44,16 +57,19 @@ public class BBAnimatedImage: UIImage {
         if !canDecode && !currentDecoder.canDecode(data) { return nil }
         currentDecoder.imageData = data
         guard let firstFrame = currentDecoder.imageFrame(at: 0),
+            let firstFrameSourceImage = firstFrame.cgImage,
             let currentFrameCount = currentDecoder.frameCount else { return nil }
         var imageFrames: [BBAnimatedImageFrame] = []
         for i in 0..<currentFrameCount {
             if let duration = currentDecoder.duration(at: i) {
-                imageFrames.append(BBAnimatedImageFrame(image: nil, duration: duration))
+                let image = (i == 0 ? firstFrame : nil)
+                let size = currentDecoder.imageFrameSize(at: i)
+                imageFrames.append(BBAnimatedImageFrame(image: image, size: size, duration: duration))
             } else {
                 return nil
             }
         }
-        self.init(cgImage: firstFrame.cgImage!, scale: 1, orientation: firstFrame.imageOrientation)
+        self.init(cgImage: firstFrameSourceImage, scale: 1, orientation: firstFrame.imageOrientation)
         frameCount = currentFrameCount
         loopCount = currentDecoder.loopCount ?? 0
         frames = imageFrames
