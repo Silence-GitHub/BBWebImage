@@ -149,14 +149,11 @@ public class BBAnimatedImage: UIImage {
     
     public func updateCacheSizeIfNeeded() {
         lock.wait()
-        let autoUpdate = autoUpdateMaxCacheSize!
-        lock.signal()
-        if !autoUpdate { return }
+        defer { lock.signal() }
+        if !autoUpdateMaxCacheSize { return }
         let total = Int64(Double(UIDevice.totalMemory) * 0.2)
         let free = Int64(Double(UIDevice.freeMemory) * 0.6)
-        lock.wait()
         maxCacheSize = min(total, free)
-        lock.signal()
     }
     
     public func preloadImageFrame(fromIndex startIndex: Int) {
