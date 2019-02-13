@@ -23,7 +23,20 @@ private struct BBAnimatedImageFrame {
 }
 
 public class BBAnimatedImage: UIImage {
-    public var bb_editor: BBWebImageEditor?
+    private var editor: BBWebImageEditor?
+    public var bb_editor: BBWebImageEditor? {
+        get {
+            lock.wait()
+            let e = editor
+            lock.signal()
+            return e
+        }
+        set {
+            lock.wait()
+            editor = newValue
+            lock.signal()
+        }
+    }
     
     private var frameCount: Int!
     public var bb_frameCount: Int { return frameCount }
@@ -35,8 +48,14 @@ public class BBAnimatedImage: UIImage {
     private var currentCacheSize: Int64!
     private var autoUpdateMaxCacheSize: Bool!
     public var bb_maxCacheSize: Int64 {
-        get { return maxCacheSize }
+        get {
+            lock.wait()
+            let m = maxCacheSize!
+            lock.signal()
+            return m
+        }
         set {
+            lock.wait()
             if newValue >= 0 {
                 maxCacheSize = newValue
                 autoUpdateMaxCacheSize = false
@@ -44,6 +63,7 @@ public class BBAnimatedImage: UIImage {
                 maxCacheSize = 0
                 autoUpdateMaxCacheSize = true
             }
+            lock.signal()
         }
     }
     
@@ -103,7 +123,7 @@ public class BBAnimatedImage: UIImage {
         if index >= frameCount { return nil }
         lock.wait()
         let cacheImage = frames[index].image
-        let editor = bb_editor
+        let editor = self.editor
         lock.signal()
         return imageFrame(at: index, cachedImage: cacheImage, editor: editor)
     }
@@ -187,7 +207,7 @@ public class BBAnimatedImage: UIImage {
                 let index = (startIndex + i) % self.frameCount
                 self.lock.wait()
                 let cachedImage = self.frames[index].image
-                let editor = self.bb_editor
+                let editor = self.editor
                 self.lock.signal()
                 if let image = self.imageFrame(at: index, cachedImage: cachedImage, editor: editor) {
                     if sentinel != self.sentinel { return }
