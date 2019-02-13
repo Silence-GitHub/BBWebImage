@@ -69,6 +69,8 @@
 		4ACFCD9521B5B9E0004316A5 /* BBLRUImageCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */; };
 		4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */; };
 		4ACFCDA321B61707004316A5 /* ImageURLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */; };
+		4ADAC374221292900095DB75 /* UIDevice+BBAdd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADAC373221292900095DB75 /* UIDevice+BBAdd.swift */; };
+		4ADAC375221292900095DB75 /* UIDevice+BBAdd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADAC373221292900095DB75 /* UIDevice+BBAdd.swift */; };
 		4AF3D1E8216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */; };
 		4AF3D1E9216D9B4300320E6C /* UIImageView+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */; };
 		4AF3D1EB216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */; };
@@ -126,6 +128,7 @@
 		4ACFCD9421B5B9E0004316A5 /* BBLRUImageCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBLRUImageCacheTests.swift; sourceTree = "<group>"; };
 		4ACFCDA021B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BBMergeRequestImageDownloaderTests.swift; sourceTree = "<group>"; };
 		4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageURLProvider.swift; path = ../../BBWebImageDemo/BBWebImageDemo/ImageURLProvider.swift; sourceTree = "<group>"; };
+		4ADAC373221292900095DB75 /* UIDevice+BBAdd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+BBAdd.swift"; sourceTree = "<group>"; };
 		4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+BBWebCache.swift"; sourceTree = "<group>"; };
 		4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+BBWebCache.swift"; sourceTree = "<group>"; };
 		4AF401B821BEF10200485C96 /* BBWebImageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageManagerTests.swift; sourceTree = "<group>"; };
@@ -239,6 +242,7 @@
 				4A87E913216C01FD0073E53C /* UIImage+ImageFormat.swift */,
 				4AF3D1E7216D9B4300320E6C /* UIImageView+BBWebCache.swift */,
 				4AF3D1EA216D9D0000320E6C /* UIButton+BBWebCache.swift */,
+				4ADAC373221292900095DB75 /* UIDevice+BBAdd.swift */,
 				4A29383621BB699000CB8DAD /* MKAnnotationView+BBWebCache.swift */,
 				4A29383321BB680B00CB8DAD /* CALayer+BBWebCache.swift */,
 				4A5DE8FB217191EE0074EEFD /* String+MD5.swift */,
@@ -368,6 +372,7 @@
 				4A29383121BB027500CB8DAD /* BBWebCache.swift in Sources */,
 				4A9C6C33220BF6F400B255E7 /* BBWeakProxy.swift in Sources */,
 				4A53315B2165BC8500C68080 /* BBImageCoder.swift in Sources */,
+				4ADAC374221292900095DB75 /* UIDevice+BBAdd.swift in Sources */,
 				4AF3D1EB216D9D0000320E6C /* UIButton+BBWebCache.swift in Sources */,
 				4A29383721BB699000CB8DAD /* MKAnnotationView+BBWebCache.swift in Sources */,
 				4A87E911216C00770073E53C /* BBWebImageImageIOCoder.swift in Sources */,
@@ -416,6 +421,7 @@
 				4A29383221BB027500CB8DAD /* BBWebCache.swift in Sources */,
 				4AF401B921BEF10200485C96 /* BBWebImageManagerTests.swift in Sources */,
 				4A9C6C24220B5A9F00B255E7 /* BBAnimatedImage.swift in Sources */,
+				4ADAC375221292900095DB75 /* UIDevice+BBAdd.swift in Sources */,
 				4ACFCDA121B616F8004316A5 /* BBMergeRequestImageDownloaderTests.swift in Sources */,
 				4ACCC50A21FFC583005497B1 /* TestImageDownloadTask.swift in Sources */,
 				4A1CACEB21AE6D2800DC0D61 /* BBCILookupFilter.swift in Sources */,

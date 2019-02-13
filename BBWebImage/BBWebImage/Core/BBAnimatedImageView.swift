@@ -48,6 +48,7 @@ public class BBAnimatedImageView: UIImageView {
         self.type = type
         stopAnimating()
         if displayLink != nil { resetAnimation() }
+        if let animatedImage = image as? BBAnimatedImage { animatedImage.updateCacheSizeIfNeeded() }
         switch type {
         case .none: break
         case .image: super.image = image as? UIImage
@@ -72,11 +73,12 @@ public class BBAnimatedImageView: UIImageView {
             layer.contents = cgimage
             CATransaction.commit()
         }
-        currentImage.preloadImageFrames(with: [(currentFrameIndex + 1) % currentImage.frameCount])
+        let nextIndex = (currentFrameIndex + 1) % currentImage.bb_frameCount
+        currentImage.preloadImageFrame(fromIndex: nextIndex)
         accumulatedTime += link.duration * Double(link.frameInterval)
         if let duration = currentImage.duration(at: currentFrameIndex),
             accumulatedTime >= duration {
-            currentFrameIndex = (currentFrameIndex + 1) % currentImage.frameCount
+            currentFrameIndex = nextIndex
             accumulatedTime -= duration
             if animationRepeatCount > 0 && currentFrameIndex == 0 {
                 loopCount += 1

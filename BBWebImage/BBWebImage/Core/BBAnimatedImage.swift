@@ -19,16 +19,35 @@ private struct BBAnimatedImageFrame {
     fileprivate var size: CGSize?
     fileprivate var duration: TimeInterval
     
-    fileprivate var bytes: Int? {
-        if let currentSize = size { return Int(currentSize.width * currentSize.height) }
-        if let currentImage = image { return Int(currentImage.size.width * currentImage.size.height) }
+    fileprivate var bytes: Int64? {
+        if let currentSize = size { return Int64(currentSize.width * currentSize.height) }
+        if let currentImage = image { return Int64(currentImage.size.width * currentImage.size.height) }
         return nil
     }
 }
 
 public class BBAnimatedImage: UIImage {
-    public var frameCount: Int!
-    public var loopCount: Int!
+    private var frameCount: Int!
+    public var bb_frameCount: Int { return frameCount }
+    
+    private var loopCount: Int!
+    public var bb_loopCount: Int { return loopCount }
+    
+    private var maxCacheSize: Int64!
+    private var currentCacheSize: Int64!
+    private var autoUpdateMaxCacheSize: Bool!
+    public var bb_maxCacheSize: Int64 {
+        get { return maxCacheSize }
+        set {
+            if newValue >= 0 {
+                maxCacheSize = newValue
+                autoUpdateMaxCacheSize = false
+            } else {
+                maxCacheSize = 0
+                autoUpdateMaxCacheSize = true
+            }
+        }
+    }
     
     private var frames: [BBAnimatedImageFrame]!
     private var decoder: BBAnimatedImageCoder!
@@ -58,7 +77,8 @@ public class BBAnimatedImage: UIImage {
         currentDecoder.imageData = data
         guard let firstFrame = currentDecoder.imageFrame(at: 0),
             let firstFrameSourceImage = firstFrame.cgImage,
-            let currentFrameCount = currentDecoder.frameCount else { return nil }
+            let currentFrameCount = currentDecoder.frameCount,
+            currentFrameCount > 0 else { return nil }
         var imageFrames: [BBAnimatedImageFrame] = []
         for i in 0..<currentFrameCount {
             if let duration = currentDecoder.duration(at: i) {
@@ -72,6 +92,9 @@ public class BBAnimatedImage: UIImage {
         self.init(cgImage: firstFrameSourceImage, scale: 1, orientation: firstFrame.imageOrientation)
         frameCount = currentFrameCount
         loopCount = currentDecoder.loopCount ?? 0
+        maxCacheSize = Int64.max
+        currentCacheSize = Int64(imageFrames.first!.bytes!)
+        autoUpdateMaxCacheSize = true
         frames = imageFrames
         decoder = currentDecoder
         lock = DispatchSemaphore(value: 1)
@@ -95,25 +118,65 @@ public class BBAnimatedImage: UIImage {
         return duration
     }
     
-    public func preloadImageFrames(with indexList: [Int]) {
+    public func updateCacheSizeIfNeeded() {
         lock.wait()
-        let shouldReturn = preloadTask != nil
+        let autoUpdate = autoUpdateMaxCacheSize!
+        lock.signal()
+        if !autoUpdate { return }
+        let total = Int64(Double(UIDevice.totalMemory) * 0.2)
+        let free = Int64(Double(UIDevice.freeMemory) * 0.6)
+        lock.wait()
+        maxCacheSize = min(total, free)
+        lock.signal()
+    }
+    
+    public func preloadImageFrame(fromIndex startIndex: Int) {
+        if startIndex >= frameCount { return }
+        lock.wait()
+        let shouldReturn = (preloadTask != nil)
         lock.signal()
         if shouldReturn { return }
         let sentinel = self.sentinel
         let work: () -> Void = { [weak self] in
             guard let self = self, sentinel == self.sentinel else { return }
-            for index in indexList {
-                if index >= self.frameCount { continue }
+            self.lock.wait()
+            let cleanCache = (self.currentCacheSize > self.maxCacheSize)
+            self.lock.signal()
+            if cleanCache {
+                for i in 0..<self.frameCount {
+                    let index = (startIndex + self.frameCount * 2 - i - 2) % self.frameCount // last second frame of start index
+                    var shouldBreak = false
+                    self.lock.wait()
+                    if self.frames[index].image != nil {
+                        self.frames[index].image = nil
+                        self.currentCacheSize -= self.frames[index].bytes ?? 0
+                        shouldBreak = (self.currentCacheSize <= self.maxCacheSize)
+                    }
+                    self.lock.signal()
+                    if shouldBreak { break }
+                }
+                return
+            }
+            for i in 0..<self.frameCount {
+                let index = (startIndex + i) % self.frameCount
                 self.lock.wait()
                 let currentFrames = self.frames!
                 self.lock.signal()
                 if currentFrames[index].image == nil {
                     if let image = self.decoder.imageFrame(at: index) {
                         if sentinel != self.sentinel { return }
+                        var shouldBreak = false
                         self.lock.wait()
-                        self.frames[index].image = image
+                        if self.frames[index].image == nil {
+                            if self.currentCacheSize + Int64(image.size.width * image.size.height) <= self.maxCacheSize {
+                                self.frames[index].image = image
+                                self.currentCacheSize += self.frames[index].bytes ?? 0
+                            } else {
+                                shouldBreak = true
+                            }
+                        }
                         self.lock.signal()
+                        if shouldBreak { break }
                     }
                 }
             }
