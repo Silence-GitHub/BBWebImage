@@ -35,7 +35,21 @@ public class BBAnimatedImageView: UIImageView {
         return super.isAnimating
     }
     
-    private var type: BBAnimatedImageViewType = .none
+    private var currentType: BBAnimatedImageViewType {
+        var type: BBAnimatedImageViewType = .none
+        if isHighlighted {
+            if let count = highlightedAnimationImages?.count, count > 0 { type = .hilightedAnimationImages }
+            else if highlightedImage != nil { type = .hilightedImage }
+        }
+        if type == .none {
+            if let count = animationImages?.count, count > 0 { type = .animationImages }
+            else if image != nil { type = .image }
+        }
+        return type
+    }
+    
+    private var imageForCurrentType: Any? { return image(forType: currentType) }
+    
     private var loopCount: Int = 0
     private var currentFrameIndex: Int = 0
     private var accumulatedTime: TimeInterval = 0
@@ -45,7 +59,6 @@ public class BBAnimatedImageView: UIImageView {
     }
     
     private func setImage(_ image: AnyObject?, withType type: BBAnimatedImageViewType) {
-        self.type = type
         stopAnimating()
         if displayLink != nil { resetAnimation() }
         if let animatedImage = image as? BBAnimatedImage { animatedImage.updateCacheSizeIfNeeded() }
@@ -66,7 +79,7 @@ public class BBAnimatedImageView: UIImageView {
     }
     
     @objc private func displayLinkRefreshed(_ link: CADisplayLink) {
-        guard let currentImage = image as? BBAnimatedImage else { return }
+        guard let currentImage = imageForCurrentType as? BBAnimatedImage else { return }
         if let cgimage = currentImage.imageFrame(at: currentFrameIndex)?.cgImage {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
@@ -90,18 +103,27 @@ public class BBAnimatedImageView: UIImageView {
         }
     }
     
+    private func image(forType type: BBAnimatedImageViewType) -> Any? {
+        switch type {
+        case .none: return nil
+        case .image: return image
+        case .hilightedImage: return highlightedImage
+        case .animationImages: return animationImages
+        case .hilightedAnimationImages: return highlightedAnimationImages
+        }
+    }
+    
     public override func startAnimating() {
-        if type == .image {
-            if image != nil {
-                if let link = displayLink {
-                    if link.isPaused { link.isPaused = false }
-                } else {
-                    let link = CADisplayLink(target: BBWeakProxy(target: self), selector: #selector(displayLinkRefreshed(_:)))
-                    link.add(to: RunLoop.main, forMode: .common)
-                    displayLink = link
-                }
+        switch currentType {
+        case .image, .hilightedImage:
+            if let link = displayLink {
+                if link.isPaused { link.isPaused = false }
+            } else {
+                let link = CADisplayLink(target: BBWeakProxy(target: self), selector: #selector(displayLinkRefreshed(_:)))
+                link.add(to: RunLoop.main, forMode: .common)
+                displayLink = link
             }
-        } else {
+        default:
             super.startAnimating()
         }
     }
