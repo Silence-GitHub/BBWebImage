@@ -233,7 +233,16 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                 remove(loadTask: task)
                 finished = true
             } else if !options.contains(.queryDataWhenInMemory) {
-                if let currentEditor = editor {
+                if let animatedImage = currentImage as? BBAnimatedImage {
+                    animatedImage.bb_editor = editor
+                    complete(with: task,
+                             completion: completion,
+                             image: animatedImage,
+                             data: nil,
+                             cacheType: .memory)
+                    remove(loadTask: task)
+                    finished = true
+                } else if let currentEditor = editor {
                     if currentEditor.key == currentImage.bb_imageEditKey {
                         complete(with: task,
                                  completion: completion,
@@ -287,8 +296,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                           editor: editor,
                           progress: progress,
                           completion: completion)
-        }
-        else if options.contains(.preload) {
+        } else if options.contains(.preload) {
             // Check whether disk data exists
             imageCache.diskDataExists(forKey: resource.cacheKey) { (exists) in
                 if exists {
@@ -307,8 +315,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                                        completion: completion)
                 }
             }
-        }
-        else {
+        } else {
             // Get disk data
             imageCache.image(forKey: resource.cacheKey, cacheType: .disk) { [weak self, weak task] (result: BBImageCacheQueryCompletionResult) in
                 guard let self = self, let task = task, !task.isCancelled else { return }
@@ -434,8 +441,22 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
         }
         self.coderQueue.async { [weak self, weak task] in
             guard let self = self, let task = task, !task.isCancelled else { return }
+            let decodedImage = self.imageCoder.decodedImage(with: data)
             if let currentEditor = editor {
-                if currentEditor.needData {
+                if let animatedImage = decodedImage as? BBAnimatedImage {
+                    animatedImage.bb_editor = currentEditor
+                    self.complete(with: task,
+                                  completion: completion,
+                                  image: animatedImage,
+                                  data: data,
+                                  cacheType: cacheType)
+                    let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
+                    self.imageCache.store(animatedImage,
+                                          data: data,
+                                          forKey: resource.cacheKey,
+                                          cacheType: storeCacheType,
+                                          completion: nil)
+                } else if currentEditor.needData {
                     if let image = currentEditor.edit(nil, data) {
                         guard !task.isCancelled else { return }
                         image.bb_imageEditKey = currentEditor.key
@@ -454,36 +475,34 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                     } else {
                         self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
                     }
-                } else {
-                    if let inputImage = self.imageCoder.decodedImage(with: data) {
-                        if let image = currentEditor.edit(inputImage, nil) {
-                            guard !task.isCancelled else { return }
-                            image.bb_imageEditKey = currentEditor.key
-                            image.bb_imageFormat = data.bb_imageFormat
-                            self.complete(with: task,
-                                          completion: completion,
-                                          image: image,
-                                          data: data,
-                                          cacheType: cacheType)
-                            let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
-                            self.imageCache.store(image,
-                                                  data: data,
-                                                  forKey: resource.cacheKey,
-                                                  cacheType: storeCacheType,
-                                                  completion: nil)
-                        } else {
-                            self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
-                        }
+                } else if let inputImage = decodedImage {
+                    if let image = currentEditor.edit(inputImage, nil) {
+                        guard !task.isCancelled else { return }
+                        image.bb_imageEditKey = currentEditor.key
+                        image.bb_imageFormat = data.bb_imageFormat
+                        self.complete(with: task,
+                                      completion: completion,
+                                      image: image,
+                                      data: data,
+                                      cacheType: cacheType)
+                        let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
+                        self.imageCache.store(image,
+                                              data: data,
+                                              forKey: resource.cacheKey,
+                                              cacheType: storeCacheType,
+                                              completion: nil)
                     } else {
-                        if cacheType == .none {
-                            pthread_mutex_lock(&self.urlBlacklistLock)
-                            self.urlBlacklist.insert(resource.downloadUrl)
-                            pthread_mutex_unlock(&self.urlBlacklistLock)
-                        }
-                        self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]))
+                        self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
                     }
+                } else {
+                    if cacheType == .none {
+                        pthread_mutex_lock(&self.urlBlacklistLock)
+                        self.urlBlacklist.insert(resource.downloadUrl)
+                        pthread_mutex_unlock(&self.urlBlacklistLock)
+                    }
+                    self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "Invalid image data"]))
                 }
-            } else if var image = self.imageCoder.decodedImage(with: data) {
+            } else if var image = decodedImage {
                 if !options.contains(.ignoreImageDecoding),
                     let decompressedImage = self.imageCoder.decompressedImage(with: image, data: data) {
                     image = decompressedImage

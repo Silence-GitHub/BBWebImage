@@ -101,7 +101,9 @@ extension BBWebImageGIFCoder: BBImageCoder {
     }
     
     public func decodedImage(with data: Data) -> UIImage? {
-        return BBAnimatedImage(bb_data: data, decoder: copy() as? BBAnimatedImageCoder)
+        let image = BBAnimatedImage(bb_data: data, decoder: copy() as? BBAnimatedImageCoder)
+        image?.bb_imageFormat = data.bb_imageFormat
+        return image
     }
     
     public func decompressedImage(with image: UIImage, data: Data) -> UIImage? {

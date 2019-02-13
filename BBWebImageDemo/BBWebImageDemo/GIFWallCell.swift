@@ -26,10 +26,16 @@ class GIFWallCell: UICollectionViewCell {
     }
     
     func set(url: URL) {
+        let editor = bb_imageEditorCommon(with: imageView.frame.size,
+                                          corner: .allCorners,
+                                          cornerRadius: 5,
+                                          borderWidth: 1,
+                                          borderColor: .yellow,
+                                          backgroundColor: .gray)
         imageView.bb_setImage(with: url,
                               placeholder: UIImage(named: "placeholder"),
                               options: .none,
-                              editor: nil,
+                              editor: editor,
                               progress: nil,
                               completion: nil)
     }

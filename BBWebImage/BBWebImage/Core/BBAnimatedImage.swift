@@ -32,6 +32,7 @@ public class BBAnimatedImage: UIImage {
             return e
         }
         set {
+            if let e = newValue, e.needData { return }
             lock.wait()
             editor = newValue
             lock.signal()
