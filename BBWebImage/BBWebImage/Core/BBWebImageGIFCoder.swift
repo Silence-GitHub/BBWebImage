@@ -50,11 +50,16 @@ public class BBWebImageGIFCoder: BBAnimatedImageCoder {
         imageOrientation = .up
     }
     
-    public func imageFrame(at index: Int) -> UIImage? {
+    public func imageFrame(at index: Int, decompress: Bool) -> UIImage? {
         if let source = imageSource,
-            let sourceImage = CGImageSourceCreateImageAtIndex(source, index, [kCGImageSourceShouldCache : true] as CFDictionary),
-            let cgimage = BBWebImageImageIOCoder.decompressedImage(sourceImage) {
-            return UIImage(cgImage: cgimage, scale: 1, orientation: imageOrientation)
+            let sourceImage = CGImageSourceCreateImageAtIndex(source, index, [kCGImageSourceShouldCache : true] as CFDictionary) {
+            if decompress {
+                if let cgimage = BBWebImageImageIOCoder.decompressedImage(sourceImage) {
+                    return UIImage(cgImage: cgimage, scale: 1, orientation: imageOrientation)
+                }
+            } else {
+                return UIImage(cgImage: sourceImage, scale: 1, orientation: imageOrientation)
+            }
         }
         return nil
     }

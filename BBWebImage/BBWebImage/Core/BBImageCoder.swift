@@ -71,7 +71,7 @@ public protocol BBAnimatedImageCoder: BBImageCoder {
     var imageData: Data? { get set }
     var frameCount: Int? { get }
     var loopCount: Int? { get }
-    func imageFrame(at index: Int) -> UIImage?
+    func imageFrame(at index: Int, decompress: Bool) -> UIImage?
     func imageFrameSize(at index: Int) -> CGSize?
     func duration(at index: Int) -> TimeInterval?
 }

@@ -19,14 +19,12 @@ private struct BBAnimatedImageFrame {
     fileprivate var size: CGSize?
     fileprivate var duration: TimeInterval
     
-    fileprivate var bytes: Int64? {
-        if let currentSize = size { return Int64(currentSize.width * currentSize.height) }
-        if let currentImage = image { return Int64(currentImage.size.width * currentImage.size.height) }
-        return nil
-    }
+    fileprivate var bytes: Int64? { return image?.bb_bytes }
 }
 
 public class BBAnimatedImage: UIImage {
+    public var bb_editor: BBWebImageEditor?
+    
     private var frameCount: Int!
     public var bb_frameCount: Int { return frameCount }
     
@@ -75,7 +73,7 @@ public class BBAnimatedImage: UIImage {
         guard let currentDecoder = tempDecoder else { return nil }
         if !canDecode && !currentDecoder.canDecode(data) { return nil }
         currentDecoder.imageData = data
-        guard let firstFrame = currentDecoder.imageFrame(at: 0),
+        guard let firstFrame = currentDecoder.imageFrame(at: 0, decompress: true),
             let firstFrameSourceImage = firstFrame.cgImage,
             let currentFrameCount = currentDecoder.frameCount,
             currentFrameCount > 0 else { return nil }
@@ -104,10 +102,41 @@ public class BBAnimatedImage: UIImage {
     public func imageFrame(at index: Int) -> UIImage? {
         if index >= frameCount { return nil }
         lock.wait()
-        let image = frames[index].image
+        let cacheImage = frames[index].image
+        let editor = bb_editor
         lock.signal()
-        if image != nil { return image }
-        return decoder.imageFrame(at: index)
+        return imageFrame(at: index, cachedImage: cacheImage, editor: editor)
+    }
+    
+    private func imageFrame(at index: Int, cachedImage: UIImage?, editor bbEditor: BBWebImageEditor?) -> UIImage? {
+        if let currentImage = cachedImage {
+            if let editor = bbEditor {
+                if currentImage.bb_imageEditKey == editor.key {
+                    return currentImage
+                } else if currentImage.bb_imageEditKey == nil {
+                    let editedImage = editor.edit(currentImage, nil)
+                    editedImage?.bb_imageEditKey = editor.key
+                    return editedImage
+                } else if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
+                    let editedImage = editor.edit(imageFrame, nil)
+                    editedImage?.bb_imageEditKey = editor.key
+                    return editedImage
+                }
+            } else if currentImage.bb_imageEditKey == nil {
+                return currentImage
+            } else {
+                return decoder.imageFrame(at: index, decompress: true)
+            }
+        } else if let editor = bbEditor {
+            if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
+                let editedImage = editor.edit(imageFrame, nil)
+                editedImage?.bb_imageEditKey = editor.key
+                return editedImage
+            }
+        } else {
+            return decoder.imageFrame(at: index, decompress: true)
+        }
+        return nil
     }
     
     public func duration(at index: Int) -> TimeInterval? {
@@ -147,9 +176,9 @@ public class BBAnimatedImage: UIImage {
                     let index = (startIndex + self.frameCount * 2 - i - 2) % self.frameCount // last second frame of start index
                     var shouldBreak = false
                     self.lock.wait()
-                    if self.frames[index].image != nil {
+                    if let oldImage = self.frames[index].image {
                         self.frames[index].image = nil
-                        self.currentCacheSize -= self.frames[index].bytes ?? 0
+                        self.currentCacheSize -= oldImage.bb_bytes
                         shouldBreak = (self.currentCacheSize <= self.maxCacheSize)
                     }
                     self.lock.signal()
@@ -160,24 +189,30 @@ public class BBAnimatedImage: UIImage {
             for i in 0..<self.frameCount {
                 let index = (startIndex + i) % self.frameCount
                 self.lock.wait()
-                let currentFrames = self.frames!
+                let cachedImage = self.frames[index].image
+                let editor = self.bb_editor
                 self.lock.signal()
-                if currentFrames[index].image == nil {
-                    if let image = self.decoder.imageFrame(at: index) {
-                        if sentinel != self.sentinel { return }
-                        var shouldBreak = false
-                        self.lock.wait()
-                        if self.frames[index].image == nil {
-                            if self.currentCacheSize + Int64(image.size.width * image.size.height) <= self.maxCacheSize {
+                if let image = self.imageFrame(at: index, cachedImage: cachedImage, editor: editor) {
+                    if sentinel != self.sentinel { return }
+                    var shouldBreak = false
+                    self.lock.wait()
+                    if let oldImage = self.frames[index].image {
+                        if oldImage !== image {
+                            if self.currentCacheSize + image.bb_bytes - oldImage.bb_bytes <= self.maxCacheSize {
                                 self.frames[index].image = image
-                                self.currentCacheSize += self.frames[index].bytes ?? 0
+                                self.currentCacheSize += image.bb_bytes - oldImage.bb_bytes
                             } else {
                                 shouldBreak = true
                             }
                         }
-                        self.lock.signal()
-                        if shouldBreak { break }
+                    } else if self.currentCacheSize + image.bb_bytes <= self.maxCacheSize {
+                        self.frames[index].image = image
+                        self.currentCacheSize += image.bb_bytes
+                    } else {
+                        shouldBreak = true
                     }
+                    self.lock.signal()
+                    if shouldBreak { break }
                 }
             }
             self.lock.wait()

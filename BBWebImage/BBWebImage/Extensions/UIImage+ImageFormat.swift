@@ -22,6 +22,8 @@ public extension UIImage {
         get { return objc_getAssociatedObject(self, &imageEditKey) as? String }
         set { objc_setAssociatedObject(self, &imageEditKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
+    
+    public var bb_bytes: Int64 { return Int64(size.width * size.height * scale) }
 }
 
 public extension CGImage {
