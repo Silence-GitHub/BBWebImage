@@ -26,6 +26,8 @@
 		4A9C6C2D220BEBF900B255E7 /* TestGIFVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9C6C2C220BEBF900B255E7 /* TestGIFVC.swift */; };
 		4A9C6C30220BED6700B255E7 /* Rotating_earth.gif in Resources */ = {isa = PBXBuildFile; fileRef = 4A9C6C2F220BED6700B255E7 /* Rotating_earth.gif */; };
 		4AF3D1EE216DA8B500320E6C /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 4AF3D1ED216DA8B500320E6C /* placeholder.png */; };
+		4AF494992213E7E700E705AA /* GIFWallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF494982213E7E700E705AA /* GIFWallVC.swift */; };
+		4AF4949B2213E86400E705AA /* GIFWallCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF4949A2213E86400E705AA /* GIFWallCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -63,6 +65,8 @@
 		4A9C6C2C220BEBF900B255E7 /* TestGIFVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGIFVC.swift; sourceTree = "<group>"; };
 		4A9C6C2F220BED6700B255E7 /* Rotating_earth.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Rotating_earth.gif; sourceTree = "<group>"; };
 		4AF3D1ED216DA8B500320E6C /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
+		4AF494982213E7E700E705AA /* GIFWallVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFWallVC.swift; sourceTree = "<group>"; };
+		4AF4949A2213E86400E705AA /* GIFWallCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFWallCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +110,8 @@
 				4A2CEA9921AF1A8D00E054A8 /* TestFilterVC.swift */,
 				4A2CEAB721B07BDA00E054A8 /* BBCILookupTestFilter.swift */,
 				4A9C6C2C220BEBF900B255E7 /* TestGIFVC.swift */,
+				4AF494982213E7E700E705AA /* GIFWallVC.swift */,
+				4AF4949A2213E86400E705AA /* GIFWallCell.swift */,
 				4AF3D1ED216DA8B500320E6C /* placeholder.png */,
 				4A5DE8FE2171973E0074EEFD /* large_leaves_70mp.jpg */,
 				4A2CEAB321AF588C00E054A8 /* sunflower.jpg */,
@@ -205,10 +211,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A53312921657ECD00C68080 /* MainMenuVC.swift in Sources */,
+				4AF494992213E7E700E705AA /* GIFWallVC.swift in Sources */,
 				4A679BD22167F05800EC36B4 /* TestVC.swift in Sources */,
 				4A9C6C2D220BEBF900B255E7 /* TestGIFVC.swift in Sources */,
 				4A2CEA9A21AF1A8D00E054A8 /* TestFilterVC.swift in Sources */,
 				4A5ABB3521936D0200036971 /* ImageWallVC.swift in Sources */,
+				4AF4949B2213E86400E705AA /* GIFWallCell.swift in Sources */,
 				4A5ABB3221936B4800036971 /* ImageURLProvider.swift in Sources */,
 				4A2CEAB821B07BDA00E054A8 /* BBCILookupTestFilter.swift in Sources */,
 				4A53312721657ECD00C68080 /* AppDelegate.swift in Sources */,
