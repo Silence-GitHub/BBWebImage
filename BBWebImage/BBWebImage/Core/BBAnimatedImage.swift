@@ -218,7 +218,7 @@ public class BBAnimatedImage: UIImage {
                     var shouldBreak = false
                     self.lock.wait()
                     if let oldImage = self.frames[index].image {
-                        if oldImage !== image {
+                        if oldImage.bb_imageEditKey != image.bb_imageEditKey {
                             if self.currentCacheSize + image.bb_bytes - oldImage.bb_bytes <= self.maxCacheSize {
                                 self.frames[index].image = image
                                 self.cachedFrameCount += 1
