@@ -20,6 +20,7 @@ public class BBAnimatedImageView: UIImageView {
     public var bb_autoStartAnimation: Bool = true
     
     private var displayLink: CADisplayLink?
+    private var shouldUpdateLayer: Bool = true
     
     public override var image: UIImage? {
         get { return super.image }
@@ -53,6 +54,7 @@ public class BBAnimatedImageView: UIImageView {
     private var loopCount: Int = 0
     private var currentFrameIndex: Int = 0
     private var accumulatedTime: TimeInterval = 0
+    private var currentLayerContent: CGImage?
     
     deinit {
         displayLink?.invalidate()
@@ -76,15 +78,17 @@ public class BBAnimatedImageView: UIImageView {
         loopCount = 0
         currentFrameIndex = 0
         accumulatedTime = 0
+        currentLayerContent = nil
+        shouldUpdateLayer = true
     }
     
     @objc private func displayLinkRefreshed(_ link: CADisplayLink) {
         guard let currentImage = imageForCurrentType as? BBAnimatedImage else { return }
-        if let cgimage = currentImage.imageFrame(at: currentFrameIndex)?.cgImage {
-            CATransaction.begin()
-            CATransaction.setDisableActions(true)
-            layer.contents = cgimage
-            CATransaction.commit()
+        if shouldUpdateLayer,
+            let cgimage = currentImage.imageFrame(at: currentFrameIndex)?.cgImage {
+            currentLayerContent = cgimage
+            layer.setNeedsDisplay()
+            shouldUpdateLayer = false
         }
         let nextIndex = (currentFrameIndex + 1) % currentImage.bb_frameCount
         currentImage.preloadImageFrame(fromIndex: nextIndex)
@@ -93,6 +97,7 @@ public class BBAnimatedImageView: UIImageView {
             accumulatedTime >= duration {
             currentFrameIndex = nextIndex
             accumulatedTime -= duration
+            shouldUpdateLayer = true
             if animationRepeatCount > 0 && currentFrameIndex == 0 {
                 loopCount += 1
                 if loopCount >= animationRepeatCount {
@@ -149,5 +154,11 @@ public class BBAnimatedImageView: UIImageView {
                 stopAnimating()
             }
         }
+    }
+    
+    // MARK: - Layer delegate
+    
+    public override func display(_ layer: CALayer) {
+        if let content = currentLayerContent { layer.contents = content }
     }
 }
