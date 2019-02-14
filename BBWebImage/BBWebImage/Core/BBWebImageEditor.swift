@@ -518,71 +518,74 @@ public extension UIImage {
                                      borderWidth: CGFloat = 0,
                                      borderColor: UIColor? = nil,
                                      backgroundColor: UIColor? = nil) -> UIImage? {
-        guard displaySize.width > 0,
-            displaySize.height > 0,
-            let sourceImage = cgImage?.cropping(to: bb_rectToDisplay(with: displaySize, fillContentMode: fillContentMode)) else { return nil }
-        var bitmapInfo = sourceImage.bitmapInfo
-        bitmapInfo.remove(.alphaInfoMask)
-        if sourceImage.bb_containsAlpha {
-            bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
-        } else {
-            bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+        return autoreleasepool { () -> UIImage? in
+            guard displaySize.width > 0,
+                displaySize.height > 0,
+                let sourceImage = cgImage?.cropping(to: bb_rectToDisplay(with: displaySize, fillContentMode: fillContentMode)) else { return nil }
+            var bitmapInfo = sourceImage.bitmapInfo
+            bitmapInfo.remove(.alphaInfoMask)
+            if sourceImage.bb_containsAlpha {
+                bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
+            } else {
+                bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+            }
+            // Make sure resolution is not too small
+            let currentMaxResolution = max(maxResolution, Int(displaySize.width * displaySize.height * 7))
+            let resolutionRatio = sqrt(CGFloat(sourceImage.width * sourceImage.height) / CGFloat(currentMaxResolution))
+            let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
+            var width = sourceImage.width
+            var height = sourceImage.height
+            if shouldScaleDown {
+                width = Int(CGFloat(sourceImage.width) / resolutionRatio)
+                height = Int(CGFloat(sourceImage.height) / resolutionRatio)
+            } else if CGFloat(width) < displaySize.width * bb_ScreenScale {
+                width = Int(displaySize.width * bb_ScreenScale)
+                height = Int(displaySize.height * bb_ScreenScale)
+            }
+            guard let context = CGContext(data: nil,
+                                          width: width,
+                                          height: height,
+                                          bitsPerComponent: sourceImage.bitsPerComponent,
+                                          bytesPerRow: 0,
+                                          space: bb_shareColorSpace,
+                                          bitmapInfo: bitmapInfo.rawValue) else { return nil }
+            context.scaleBy(x: 1, y: -1)
+            context.translateBy(x: 0, y: CGFloat(-height))
+            context.interpolationQuality = .high
+            context.saveGState()
+            
+            let ratio = CGFloat(width) / displaySize.width
+            let currentCornerRadius = cornerRadius * ratio
+            let currentBorderWidth = borderWidth * ratio
+            
+            if let fillColor = backgroundColor?.cgColor {
+                context.setFillColor(fillColor)
+                context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+            }
+            if cornerRadius > 0 && corner.isSubset(of: .allCorners) && !corner.isEmpty {
+                let clipPath = bb_borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
+                context.addPath(clipPath.cgPath)
+                context.clip()
+            }
+            context.scaleBy(x: 1, y: -1)
+            context.translateBy(x: 0, y: CGFloat(-height))
+            if shouldScaleDown {
+                bb_drawForScaleDown(context, sourceImage: sourceImage)
+            } else {
+                context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            }
+            context.restoreGState()
+            if let strokeColor = borderColor?.cgColor,
+                borderWidth > 0 {
+                let strokePath = bb_borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
+                context.addPath(strokePath.cgPath)
+                context.setLineWidth(currentBorderWidth)
+                context.setStrokeColor(strokeColor)
+                context.strokePath()
+            }
+            return context.makeImage().flatMap { UIImage(cgImage: $0) }
         }
-        // Make sure resolution is not too small
-        let currentMaxResolution = max(maxResolution, Int(displaySize.width * displaySize.height * 7))
-        let resolutionRatio = sqrt(CGFloat(sourceImage.width * sourceImage.height) / CGFloat(currentMaxResolution))
-        let shouldScaleDown = maxResolution > 0 && resolutionRatio > 1
-        var width = sourceImage.width
-        var height = sourceImage.height
-        if shouldScaleDown {
-            width = Int(CGFloat(sourceImage.width) / resolutionRatio)
-            height = Int(CGFloat(sourceImage.height) / resolutionRatio)
-        } else if CGFloat(width) < displaySize.width * bb_ScreenScale {
-            width = Int(displaySize.width * bb_ScreenScale)
-            height = Int(displaySize.height * bb_ScreenScale)
-        }
-        guard let context = CGContext(data: nil,
-                                      width: width,
-                                      height: height,
-                                      bitsPerComponent: sourceImage.bitsPerComponent,
-                                      bytesPerRow: 0,
-                                      space: bb_shareColorSpace,
-                                      bitmapInfo: bitmapInfo.rawValue) else { return nil }
-        context.scaleBy(x: 1, y: -1)
-        context.translateBy(x: 0, y: CGFloat(-height))
-        context.interpolationQuality = .high
-        context.saveGState()
         
-        let ratio = CGFloat(width) / displaySize.width
-        let currentCornerRadius = cornerRadius * ratio
-        let currentBorderWidth = borderWidth * ratio
-        
-        if let fillColor = backgroundColor?.cgColor {
-            context.setFillColor(fillColor)
-            context.fill(CGRect(x: 0, y: 0, width: width, height: height))
-        }
-        if cornerRadius > 0 && corner.isSubset(of: .allCorners) && !corner.isEmpty {
-            let clipPath = bb_borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
-            context.addPath(clipPath.cgPath)
-            context.clip()
-        }
-        context.scaleBy(x: 1, y: -1)
-        context.translateBy(x: 0, y: CGFloat(-height))
-        if shouldScaleDown {
-            bb_drawForScaleDown(context, sourceImage: sourceImage)
-        } else {
-            context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-        }
-        context.restoreGState()
-        if let strokeColor = borderColor?.cgColor,
-            borderWidth > 0 {
-            let strokePath = bb_borderPath(with: CGSize(width: width, height: height), corner: corner, cornerRadius: currentCornerRadius, borderWidth: currentBorderWidth)
-            context.addPath(strokePath.cgPath)
-            context.setLineWidth(currentBorderWidth)
-            context.setStrokeColor(strokeColor)
-            context.strokePath()
-        }
-        return context.makeImage().flatMap { UIImage(cgImage: $0) }
     }
     
     /// Calculates image rect to display with view size and content mode.

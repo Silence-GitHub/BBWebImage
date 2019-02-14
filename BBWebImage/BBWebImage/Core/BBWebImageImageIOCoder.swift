@@ -44,24 +44,26 @@ public class BBWebImageImageIOCoder: BBImageCoder {
     }
     
     public static func decompressedImage(_ sourceImage: CGImage) -> CGImage? {
-        let width = sourceImage.width
-        let height = sourceImage.height
-        var bitmapInfo = sourceImage.bitmapInfo
-        bitmapInfo.remove(.alphaInfoMask)
-        if sourceImage.bb_containsAlpha {
-            bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
-        } else {
-            bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+        return autoreleasepool { () -> CGImage? in
+            let width = sourceImage.width
+            let height = sourceImage.height
+            var bitmapInfo = sourceImage.bitmapInfo
+            bitmapInfo.remove(.alphaInfoMask)
+            if sourceImage.bb_containsAlpha {
+                bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue)
+            } else {
+                bitmapInfo = CGBitmapInfo(rawValue: bitmapInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue)
+            }
+            guard let context = CGContext(data: nil,
+                                          width: width,
+                                          height: height,
+                                          bitsPerComponent: sourceImage.bitsPerComponent,
+                                          bytesPerRow: 0,
+                                          space: bb_shareColorSpace,
+                                          bitmapInfo: bitmapInfo.rawValue) else { return nil }
+            context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return context.makeImage()
         }
-        guard let context = CGContext(data: nil,
-                                      width: width,
-                                      height: height,
-                                      bitsPerComponent: sourceImage.bitsPerComponent,
-                                      bytesPerRow: 0,
-                                      space: bb_shareColorSpace,
-                                      bitmapInfo: bitmapInfo.rawValue) else { return nil }
-        context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-        return context.makeImage()
     }
     
     public func canEncode(_ format: BBImageFormat) -> Bool {
