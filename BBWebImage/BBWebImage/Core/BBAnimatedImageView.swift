@@ -91,7 +91,7 @@ public class BBAnimatedImageView: UIImageView {
     @objc private func displayLinkRefreshed(_ link: CADisplayLink) {
         guard let currentImage = imageForCurrentType as? BBAnimatedImage else { return }
         if shouldUpdateLayer,
-            let cgimage = currentImage.imageFrame(at: currentFrameIndex)?.cgImage {
+            let cgimage = currentImage.imageFrame(at: currentFrameIndex, decodeIfNeeded: (currentFrameIndex == 0))?.cgImage {
             currentLayerContent = cgimage
             layer.setNeedsDisplay()
             shouldUpdateLayer = false

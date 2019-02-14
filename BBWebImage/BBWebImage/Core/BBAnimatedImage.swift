@@ -124,35 +124,45 @@ public class BBAnimatedImage: UIImage {
         sentinel = 0
     }
     
-    public func imageFrame(at index: Int) -> UIImage? {
+    public func imageFrame(at index: Int, decodeIfNeeded: Bool) -> UIImage? {
         if index >= frameCount { return nil }
         lock.wait()
         let cacheImage = frames[index].image
         let editor = self.editor
         lock.signal()
-        return imageFrame(at: index, cachedImage: cacheImage, editor: editor)
+        return imageFrame(at: index,
+                          cachedImage: cacheImage,
+                          editor: editor,
+                          decodeIfNeeded: decodeIfNeeded)
     }
     
-    private func imageFrame(at index: Int, cachedImage: UIImage?, editor bbEditor: BBWebImageEditor?) -> UIImage? {
+    private func imageFrame(at index: Int,
+                            cachedImage: UIImage?,
+                            editor bbEditor: BBWebImageEditor?,
+                            decodeIfNeeded: Bool) -> UIImage? {
         if let currentImage = cachedImage {
             if let editor = bbEditor {
                 if currentImage.bb_imageEditKey == editor.key {
                     return currentImage
-                } else if currentImage.bb_imageEditKey == nil {
-                    let editedImage = editor.edit(currentImage, nil)
-                    editedImage?.bb_imageEditKey = editor.key
-                    return editedImage
-                } else if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
-                    let editedImage = editor.edit(imageFrame, nil)
-                    editedImage?.bb_imageEditKey = editor.key
-                    return editedImage
+                } else if decodeIfNeeded {
+                    if currentImage.bb_imageEditKey == nil {
+                        let editedImage = editor.edit(currentImage, nil)
+                        editedImage?.bb_imageEditKey = editor.key
+                        return editedImage
+                    } else if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
+                        let editedImage = editor.edit(imageFrame, nil)
+                        editedImage?.bb_imageEditKey = editor.key
+                        return editedImage
+                    }
                 }
             } else if currentImage.bb_imageEditKey == nil {
                 return currentImage
-            } else {
+            } else if decodeIfNeeded {
                 return decoder.imageFrame(at: index, decompress: true)
             }
-        } else if let editor = bbEditor {
+        }
+        if !decodeIfNeeded { return nil }
+        if let editor = bbEditor {
             if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
                 let editedImage = editor.edit(imageFrame, nil)
                 editedImage?.bb_imageEditKey = editor.key
@@ -215,7 +225,10 @@ public class BBAnimatedImage: UIImage {
                 let cachedImage = self.frames[index].image
                 let editor = self.editor
                 self.lock.signal()
-                if let image = self.imageFrame(at: index, cachedImage: cachedImage, editor: editor) {
+                if let image = self.imageFrame(at: index,
+                                               cachedImage: cachedImage,
+                                               editor: editor,
+                                               decodeIfNeeded: true) {
                     if sentinel != self.sentinel { return }
                     var shouldBreak = false
                     self.lock.wait()
