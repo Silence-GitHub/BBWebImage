@@ -33,7 +33,13 @@ public class BBAnimatedImageView: UIImageView {
     }
     
     public override var isAnimating: Bool {
-        return super.isAnimating
+        switch currentType {
+        case .none: return false
+        case .image, .hilightedImage:
+            if let link = displayLink { return !link.isPaused }
+            return false
+        default: return super.isAnimating
+        }
     }
     
     private var currentType: BBAnimatedImageViewType {
@@ -92,7 +98,7 @@ public class BBAnimatedImageView: UIImageView {
         }
         let nextIndex = (currentFrameIndex + 1) % currentImage.bb_frameCount
         currentImage.preloadImageFrame(fromIndex: nextIndex)
-        accumulatedTime += link.duration * Double(link.frameInterval)
+        accumulatedTime += link.duration // multiply frameInterval if frameInterval is not 1
         if let duration = currentImage.duration(at: currentFrameIndex),
             accumulatedTime >= duration {
             currentFrameIndex = nextIndex
