@@ -48,6 +48,7 @@ public class BBAnimatedImage: UIImage {
     private var maxCacheSize: Int64!
     private var currentCacheSize: Int64!
     private var autoUpdateMaxCacheSize: Bool!
+    private var cachedFrameCount: Int!
     public var bb_maxCacheSize: Int64 {
         get {
             lock.wait()
@@ -114,6 +115,7 @@ public class BBAnimatedImage: UIImage {
         maxCacheSize = Int64.max
         currentCacheSize = Int64(imageFrames.first!.bytes!)
         autoUpdateMaxCacheSize = true
+        cachedFrameCount = 1
         frames = imageFrames
         decoder = currentDecoder
         lock = DispatchSemaphore(value: 1)
@@ -180,7 +182,7 @@ public class BBAnimatedImage: UIImage {
     public func preloadImageFrame(fromIndex startIndex: Int) {
         if startIndex >= frameCount { return }
         lock.wait()
-        let shouldReturn = (preloadTask != nil)
+        let shouldReturn = (preloadTask != nil || cachedFrameCount >= self.frameCount)
         lock.signal()
         if shouldReturn { return }
         let sentinel = self.sentinel
@@ -196,6 +198,7 @@ public class BBAnimatedImage: UIImage {
                     self.lock.wait()
                     if let oldImage = self.frames[index].image {
                         self.frames[index].image = nil
+                        self.cachedFrameCount -= 1
                         self.currentCacheSize -= oldImage.bb_bytes
                         shouldBreak = (self.currentCacheSize <= self.maxCacheSize)
                     }
@@ -218,6 +221,7 @@ public class BBAnimatedImage: UIImage {
                         if oldImage !== image {
                             if self.currentCacheSize + image.bb_bytes - oldImage.bb_bytes <= self.maxCacheSize {
                                 self.frames[index].image = image
+                                self.cachedFrameCount += 1
                                 self.currentCacheSize += image.bb_bytes - oldImage.bb_bytes
                             } else {
                                 shouldBreak = true
@@ -225,6 +229,7 @@ public class BBAnimatedImage: UIImage {
                         }
                     } else if self.currentCacheSize + image.bb_bytes <= self.maxCacheSize {
                         self.frames[index].image = image
+                        self.cachedFrameCount += 1
                         self.currentCacheSize += image.bb_bytes
                     } else {
                         shouldBreak = true
