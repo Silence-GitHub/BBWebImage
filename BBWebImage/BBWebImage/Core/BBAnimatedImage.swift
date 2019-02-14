@@ -23,7 +23,6 @@ private struct BBAnimatedImageFrame {
 }
 
 public class BBAnimatedImage: UIImage {
-    private var editor: BBWebImageEditor?
     public var bb_editor: BBWebImageEditor? {
         get {
             lock.wait()
@@ -39,16 +38,10 @@ public class BBAnimatedImage: UIImage {
         }
     }
     
-    private var frameCount: Int!
     public var bb_frameCount: Int { return frameCount }
     
-    private var loopCount: Int!
     public var bb_loopCount: Int { return loopCount }
     
-    private var maxCacheSize: Int64!
-    private var currentCacheSize: Int64!
-    private var autoUpdateMaxCacheSize: Bool!
-    private var cachedFrameCount: Int!
     public var bb_maxCacheSize: Int64 {
         get {
             lock.wait()
@@ -69,6 +62,15 @@ public class BBAnimatedImage: UIImage {
         }
     }
     
+    public var bb_originalImageData: Data { return decoder.imageData! }
+    
+    private var editor: BBWebImageEditor?
+    private var frameCount: Int!
+    private var loopCount: Int!
+    private var maxCacheSize: Int64!
+    private var currentCacheSize: Int64!
+    private var autoUpdateMaxCacheSize: Bool!
+    private var cachedFrameCount: Int!
     private var frames: [BBAnimatedImageFrame]!
     private var decoder: BBAnimatedImageCoder!
     private var lock: DispatchSemaphore!

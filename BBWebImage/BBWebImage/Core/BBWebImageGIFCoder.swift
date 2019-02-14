@@ -111,11 +111,15 @@ extension BBWebImageGIFCoder: BBImageCoder {
     }
     
     public func canEncode(_ format: BBImageFormat) -> Bool {
-        // TODO: Encode gif
-        return false
+        return format == .GIF
     }
     
     public func encodedData(with image: UIImage, format: BBImageFormat) -> Data? {
+        if let animatedImage = image as? BBAnimatedImage,
+            animatedImage.bb_imageFormat == .GIF,
+            format == .GIF {
+            return animatedImage.bb_originalImageData
+        }
         // TODO: Encode gif
         return nil
     }
