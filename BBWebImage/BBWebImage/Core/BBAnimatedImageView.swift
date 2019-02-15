@@ -24,6 +24,18 @@ public class BBAnimatedImageView: UIImageView {
         set { if newValue > 0 { animationDurationScale = newValue } }
     }
     
+    public var bb_runLoopMode: RunLoop.Mode {
+        get { return runLoopMode }
+        set {
+            if runLoopMode == newValue { return }
+            if let link = displayLink {
+                link.remove(from: .main, forMode: runLoopMode)
+                link.add(to: .main, forMode: newValue)
+            }
+            runLoopMode = newValue
+        }
+    }
+    
     public override var image: UIImage? {
         get { return super.image }
         set {
@@ -82,7 +94,8 @@ public class BBAnimatedImageView: UIImageView {
     private var imageForCurrentType: Any? { return image(forType: currentType) }
     
     private var displayLink: CADisplayLink?
-    public var animationDurationScale: Double = 1
+    private var animationDurationScale: Double = 1
+    private var runLoopMode: RunLoop.Mode = .common
     private var shouldUpdateLayer: Bool = true
     private var loopCount: Int = 0
     private var currentFrameIndex: Int = 0
@@ -168,7 +181,7 @@ public class BBAnimatedImageView: UIImageView {
                 if link.isPaused { link.isPaused = false }
             } else {
                 let link = CADisplayLink(target: BBWeakProxy(target: self), selector: #selector(displayLinkRefreshed(_:)))
-                link.add(to: RunLoop.main, forMode: .common)
+                link.add(to: .main, forMode: runLoopMode)
                 displayLink = link
             }
         default:
