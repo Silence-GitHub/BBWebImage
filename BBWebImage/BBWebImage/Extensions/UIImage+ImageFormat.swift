@@ -30,3 +30,35 @@ public extension CGImage {
     public var bb_containsAlpha: Bool { return !(alphaInfo == .none || alphaInfo == .noneSkipFirst || alphaInfo == .noneSkipLast) }
     public var bb_cost: Int { return max(1, height * bytesPerRow) }
 }
+
+extension CGImagePropertyOrientation {
+    var bb_UIImageOrientation: UIImage.Orientation {
+        switch self {
+        case .up: return .up
+        case .down: return .down
+        case .left: return .left
+        case .right: return .right
+        case .upMirrored: return .upMirrored
+        case .downMirrored: return .downMirrored
+        case .leftMirrored: return .leftMirrored
+        case .rightMirrored: return .downMirrored
+        default: return .up
+        }
+    }
+}
+
+extension UIImage.Orientation {
+    var bb_CGImageOrientation: CGImagePropertyOrientation {
+        switch self {
+        case .up: return .up
+        case .down: return .down
+        case .left: return .left
+        case .right: return .right
+        case .upMirrored: return .upMirrored
+        case .downMirrored: return .downMirrored
+        case .leftMirrored: return .leftMirrored
+        case .rightMirrored: return .rightMirrored
+        default: return .up
+        }
+    }
+}

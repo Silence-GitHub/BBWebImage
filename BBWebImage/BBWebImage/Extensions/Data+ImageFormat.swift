@@ -19,8 +19,12 @@ public enum BBImageFormat {
         switch self {
         case .JPEG:
             return kUTTypeJPEG
-        default:
+        case .PNG:
             return kUTTypePNG
+        case .GIF:
+            return kUTTypeGIF
+        default:
+            return kUTTypeImage
         }
     }
 }

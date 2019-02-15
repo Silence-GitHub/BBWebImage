@@ -74,11 +74,10 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         guard let sourceImage = image.cgImage,
             let data = CFDataCreateMutable(kCFAllocatorDefault, 0) else { return nil }
         var imageFormat = format
-        if format == .unknown {
-            imageFormat = sourceImage.bb_containsAlpha ? .PNG : .JPEG
-        }
+        if format == .unknown { imageFormat = sourceImage.bb_containsAlpha ? .PNG : .JPEG }
         if let destination = CGImageDestinationCreateWithData(data, imageFormat.UTType, 1, nil) {
-            CGImageDestinationAddImage(destination, sourceImage, nil)
+            let properties = [kCGImagePropertyOrientation : image.imageOrientation.bb_CGImageOrientation.rawValue]
+            CGImageDestinationAddImage(destination, sourceImage, properties as CFDictionary)
             if !CGImageDestinationFinalize(destination) {
                 return nil
             }
@@ -119,7 +118,7 @@ extension BBWebImageImageIOCoder: BBImageProgressiveCoder {
             }
             if let rawValue = properties[kCGImagePropertyOrientation] as? UInt32,
                 let orientation = CGImagePropertyOrientation(rawValue: rawValue) {
-                imageOrientation = orientation.toUIImageOrientation
+                imageOrientation = orientation.bb_UIImageOrientation
             }
         }
         if imageWidth > 0 && imageHeight > 0,

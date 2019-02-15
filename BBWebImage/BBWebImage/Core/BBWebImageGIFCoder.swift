@@ -20,7 +20,7 @@ public class BBWebImageGIFCoder: BBAnimatedImageCoder {
                     let properties = CGImageSourceCopyProperties(source, nil) as? [CFString : Any],
                     let rawValue = properties[kCGImagePropertyOrientation] as? UInt32,
                     let orientation = CGImagePropertyOrientation(rawValue: rawValue) {
-                    imageOrientation = orientation.toUIImageOrientation
+                    imageOrientation = orientation.bb_UIImageOrientation
                 }
             } else {
                 imageSource = nil
