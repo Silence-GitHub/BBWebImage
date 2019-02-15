@@ -125,7 +125,7 @@ public class BBAnimatedImage: UIImage {
         self.init(cgImage: firstFrameSourceImage, scale: 1, orientation: firstFrame.imageOrientation)
         frameCount = currentFrameCount
         loopCount = currentDecoder.loopCount ?? 0
-        maxCacheSize = Int64.max
+        maxCacheSize = .max
         currentCacheSize = Int64(imageFrames.first!.bytes!)
         autoUpdateMaxCacheSize = true
         cachedFrameCount = 1
@@ -213,7 +213,7 @@ public class BBAnimatedImage: UIImage {
     public func bb_preloadImageFrame(fromIndex startIndex: Int) {
         if startIndex >= frameCount { return }
         lock.wait()
-        let shouldReturn = (preloadTask != nil || cachedFrameCount >= self.frameCount)
+        let shouldReturn = (preloadTask != nil || cachedFrameCount >= frameCount)
         lock.signal()
         if shouldReturn { return }
         let sentinel = self.sentinel
@@ -272,6 +272,22 @@ public class BBAnimatedImage: UIImage {
         lock.wait()
         preloadTask = work
         BBDispatchQueuePool.default.async(work: work)
+        lock.signal()
+    }
+    
+    public func bb_preloadAllImageFrames() {
+        lock.wait()
+        autoUpdateMaxCacheSize = false
+        maxCacheSize = .max
+        cachedFrameCount = 0
+        currentCacheSize = 0
+        for i in 0..<frames.count {
+            if let image = bb_imageFrame(at: i, decodeIfNeeded: true) {
+                frames[i].image = image
+                cachedFrameCount += 1
+                currentCacheSize += image.bb_bytes
+            }
+        }
         lock.signal()
     }
     
