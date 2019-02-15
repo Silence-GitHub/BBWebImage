@@ -19,6 +19,11 @@ enum BBAnimatedImageViewType {
 public class BBAnimatedImageView: UIImageView {
     public var bb_autoStartAnimation: Bool = true
     
+    public var bb_animationDurationScale: Double {
+        get { return animationDurationScale }
+        set { if newValue > 0 { animationDurationScale = newValue } }
+    }
+    
     public override var image: UIImage? {
         get { return super.image }
         set {
@@ -77,6 +82,7 @@ public class BBAnimatedImageView: UIImageView {
     private var imageForCurrentType: Any? { return image(forType: currentType) }
     
     private var displayLink: CADisplayLink?
+    public var animationDurationScale: Double = 1
     private var shouldUpdateLayer: Bool = true
     private var loopCount: Int = 0
     private var currentFrameIndex: Int = 0
@@ -128,16 +134,18 @@ public class BBAnimatedImageView: UIImageView {
         let nextIndex = (currentFrameIndex + 1) % currentImage.bb_frameCount
         currentImage.bb_preloadImageFrame(fromIndex: nextIndex)
         accumulatedTime += link.duration // multiply frameInterval if frameInterval is not 1
-        if let duration = currentImage.bb_duration(at: currentFrameIndex),
-            accumulatedTime >= duration {
-            currentFrameIndex = nextIndex
-            accumulatedTime -= duration
-            shouldUpdateLayer = true
-            if animationRepeatCount > 0 && currentFrameIndex == 0 {
-                loopCount += 1
-                if loopCount >= animationRepeatCount {
-                    stopAnimating()
-                    resetAnimation()
+        if var duration = currentImage.bb_duration(at: currentFrameIndex) {
+            duration *= animationDurationScale
+            if accumulatedTime >= duration {
+                currentFrameIndex = nextIndex
+                accumulatedTime -= duration
+                shouldUpdateLayer = true
+                if animationRepeatCount > 0 && currentFrameIndex == 0 {
+                    loopCount += 1
+                    if loopCount >= animationRepeatCount {
+                        stopAnimating()
+                        resetAnimation()
+                    }
                 }
             }
         }
