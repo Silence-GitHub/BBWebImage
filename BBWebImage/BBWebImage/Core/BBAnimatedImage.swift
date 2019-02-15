@@ -128,6 +128,8 @@ public class BBAnimatedImage: UIImage {
         lock = DispatchSemaphore(value: 1)
         sentinel = 0
         NotificationCenter.default.addObserver(self, selector: #selector(didReceiveMemoryWarning), name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     public func imageFrame(at index: Int, decodeIfNeeded: Bool) -> UIImage? {
@@ -277,7 +279,7 @@ public class BBAnimatedImage: UIImage {
         views.remove(view)
         if views.count <= 0 {
             cancelPreloadTask()
-            clear(completion: nil)
+            clearAsynchronously(completion: nil)
         }
     }
     
@@ -290,27 +292,39 @@ public class BBAnimatedImage: UIImage {
         lock.signal()
     }
     
-    private func clear(completion: (() -> Void)?) {
+    private func clearAsynchronously(completion: (() -> Void)?) {
         BBDispatchQueuePool.default.async { [weak self] in
             guard let self = self else { return }
-            self.lock.wait()
-            for i in 0..<self.frames.count {
-                self.frames[i].image = nil
-            }
-            self.cachedFrameCount = 0
-            self.currentCacheSize = 0
-            self.lock.signal()
+            self.clear()
             completion?()
         }
     }
     
+    private func clear() {
+        lock.wait()
+        for i in 0..<frames.count {
+            frames[i].image = nil
+        }
+        cachedFrameCount = 0
+        currentCacheSize = 0
+        lock.signal()
+    }
+    
     @objc private func didReceiveMemoryWarning() {
-        clear { [weak self] in
+        clearAsynchronously { [weak self] in
             guard let self = self else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
                 guard let self = self else { return }
                 self.updateCacheSizeIfNeeded()
             }
         }
+    }
+    
+    @objc private func didEnterBackground() {
+        clear()
+    }
+    
+    @objc private func didBecomeActive() {
+        updateCacheSizeIfNeeded()
     }
 }
