@@ -19,16 +19,35 @@ enum BBAnimatedImageViewType {
 public class BBAnimatedImageView: UIImageView {
     public var bb_autoStartAnimation: Bool = true
     
-    private var displayLink: CADisplayLink?
-    private var shouldUpdateLayer: Bool = true
-    
     public override var image: UIImage? {
         get { return super.image }
         set {
-            if super.image == newValue {
-                return
-            }
+            if super.image == newValue { return }
             setImage(newValue, withType: .image)
+        }
+    }
+    
+    public override var highlightedImage: UIImage? {
+        get { return super.highlightedImage }
+        set {
+            if super.highlightedImage == newValue { return }
+            setImage(newValue, withType: .hilightedImage)
+        }
+    }
+    
+    public override var animationImages: [UIImage]? {
+        get { return super.animationImages }
+        set {
+            if super.animationImages == newValue { return }
+            setImage(newValue, withType: .animationImages)
+        }
+    }
+    
+    public override var highlightedAnimationImages: [UIImage]? {
+        get { return super.highlightedAnimationImages }
+        set {
+            if super.highlightedAnimationImages == newValue { return }
+            setImage(newValue, withType: .hilightedAnimationImages)
         }
     }
     
@@ -57,6 +76,8 @@ public class BBAnimatedImageView: UIImageView {
     
     private var imageForCurrentType: Any? { return image(forType: currentType) }
     
+    private var displayLink: CADisplayLink?
+    private var shouldUpdateLayer: Bool = true
     private var loopCount: Int = 0
     private var currentFrameIndex: Int = 0
     private var accumulatedTime: TimeInterval = 0
@@ -66,14 +87,22 @@ public class BBAnimatedImageView: UIImageView {
         displayLink?.invalidate()
     }
     
-    private func setImage(_ image: AnyObject?, withType type: BBAnimatedImageViewType) {
+    private func setImage(_ image: Any?, withType type: BBAnimatedImageViewType) {
         stopAnimating()
         if displayLink != nil { resetAnimation() }
         if let animatedImage = image as? BBAnimatedImage { animatedImage.updateCacheSizeIfNeeded() }
         switch type {
         case .none: break
-        case .image: super.image = image as? UIImage
-        case .hilightedImage: super.highlightedImage = image as? UIImage
+        case .image:
+            let old = super.image as? BBAnimatedImage
+            super.image = image as? UIImage
+            old?.didRemoveFromView(self)
+            (image as? BBAnimatedImage)?.didAddToView(self)
+        case .hilightedImage:
+            let old = super.highlightedImage as? BBAnimatedImage
+            super.highlightedImage = image as? UIImage
+            old?.didRemoveFromView(self)
+            (image as? BBAnimatedImage)?.didAddToView(self)
         case .animationImages: super.animationImages = image as? [UIImage]
         case .hilightedAnimationImages: super.highlightedAnimationImages = image as? [UIImage]
         }

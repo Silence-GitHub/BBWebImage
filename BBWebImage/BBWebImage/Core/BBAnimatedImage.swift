@@ -73,6 +73,7 @@ public class BBAnimatedImage: UIImage {
     private var cachedFrameCount: Int!
     private var frames: [BBAnimatedImageFrame]!
     private var decoder: BBAnimatedImageCoder!
+    private var views: NSHashTable<BBAnimatedImageView>!
     private var lock: DispatchSemaphore!
     private var sentinel: Int32!
     private var preloadTask: (() -> Void)?
@@ -120,6 +121,7 @@ public class BBAnimatedImage: UIImage {
         cachedFrameCount = 1
         frames = imageFrames
         decoder = currentDecoder
+        views = NSHashTable(options: .weakMemory)
         lock = DispatchSemaphore(value: 1)
         sentinel = 0
     }
@@ -261,6 +263,15 @@ public class BBAnimatedImage: UIImage {
         preloadTask = work
         BBDispatchQueuePool.default.async(work: work)
         lock.signal()
+    }
+    
+    public func didAddToView(_ view: BBAnimatedImageView) {
+        views.add(view)
+    }
+    
+    public func didRemoveFromView(_ view: BBAnimatedImageView) {
+        views.remove(view)
+        if views.count <= 0 { cancelPreloadTask() }
     }
     
     private func cancelPreloadTask() {
