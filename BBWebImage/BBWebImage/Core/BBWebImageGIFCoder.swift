@@ -152,7 +152,5 @@ extension BBWebImageGIFCoder: BBImageCoder {
         return nil
     }
     
-    public func copy() -> BBImageCoder {
-        return BBWebImageGIFCoder()
-    }
+    public func copy() -> BBImageCoder { return BBWebImageGIFCoder() }
 }

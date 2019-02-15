@@ -83,9 +83,7 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         return nil
     }
     
-    public func copy() -> BBImageCoder {
-        return BBWebImageImageIOCoder()
-    }
+    public func copy() -> BBImageCoder { return BBWebImageImageIOCoder() }
 }
 
 extension BBWebImageImageIOCoder: BBImageProgressiveCoder {
