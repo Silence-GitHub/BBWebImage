@@ -90,22 +90,22 @@ public class BBAnimatedImageView: UIImageView {
     private func setImage(_ image: Any?, withType type: BBAnimatedImageViewType) {
         stopAnimating()
         if displayLink != nil { resetAnimation() }
-        if let animatedImage = image as? BBAnimatedImage { animatedImage.updateCacheSizeIfNeeded() }
+        let animatedImage = image as? BBAnimatedImage
         switch type {
         case .none: break
         case .image:
             let old = super.image as? BBAnimatedImage
             super.image = image as? UIImage
             old?.didRemoveFromView(self)
-            (image as? BBAnimatedImage)?.didAddToView(self)
         case .hilightedImage:
             let old = super.highlightedImage as? BBAnimatedImage
             super.highlightedImage = image as? UIImage
             old?.didRemoveFromView(self)
-            (image as? BBAnimatedImage)?.didAddToView(self)
         case .animationImages: super.animationImages = image as? [UIImage]
         case .hilightedAnimationImages: super.highlightedAnimationImages = image as? [UIImage]
         }
+        animatedImage?.didAddToView(self)
+        animatedImage?.updateCacheSizeIfNeeded()
         didMove()
     }
     

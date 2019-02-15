@@ -78,7 +78,10 @@ public class BBAnimatedImage: UIImage {
     private var sentinel: Int32!
     private var preloadTask: (() -> Void)?
     
-    deinit { cancelPreloadTask() }
+    deinit {
+        cancelPreloadTask()
+        NotificationCenter.default.removeObserver(self)
+    }
     
     public convenience init?(bb_data data: Data, decoder aDecoder: BBAnimatedImageCoder? = nil) {
         var tempDecoder = aDecoder
@@ -124,6 +127,7 @@ public class BBAnimatedImage: UIImage {
         views = NSHashTable(options: .weakMemory)
         lock = DispatchSemaphore(value: 1)
         sentinel = 0
+        NotificationCenter.default.addObserver(self, selector: #selector(didReceiveMemoryWarning), name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
     }
     
     public func imageFrame(at index: Int, decodeIfNeeded: Bool) -> UIImage? {
@@ -271,7 +275,10 @@ public class BBAnimatedImage: UIImage {
     
     public func didRemoveFromView(_ view: BBAnimatedImageView) {
         views.remove(view)
-        if views.count <= 0 { cancelPreloadTask() }
+        if views.count <= 0 {
+            cancelPreloadTask()
+            clear(completion: nil)
+        }
     }
     
     private func cancelPreloadTask() {
@@ -281,5 +288,29 @@ public class BBAnimatedImage: UIImage {
             preloadTask = nil
         }
         lock.signal()
+    }
+    
+    private func clear(completion: (() -> Void)?) {
+        BBDispatchQueuePool.default.async { [weak self] in
+            guard let self = self else { return }
+            self.lock.wait()
+            for i in 0..<self.frames.count {
+                self.frames[i].image = nil
+            }
+            self.cachedFrameCount = 0
+            self.currentCacheSize = 0
+            self.lock.signal()
+            completion?()
+        }
+    }
+    
+    @objc private func didReceiveMemoryWarning() {
+        clear { [weak self] in
+            guard let self = self else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                guard let self = self else { return }
+                self.updateCacheSizeIfNeeded()
+            }
+        }
     }
 }
