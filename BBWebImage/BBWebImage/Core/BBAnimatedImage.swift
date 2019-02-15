@@ -240,14 +240,7 @@ public class BBAnimatedImage: UIImage {
             }
             for i in 0..<self.frameCount {
                 let index = (startIndex + i) % self.frameCount
-                self.lock.wait()
-                let cachedImage = self.frames[index].image
-                let editor = self.editor
-                self.lock.signal()
-                if let image = self.imageFrame(at: index,
-                                               cachedImage: cachedImage,
-                                               editor: editor,
-                                               decodeIfNeeded: true) {
+                if let image = self.bb_imageFrame(at: index, decodeIfNeeded: true) {
                     if sentinel != self.sentinel { return }
                     var shouldBreak = false
                     self.lock.wait()
