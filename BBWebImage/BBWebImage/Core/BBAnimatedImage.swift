@@ -52,14 +52,21 @@ public class BBAnimatedImage: UIImage {
         set {
             lock.wait()
             if newValue >= 0 {
-                maxCacheSize = newValue
                 autoUpdateMaxCacheSize = false
+                maxCacheSize = newValue
             } else {
-                maxCacheSize = 0
                 autoUpdateMaxCacheSize = true
+                updateCacheSize()
             }
             lock.signal()
         }
+    }
+    
+    public var bb_currentCacheSize: Int64 {
+        lock.wait()
+        let s = currentCacheSize!
+        lock.signal()
+        return s
     }
     
     public var bb_originalImageData: Data { return decoder.imageData! }
@@ -132,7 +139,7 @@ public class BBAnimatedImage: UIImage {
         NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
-    public func imageFrame(at index: Int, decodeIfNeeded: Bool) -> UIImage? {
+    public func bb_imageFrame(at index: Int, decodeIfNeeded: Bool) -> UIImage? {
         if index >= frameCount { return nil }
         lock.wait()
         let cacheImage = frames[index].image
@@ -182,7 +189,7 @@ public class BBAnimatedImage: UIImage {
         return nil
     }
     
-    public func duration(at index: Int) -> TimeInterval? {
+    public func bb_duration(at index: Int) -> TimeInterval? {
         if index >= frameCount { return nil }
         lock.wait()
         let duration = frames[index].duration
@@ -190,16 +197,20 @@ public class BBAnimatedImage: UIImage {
         return duration
     }
     
-    public func updateCacheSizeIfNeeded() {
+    public func bb_updateCacheSizeIfNeeded() {
         lock.wait()
         defer { lock.signal() }
         if !autoUpdateMaxCacheSize { return }
+        updateCacheSize()
+    }
+    
+    private func updateCacheSize() {
         let total = Int64(Double(UIDevice.totalMemory) * 0.2)
         let free = Int64(Double(UIDevice.freeMemory) * 0.6)
         maxCacheSize = min(total, free)
     }
     
-    public func preloadImageFrame(fromIndex startIndex: Int) {
+    public func bb_preloadImageFrame(fromIndex startIndex: Int) {
         if startIndex >= frameCount { return }
         lock.wait()
         let shouldReturn = (preloadTask != nil || cachedFrameCount >= self.frameCount)
@@ -271,11 +282,11 @@ public class BBAnimatedImage: UIImage {
         lock.signal()
     }
     
-    public func didAddToView(_ view: BBAnimatedImageView) {
+    public func bb_didAddToView(_ view: BBAnimatedImageView) {
         views.add(view)
     }
     
-    public func didRemoveFromView(_ view: BBAnimatedImageView) {
+    public func bb_didRemoveFromView(_ view: BBAnimatedImageView) {
         views.remove(view)
         if views.count <= 0 {
             cancelPreloadTask()
@@ -315,7 +326,7 @@ public class BBAnimatedImage: UIImage {
             guard let self = self else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
                 guard let self = self else { return }
-                self.updateCacheSizeIfNeeded()
+                self.bb_updateCacheSizeIfNeeded()
             }
         }
     }
@@ -325,6 +336,6 @@ public class BBAnimatedImage: UIImage {
     }
     
     @objc private func didBecomeActive() {
-        updateCacheSizeIfNeeded()
+        bb_updateCacheSizeIfNeeded()
     }
 }

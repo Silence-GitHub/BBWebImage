@@ -96,16 +96,16 @@ public class BBAnimatedImageView: UIImageView {
         case .image:
             let old = super.image as? BBAnimatedImage
             super.image = image as? UIImage
-            old?.didRemoveFromView(self)
+            old?.bb_didRemoveFromView(self)
         case .hilightedImage:
             let old = super.highlightedImage as? BBAnimatedImage
             super.highlightedImage = image as? UIImage
-            old?.didRemoveFromView(self)
+            old?.bb_didRemoveFromView(self)
         case .animationImages: super.animationImages = image as? [UIImage]
         case .hilightedAnimationImages: super.highlightedAnimationImages = image as? [UIImage]
         }
-        animatedImage?.didAddToView(self)
-        animatedImage?.updateCacheSizeIfNeeded()
+        animatedImage?.bb_didAddToView(self)
+        animatedImage?.bb_updateCacheSizeIfNeeded()
         didMove()
     }
     
@@ -120,15 +120,15 @@ public class BBAnimatedImageView: UIImageView {
     @objc private func displayLinkRefreshed(_ link: CADisplayLink) {
         guard let currentImage = imageForCurrentType as? BBAnimatedImage else { return }
         if shouldUpdateLayer,
-            let cgimage = currentImage.imageFrame(at: currentFrameIndex, decodeIfNeeded: (currentFrameIndex == 0))?.cgImage {
+            let cgimage = currentImage.bb_imageFrame(at: currentFrameIndex, decodeIfNeeded: (currentFrameIndex == 0))?.cgImage {
             currentLayerContent = cgimage
             layer.setNeedsDisplay()
             shouldUpdateLayer = false
         }
         let nextIndex = (currentFrameIndex + 1) % currentImage.bb_frameCount
-        currentImage.preloadImageFrame(fromIndex: nextIndex)
+        currentImage.bb_preloadImageFrame(fromIndex: nextIndex)
         accumulatedTime += link.duration // multiply frameInterval if frameInterval is not 1
-        if let duration = currentImage.duration(at: currentFrameIndex),
+        if let duration = currentImage.bb_duration(at: currentFrameIndex),
             accumulatedTime >= duration {
             currentFrameIndex = nextIndex
             accumulatedTime -= duration
