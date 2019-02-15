@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MobileCoreServices
 
 public class BBWebImageGIFCoder: BBAnimatedImageCoder {
     private var imageSource: CGImageSource?
@@ -115,12 +116,39 @@ extension BBWebImageGIFCoder: BBImageCoder {
     }
     
     public func encodedData(with image: UIImage, format: BBImageFormat) -> Data? {
+        if format != .GIF { return nil }
         if let animatedImage = image as? BBAnimatedImage,
-            animatedImage.bb_imageFormat == .GIF,
-            format == .GIF {
+            animatedImage.bb_imageFormat == .GIF {
             return animatedImage.bb_originalImageData
         }
-        // TODO: Encode gif
+        var sourceImages: [CGImage] = []
+        if let images = image.images {
+            for frame in images {
+                if let sourceImage = frame.cgImage {
+                    sourceImages.append(sourceImage)
+                }
+            }
+        }
+        if sourceImages.isEmpty,
+            let sourceImage = image.cgImage {
+            sourceImages.append(sourceImage)
+        }
+        guard !sourceImages.isEmpty,
+            let data = CFDataCreateMutable(kCFAllocatorDefault, 0),
+            let destination = CGImageDestinationCreateWithData(data, kUTTypeGIF, sourceImages.count, nil) else { return nil }
+        if sourceImages.count == 1 {
+            CGImageDestinationAddImage(destination, sourceImages.first!, nil)
+        } else {
+            let properties: [CFString : Any] = [kCGImagePropertyGIFDictionary : [kCGImagePropertyGIFLoopCount : 0]]
+            CGImageDestinationSetProperties(destination, properties as CFDictionary)
+            
+            let frameDuration = image.duration / Double(image.images!.count)
+            let frameProperties: [CFString : Any] = [kCGImagePropertyGIFDictionary : [kCGImagePropertyGIFUnclampedDelayTime : frameDuration]]
+            for sourceImage in sourceImages {
+                CGImageDestinationAddImage(destination, sourceImage, frameProperties as CFDictionary)
+            }
+        }
+        if CGImageDestinationFinalize(destination) { return data as Data }
         return nil
     }
     

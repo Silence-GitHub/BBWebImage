@@ -78,10 +78,7 @@ public class BBWebImageImageIOCoder: BBImageCoder {
         if let destination = CGImageDestinationCreateWithData(data, imageFormat.UTType, 1, nil) {
             let properties = [kCGImagePropertyOrientation : image.imageOrientation.bb_CGImageOrientation.rawValue]
             CGImageDestinationAddImage(destination, sourceImage, properties as CFDictionary)
-            if !CGImageDestinationFinalize(destination) {
-                return nil
-            }
-            return data as Data
+            if CGImageDestinationFinalize(destination) { return data as Data }
         }
         return nil
     }
