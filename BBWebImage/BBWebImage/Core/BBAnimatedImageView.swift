@@ -17,13 +17,18 @@ enum BBAnimatedImageViewType {
 }
 
 public class BBAnimatedImageView: UIImageView {
+    /// If true (default value), animation will be started/stopped automatically when the view becomes visible/invisible
     public var bb_autoStartAnimation: Bool = true
     
+    /// A scale value that will be multiplied by duration. The default value is 1.
+    /// Change this property to change animation speed. Only positive value is valid.
     public var bb_animationDurationScale: Double {
         get { return animationDurationScale }
         set { if newValue > 0 { animationDurationScale = newValue } }
     }
     
+    /// The image animation is played with CADisplayLink. This property is the run loop mode associated with the CADisplayLink.
+    /// The default value is common run loop mode.
     public var bb_runLoopMode: RunLoop.Mode {
         get { return runLoopMode }
         set {
@@ -36,6 +41,7 @@ public class BBAnimatedImageView: UIImageView {
         }
     }
     
+    /// Set a BBAnimatedImage object to play animation
     public override var image: UIImage? {
         get { return super.image }
         set {
@@ -44,6 +50,7 @@ public class BBAnimatedImageView: UIImageView {
         }
     }
     
+    /// Set a BBAnimatedImage object to play animation
     public override var highlightedImage: UIImage? {
         get { return super.highlightedImage }
         set {
