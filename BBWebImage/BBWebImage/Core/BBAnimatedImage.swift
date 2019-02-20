@@ -22,6 +22,7 @@ private struct BBAnimatedImageFrame {
     fileprivate var bytes: Int64? { return image?.bb_bytes }
 }
 
+/// BBAnimatedImage manages animated image data
 public class BBAnimatedImage: UIImage {
     /// Editor editing image frames
     public var bb_editor: BBWebImageEditor? {
@@ -98,23 +99,27 @@ public class BBAnimatedImage: UIImage {
         NotificationCenter.default.removeObserver(self)
     }
     
+    /// Creates animated image with data and decoder.
+    /// If specify decoder to nil, this method tries to find a coder from BBWebImageManager shared instance.
+    /// If no decoder found or decoder can not decode data, this method returns nil.
+    ///
+    /// - Parameters:
+    ///   - data: image data
+    ///   - aDecoder: animated image data decoder
     public convenience init?(bb_data data: Data, decoder aDecoder: BBAnimatedImageCoder? = nil) {
         var tempDecoder = aDecoder
-        var canDecode = false
         if tempDecoder == nil {
             if let manager = BBWebImageManager.shared.imageCoder as? BBImageCoderManager {
                 for coder in manager.coders {
                     if let animatedCoder = coder as? BBAnimatedImageCoder,
                         animatedCoder.canDecode(data) {
-                        tempDecoder = animatedCoder
-                        canDecode = true
+                        tempDecoder = animatedCoder.copy() as? BBAnimatedImageCoder
                         break
                     }
                 }
             }
         }
-        guard let currentDecoder = tempDecoder else { return nil }
-        if !canDecode && !currentDecoder.canDecode(data) { return nil }
+        guard let currentDecoder = tempDecoder, currentDecoder.canDecode(data) else { return nil }
         currentDecoder.imageData = data
         guard let firstFrame = currentDecoder.imageFrame(at: 0, decompress: true),
             let firstFrameSourceImage = firstFrame.cgImage,
