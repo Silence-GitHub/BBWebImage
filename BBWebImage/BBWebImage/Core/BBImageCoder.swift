@@ -85,19 +85,19 @@ public protocol BBAnimatedImageCoder: BBImageCoder {
     /// - Parameters:
     ///   - index: frame index
     ///   - decompress: whether to decompress image or not
-    /// - Returns: image frame
+    /// - Returns: image frame, or nil if fail
     func imageFrame(at index: Int, decompress: Bool) -> UIImage?
     
     /// Gets image frame size at specified index
     ///
     /// - Parameter index: frame index
-    /// - Returns: image frame size
+    /// - Returns: image frame size, or nil if fail
     func imageFrameSize(at index: Int) -> CGSize?
     
     /// Gets image frame duration at specified index
     ///
     /// - Parameter index: frame index
-    /// - Returns: image frame duration
+    /// - Returns: image frame duration, or nil if fail
     func duration(at index: Int) -> TimeInterval?
 }
 

@@ -23,6 +23,7 @@ private struct BBAnimatedImageFrame {
 }
 
 public class BBAnimatedImage: UIImage {
+    /// Editor editing image frames
     public var bb_editor: BBWebImageEditor? {
         get {
             lock.wait()
@@ -38,10 +39,15 @@ public class BBAnimatedImage: UIImage {
         }
     }
     
+    /// Number of image frames
     public var bb_frameCount: Int { return frameCount }
     
+    /// Number of times to repeat the animation
     public var bb_loopCount: Int { return loopCount }
     
+    /// Max cache size in bytes. Max cache size is auto updated by default.
+    /// Setting this property with non-negative value disables auto update max cache size strategy.
+    /// Setting this property with negative value enables auto update max cache size strategy.
     public var bb_maxCacheSize: Int64 {
         get {
             lock.wait()
@@ -62,6 +68,7 @@ public class BBAnimatedImage: UIImage {
         }
     }
     
+    /// Current cache size in bytes
     public var bb_currentCacheSize: Int64 {
         lock.wait()
         let s = currentCacheSize!
@@ -69,6 +76,7 @@ public class BBAnimatedImage: UIImage {
         return s
     }
     
+    /// Original image data used when creating the image
     public var bb_originalImageData: Data { return decoder.imageData! }
     
     private var editor: BBWebImageEditor?
@@ -140,6 +148,12 @@ public class BBAnimatedImage: UIImage {
         NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
+    /// Gets image frame at specified index
+    ///
+    /// - Parameters:
+    ///   - index: frame index
+    ///   - decodeIfNeeded: whether to decode or edit image if no cached image found
+    /// - Returns: image frame, or nil if fail
     public func bb_imageFrame(at index: Int, decodeIfNeeded: Bool) -> UIImage? {
         if index >= frameCount { return nil }
         lock.wait()
@@ -190,6 +204,10 @@ public class BBAnimatedImage: UIImage {
         return nil
     }
     
+    /// Gets image frame duration at specified index
+    ///
+    /// - Parameter index: frame index
+    /// - Returns: image frame duration, or nil if fail
     public func bb_duration(at index: Int) -> TimeInterval? {
         if index >= frameCount { return nil }
         lock.wait()
@@ -198,6 +216,7 @@ public class BBAnimatedImage: UIImage {
         return duration
     }
     
+    /// Updates max cache size if auto update strategy is used
     public func bb_updateCacheSizeIfNeeded() {
         lock.wait()
         defer { lock.signal() }
@@ -211,6 +230,9 @@ public class BBAnimatedImage: UIImage {
         maxCacheSize = min(total, free)
     }
     
+    /// Preload image frame asynchronously
+    ///
+    /// - Parameter startIndex: frame index to start preloading
     public func bb_preloadImageFrame(fromIndex startIndex: Int) {
         if startIndex >= frameCount { return }
         lock.wait()
@@ -276,6 +298,7 @@ public class BBAnimatedImage: UIImage {
         lock.signal()
     }
     
+    /// Preload all image frames synchronously
     public func bb_preloadAllImageFrames() {
         lock.wait()
         autoUpdateMaxCacheSize = false
@@ -295,10 +318,18 @@ public class BBAnimatedImage: UIImage {
         lock.signal()
     }
     
+    /// The image is added to a given image view.
+    /// Call this method when the image is set to an image view.
+    ///
+    /// - Parameter view: image view displaying the image
     public func bb_didAddToView(_ view: BBAnimatedImageView) {
         views.add(view)
     }
     
+    /// The image is removed from a given image view.
+    /// Call this method when the image is removed from an image view.
+    ///
+    /// - Parameter view: image view displaying the image
     public func bb_didRemoveFromView(_ view: BBAnimatedImageView) {
         views.remove(view)
         if views.count <= 0 {
@@ -307,7 +338,7 @@ public class BBAnimatedImage: UIImage {
         }
     }
     
-    /// Cancels preload task
+    /// Cancels asynchronous preload task
     public func bb_cancelPreloadTask() {
         lock.wait()
         if preloadTask != nil {
@@ -328,7 +359,7 @@ public class BBAnimatedImage: UIImage {
         }
     }
     
-    /// Removes all image frames from cache
+    /// Removes all image frames from cache synchronously
     public func bb_clear() {
         lock.wait()
         for i in 0..<frames.count {
