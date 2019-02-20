@@ -16,6 +16,7 @@
 		4A53312C21657ECD00C68080 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312A21657ECD00C68080 /* Main.storyboard */; };
 		4A53312E21657ECE00C68080 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312D21657ECE00C68080 /* Assets.xcassets */; };
 		4A53313121657ECE00C68080 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A53312F21657ECE00C68080 /* LaunchScreen.storyboard */; };
+		4A55F94F221CD5DA00380C72 /* Rotating_earth.gif in Resources */ = {isa = PBXBuildFile; fileRef = 4A55F94A221CC42800380C72 /* Rotating_earth.gif */; };
 		4A5ABB3221936B4800036971 /* ImageURLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5ABB3121936B4800036971 /* ImageURLProvider.swift */; };
 		4A5ABB3521936D0200036971 /* ImageWallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5ABB3421936D0200036971 /* ImageWallVC.swift */; };
 		4A5ABB3721936EB200036971 /* ImageWallCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5ABB3621936EB200036971 /* ImageWallCell.swift */; };
@@ -192,6 +193,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A53313121657ECE00C68080 /* LaunchScreen.storyboard in Resources */,
+				4A55F94F221CD5DA00380C72 /* Rotating_earth.gif in Resources */,
 				4AF3D1EE216DA8B500320E6C /* placeholder.png in Resources */,
 				4A2CEAB421AF588C00E054A8 /* sunflower.jpg in Resources */,
 				4A53312E21657ECE00C68080 /* Assets.xcassets in Resources */,
