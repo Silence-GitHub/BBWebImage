@@ -67,12 +67,37 @@ public protocol BBImageProgressiveCoder: BBImageCoder {
     func incrementallyDecodedImage(with data: Data, finished: Bool) -> UIImage?
 }
 
+/// BBAnimatedImageCoder defines animated image decoding behaviors
 public protocol BBAnimatedImageCoder: BBImageCoder {
+    /// Image data to decode
     var imageData: Data? { get set }
+    
+    /// Number of image frames, or nil if fail to get the value
     var frameCount: Int? { get }
+    
+    /// Number of times to repeat the animation.
+    /// Value 0 specifies to repeat the animation indefinitely.
+    /// Value nil means failing to get the value.
     var loopCount: Int? { get }
+    
+    /// Gets image frame at specified index
+    ///
+    /// - Parameters:
+    ///   - index: frame index
+    ///   - decompress: whether to decompress image or not
+    /// - Returns: image frame
     func imageFrame(at index: Int, decompress: Bool) -> UIImage?
+    
+    /// Gets image frame size at specified index
+    ///
+    /// - Parameter index: frame index
+    /// - Returns: image frame size
     func imageFrameSize(at index: Int) -> CGSize?
+    
+    /// Gets image frame duration at specified index
+    ///
+    /// - Parameter index: frame index
+    /// - Returns: image frame duration
     func duration(at index: Int) -> TimeInterval?
 }
 

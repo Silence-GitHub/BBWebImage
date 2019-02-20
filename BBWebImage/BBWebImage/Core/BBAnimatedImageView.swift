@@ -153,9 +153,10 @@ public class BBAnimatedImageView: UIImageView {
                 currentFrameIndex = nextIndex
                 accumulatedTime -= duration
                 shouldUpdateLayer = true
-                if animationRepeatCount > 0 && currentFrameIndex == 0 {
+                if (animationRepeatCount > 0 || currentImage.bb_loopCount > 0) && currentFrameIndex == 0 {
                     loopCount += 1
-                    if loopCount >= animationRepeatCount {
+                    if (animationRepeatCount > 0 && loopCount >= animationRepeatCount) ||
+                        (currentImage.bb_loopCount > 0 && loopCount >= currentImage.bb_loopCount) {
                         stopAnimating()
                         resetAnimation()
                     }

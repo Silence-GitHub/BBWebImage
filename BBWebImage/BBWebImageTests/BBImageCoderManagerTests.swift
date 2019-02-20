@@ -96,6 +96,10 @@ class BBImageCoderManagerTests: XCTestCase {
         }
     }
     
+    func testCopy() {
+        XCTAssertFalse(coder === coder.copy())
+    }
+    
     func testCanIncrementallyDecode() {
         XCTAssertTrue(coder.canIncrementallyDecode(pngData))
         XCTAssertTrue(coder.canIncrementallyDecode(jpgData))
