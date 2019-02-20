@@ -87,6 +87,26 @@ class BBAnimatedImageTests: XCTestCase {
         waitForExpectations(timeout: 1, handler: nil)
     }
     
+    func testCancelPreloadTask() {
+        let expectation = self.expectation(description: "Wait for preloading images")
+        image.bb_preloadImageFrame(fromIndex: 0)
+        image.bb_cancelPreloadTask()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            var count = self.image.bb_frameCount
+            for i in 0..<self.image.bb_frameCount {
+                let cachedFrame = self.image.bb_imageFrame(at: i, decodeIfNeeded: false)
+                if i == 0 {
+                    XCTAssertNotNil(cachedFrame)
+                } else {
+                    XCTAssertNil(cachedFrame)
+                }
+                count -= 1
+                if count == 0 { expectation.fulfill() }
+            }
+        }
+        waitForExpectations(timeout: 1, handler: nil)
+    }
+    
     func testPreloadAllImageFrames() {
         image.bb_preloadAllImageFrames()
         for i in 0..<image.bb_frameCount {

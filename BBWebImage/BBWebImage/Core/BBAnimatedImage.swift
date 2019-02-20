@@ -86,7 +86,7 @@ public class BBAnimatedImage: UIImage {
     private var preloadTask: (() -> Void)?
     
     deinit {
-        cancelPreloadTask()
+        bb_cancelPreloadTask()
         NotificationCenter.default.removeObserver(self)
     }
     
@@ -302,12 +302,13 @@ public class BBAnimatedImage: UIImage {
     public func bb_didRemoveFromView(_ view: BBAnimatedImageView) {
         views.remove(view)
         if views.count <= 0 {
-            cancelPreloadTask()
+            bb_cancelPreloadTask()
             clearAsynchronously(completion: nil)
         }
     }
     
-    private func cancelPreloadTask() {
+    /// Cancels preload task
+    public func bb_cancelPreloadTask() {
         lock.wait()
         if preloadTask != nil {
             OSAtomicIncrement32(&sentinel)
