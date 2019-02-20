@@ -136,4 +136,22 @@ class BBAnimatedImageTests: XCTestCase {
         }
         waitForExpectations(timeout: 1, handler: nil)
     }
+    
+    func testEditor() {
+        for i in 0..<image.bb_frameCount {
+            let frame = image.bb_imageFrame(at: i, decodeIfNeeded: true)
+            let size = frame?.size
+            XCTAssertEqual(size, CGSize(width: 400, height: 400))
+        }
+        image.bb_editor = bb_imageEditorResize(with: CGSize(width: 200, height: 200))
+        for i in 0..<image.bb_frameCount {
+            let frame = image.bb_imageFrame(at: i, decodeIfNeeded: false)
+            XCTAssertNil(frame)
+        }
+        for i in 0..<image.bb_frameCount {
+            let frame = image.bb_imageFrame(at: i, decodeIfNeeded: true)
+            let size = frame?.size
+            XCTAssertEqual(size, CGSize(width: 200, height: 200))
+        }
+    }
 }
