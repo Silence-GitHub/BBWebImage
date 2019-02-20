@@ -303,7 +303,7 @@ public class BBAnimatedImage: UIImage {
         views.remove(view)
         if views.count <= 0 {
             bb_cancelPreloadTask()
-            clearAsynchronously(completion: nil)
+            bb_clearAsynchronously(completion: nil)
         }
     }
     
@@ -317,15 +317,19 @@ public class BBAnimatedImage: UIImage {
         lock.signal()
     }
     
-    private func clearAsynchronously(completion: (() -> Void)?) {
+    /// Removes all image frames from cache asynchronously
+    ///
+    /// - Parameter completion: a closure called when clearing is finished
+    public func bb_clearAsynchronously(completion: (() -> Void)?) {
         BBDispatchQueuePool.default.async { [weak self] in
             guard let self = self else { return }
-            self.clear()
+            self.bb_clear()
             completion?()
         }
     }
     
-    private func clear() {
+    /// Removes all image frames from cache
+    public func bb_clear() {
         lock.wait()
         for i in 0..<frames.count {
             frames[i].image = nil
@@ -336,7 +340,7 @@ public class BBAnimatedImage: UIImage {
     }
     
     @objc private func didReceiveMemoryWarning() {
-        clearAsynchronously { [weak self] in
+        bb_clearAsynchronously { [weak self] in
             guard let self = self else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
                 guard let self = self else { return }
@@ -346,7 +350,7 @@ public class BBAnimatedImage: UIImage {
     }
     
     @objc private func didEnterBackground() {
-        clear()
+        bb_clear()
     }
     
     @objc private func didBecomeActive() {
