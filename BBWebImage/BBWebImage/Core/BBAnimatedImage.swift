@@ -283,7 +283,10 @@ public class BBAnimatedImage: UIImage {
         cachedFrameCount = 0
         currentCacheSize = 0
         for i in 0..<frames.count {
-            if let image = bb_imageFrame(at: i, decodeIfNeeded: true) {
+            if let image = imageFrame(at: i,
+                                      cachedImage: frames[i].image,
+                                      editor: editor,
+                                      decodeIfNeeded: true) {
                 frames[i].image = image
                 cachedFrameCount += 1
                 currentCacheSize += image.bb_bytes
