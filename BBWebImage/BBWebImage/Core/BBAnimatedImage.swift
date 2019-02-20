@@ -123,6 +123,7 @@ public class BBAnimatedImage: UIImage {
             }
         }
         self.init(cgImage: firstFrameSourceImage, scale: 1, orientation: firstFrame.imageOrientation)
+        bb_imageFormat = data.bb_imageFormat
         frameCount = currentFrameCount
         loopCount = currentDecoder.loopCount ?? 0
         maxCacheSize = .max

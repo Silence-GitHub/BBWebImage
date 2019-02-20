@@ -28,10 +28,14 @@ class BBWebImageGIFCoderTests: XCTestCase {
     }
     
     func testDecode() {
-        let gifImage = coder.decodedImage(with: gifData)
-        XCTAssertNotNil(gifImage)
-        XCTAssertEqual(gifImage?.bb_imageFormat, .GIF)
-        XCTAssertTrue(gifImage is BBAnimatedImage)
+        let test = { (gifImage: UIImage?) -> Void in
+            XCTAssertNotNil(gifImage)
+            XCTAssertEqual(gifImage?.bb_imageFormat, .GIF)
+            XCTAssertTrue(gifImage is BBAnimatedImage)
+        }
+        test(coder.decodedImage(with: gifData))
+        test(BBAnimatedImage(bb_data: gifData))
+        test(BBAnimatedImage(bb_data: gifData, decoder: coder))
     }
     
     func testDecompress() {

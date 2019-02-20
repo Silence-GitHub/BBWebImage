@@ -35,6 +35,7 @@
 		4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A53315A2165BC8500C68080 /* BBImageCoder.swift */; };
 		4A55F94C221CC45600380C72 /* Rotating_earth.gif in Resources */ = {isa = PBXBuildFile; fileRef = 4A55F94B221CC45600380C72 /* Rotating_earth.gif */; };
 		4A55F94E221CC8E900380C72 /* BBWebImageGIFCoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A55F94D221CC8E900380C72 /* BBWebImageGIFCoderTests.swift */; };
+		4A55F951221D052B00380C72 /* BBAnimatedImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A55F950221D052B00380C72 /* BBAnimatedImageTests.swift */; };
 		4A5DE8FC217191EE0074EEFD /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5DE8FB217191EE0074EEFD /* String+MD5.swift */; };
 		4A5DE8FD217191EE0074EEFD /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5DE8FB217191EE0074EEFD /* String+MD5.swift */; };
 		4A5F131A2204D71E00657835 /* BBImageDownloadOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5F13192204D71E00657835 /* BBImageDownloadOperationQueue.swift */; };
@@ -111,6 +112,7 @@
 		4A53315A2165BC8500C68080 /* BBImageCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageCoder.swift; sourceTree = "<group>"; };
 		4A55F94B221CC45600380C72 /* Rotating_earth.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = Rotating_earth.gif; path = ../../BBWebImageDemo/BBWebImageDemo/Rotating_earth.gif; sourceTree = "<group>"; };
 		4A55F94D221CC8E900380C72 /* BBWebImageGIFCoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebImageGIFCoderTests.swift; sourceTree = "<group>"; };
+		4A55F950221D052B00380C72 /* BBAnimatedImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBAnimatedImageTests.swift; sourceTree = "<group>"; };
 		4A5DE8FB217191EE0074EEFD /* String+MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
 		4A5F13192204D71E00657835 /* BBImageDownloadOperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBImageDownloadOperationQueue.swift; sourceTree = "<group>"; };
 		4A5FF70321BBBDA60006B877 /* BBWebCacheResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBWebCacheResource.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 				4A7D8F9121D89A5C008AC2D6 /* TestImageDownloadOperation.swift */,
 				4ACDDC5121B7636F003E364A /* BBImageCoderManagerTests.swift */,
 				4A55F94D221CC8E900380C72 /* BBWebImageGIFCoderTests.swift */,
+				4A55F950221D052B00380C72 /* BBAnimatedImageTests.swift */,
 				4ACFCDA221B61707004316A5 /* ImageURLProvider.swift */,
 				4A22206821BA37BE0094F9FD /* mew_baseline.jpg */,
 				4A22206721BA37BE0094F9FD /* mew_baseline.png */,
@@ -437,6 +440,7 @@
 				4A87E909216BE4430073E53C /* Data+ImageFormat.swift in Sources */,
 				4A53315C2165BC8500C68080 /* BBImageCoder.swift in Sources */,
 				4A9C6C2A220B668D00B255E7 /* BBWebImageGIFCoder.swift in Sources */,
+				4A55F951221D052B00380C72 /* BBAnimatedImageTests.swift in Sources */,
 				4A87E915216C01FD0073E53C /* UIImage+ImageFormat.swift in Sources */,
 				4A6E2D8A218787FB00CE1CD2 /* BBDiskCache.swift in Sources */,
 				4A5F131B2204D71E00657835 /* BBImageDownloadOperationQueue.swift in Sources */,
