@@ -100,5 +100,5 @@ public func bb_imageEditorCILookupTestFilter(maxTileSize: Int = 0) -> BBWebImage
             return context?.makeImage().flatMap { UIImage(cgImage: $0) } ?? image
         }
     }
-    return BBWebImageEditor(key: BBCILookupTestFilter.description(), needData: false, edit: edit)
+    return BBWebImageEditor(key: BBCILookupTestFilter.description(), edit: edit)
 }

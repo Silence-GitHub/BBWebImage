@@ -34,7 +34,7 @@ public func bb_imageEditorCrop(with rect: CGRect) -> BBWebImageEditor {
         if let currentImage = image.bb_croppedImage(with: rect) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.crop.rect=\(rect)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.crop.rect=\(rect)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to resize image to the specific size
@@ -46,7 +46,7 @@ public func bb_imageEditorResize(with size: CGSize) -> BBWebImageEditor {
         if let currentImage = image.bb_resizedImage(with: size) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(size)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(size)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to resize image with view size and content mode.
@@ -62,7 +62,7 @@ public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.C
         if let currentImage = image.bb_resizedImage(with: displaySize, contentMode: contentMode) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to resize image with view size and fill content mode.
@@ -78,7 +78,7 @@ public func bb_imageEditorResize(with displaySize: CGSize, fillContentMode: UIVi
         if let currentImage = image.bb_resizedImage(with: displaySize, fillContentMode: fillContentMode) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),fillContentMode=\(fillContentMode)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),fillContentMode=\(fillContentMode)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to rotate image
@@ -92,7 +92,7 @@ public func bb_imageEditorRotate(withAngle angle: CGFloat, fitSize: Bool) -> BBW
         if let currentImage = image.bb_rotatedImage(withAngle: angle, fitSize: fitSize) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.rotate.angle=\(angle),fitSize=\(fitSize)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.rotate.angle=\(angle),fitSize=\(fitSize)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to flip image horizontally and/or vertically
@@ -106,7 +106,7 @@ public func bb_imageEditorFlip(withHorizontal horizontal: Bool, vertical: Bool) 
         if let currentImage = image.bb_flippedImage(withHorizontal: horizontal, vertical: vertical) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.flip.horizontal=\(horizontal),vertical=\(vertical)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.flip.horizontal=\(horizontal),vertical=\(vertical)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to tint image with color
@@ -120,7 +120,7 @@ public func bb_imageEditorTint(with color: UIColor, blendMode: CGBlendMode = .no
         if let currentImage = image.bb_tintedImage(with: color, blendMode: blendMode) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.tint.color=\(color),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.tint.color=\(color),blendMode=\(blendMode.rawValue)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor to tint image with gradient color
@@ -147,7 +147,7 @@ public func bb_imageEditorGradientlyTint(with colors: [UIColor],
         }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.gradientlyTint.colors=\(colors),locations=\(locations),start=\(start),end=\(end),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.gradientlyTint.colors=\(colors),locations=\(locations),start=\(start),end=\(end),blendMode=\(blendMode.rawValue)", edit: edit)
 }
 
 /// Creates an image overlaid by another image
@@ -170,7 +170,7 @@ public func bb_imageEditorOverlay(with overlayImage: UIImage, blendMode: CGBlend
         if let currentImage = image.bb_overlaidImage(with: overlayImage, blendMode: blendMode, alpha: alpha) { return currentImage }
         return image
     }
-    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.overlay.image=\(overlayImage),blendMode=\(blendMode.rawValue),alpha=\(alpha)", needData: false, edit: edit)
+    return BBWebImageEditor(key: "com.Kaibo.BBWebImage.overlay.image=\(overlayImage),blendMode=\(blendMode.rawValue),alpha=\(alpha)", edit: edit)
 }
 
 /// Creates a BBWebImageEditor for common use
@@ -207,7 +207,7 @@ public func bb_imageEditorCommon(with displaySize: CGSize,
         return image
     }
     let key = "com.Kaibo.BBWebImage.common.displaySize=\(displaySize),fillContentMode=\(fillContentMode),maxResolution=\(maxResolution),corner=\(corner),cornerRadius=\(cornerRadius),borderWidth=\(borderWidth),borderColor=\(borderColor?.description ?? "nil"),backgroundColor=\(backgroundColor?.description ?? "nil")"
-    return BBWebImageEditor(key: key, needData: false, edit: edit)
+    return BBWebImageEditor(key: key, edit: edit)
 }
 
 public func bb_borderPath(with size: CGSize, corner: UIRectCorner, cornerRadius: CGFloat, borderWidth: CGFloat) -> UIBezierPath {
@@ -293,7 +293,6 @@ public func bb_drawForScaleDown(_ context: CGContext, sourceImage: CGImage) {
 /// BBWebImageEditor defines how to edit and cache image in memory
 public struct BBWebImageEditor {
     public var key: String
-    public var needData: Bool
     public var edit: BBWebImageEditMethod
     
     /// Creates a BBWebImageEditor variable
@@ -302,9 +301,8 @@ public struct BBWebImageEditor {
     ///   - key: identification of editor
     ///   - needData: whether image data is necessary or not for editing
     ///   - edit: an edit image closure
-    public init(key: String, needData: Bool, edit: @escaping BBWebImageEditMethod) {
+    public init(key: String, edit: @escaping BBWebImageEditMethod) {
         self.key = key
-        self.needData = needData
         self.edit = edit
     }
 }

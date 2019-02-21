@@ -251,8 +251,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                                  cacheType: .memory)
                         remove(loadTask: task)
                         finished = true
-                    } else if !currentEditor.needData,
-                        currentImage.bb_imageEditKey == nil {
+                    } else if currentImage.bb_imageEditKey == nil {
                         coderQueue.async { [weak self, weak task] in
                             guard let self = self, let task = task, !task.isCancelled else { return }
                             if let image = currentEditor.edit(currentImage) {
