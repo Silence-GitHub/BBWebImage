@@ -54,7 +54,7 @@ public typealias BBWebImagePreloadProgress = (_ successCount: Int, _ finishCount
 public typealias BBWebImagePreloadCompletion = (_ successCount: Int, _ total: Int) -> Void
 
 /// BBWebImageLoadTask defines an image loading task
-public class BBWebImageLoadTask {
+public class BBWebImageLoadTask: NSObject { // If not subclass NSObject, there is memory leak (unknown reason)
     public var isCancelled: Bool {
         pthread_mutex_lock(&lock)
         let c = cancelled
@@ -89,20 +89,18 @@ public class BBWebImageLoadTask {
         }
         imageManager?.remove(loadTask: self)
     }
-}
-
-extension BBWebImageLoadTask: Hashable {
+    
     public static func == (lhs: BBWebImageLoadTask, rhs: BBWebImageLoadTask) -> Bool {
         return lhs.sentinel == rhs.sentinel
     }
     
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(sentinel)
+    public override var hash: Int {
+        return Int(sentinel)
     }
 }
 
 /// BBWebImageManager downloads and caches image asynchronously
-public class BBWebImageManager: NSObject { // If not subclass NSObject, there is memory leak (unknown reason)
+public class BBWebImageManager {
     /// BBWebImageManager shared instance
     public static let shared: BBWebImageManager = { () -> BBWebImageManager in
         let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/com.Kaibo.BBWebImage"
