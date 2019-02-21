@@ -33,9 +33,15 @@ public class BBAnimatedImageView: UIImageView {
         get { return runLoopMode }
         set {
             if runLoopMode == newValue { return }
-            if let link = displayLink {
-                link.remove(from: .main, forMode: runLoopMode)
+            if let oldLink = displayLink {
+                // If remove old run loop mode and add new run loop mode, the animation will pause a while in iOS 8.
+                // So create a new display link here.
+                let isPaused = oldLink.isPaused
+                oldLink.invalidate()
+                let link = CADisplayLink(target: BBWeakProxy(target: self), selector: #selector(displayLinkRefreshed(_:)))
+                link.isPaused = isPaused
                 link.add(to: .main, forMode: newValue)
+                displayLink = link
             }
             runLoopMode = newValue
         }
