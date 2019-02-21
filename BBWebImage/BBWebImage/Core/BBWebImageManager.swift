@@ -582,7 +582,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                           data: Data?,
                           error: Error?,
                           cacheType: BBImageCacheType) {
-        DispatchQueue.main.safeAsync { [weak self] in
+        DispatchQueue.main.bb_safeAsync { [weak self] in
             guard self != nil, !task.isCancelled else { return }
             completion(image, data, error, cacheType)
         }

@@ -85,7 +85,7 @@ public extension BBWebCache {
         webCacheOperation.task(forKey: taskKey)?.cancel()
         webCacheOperation.setDownloadProgress(0 ,forKey: taskKey)
         if !options.contains(.ignorePlaceholder) {
-            DispatchQueue.main.safeSync { [weak self] in
+            DispatchQueue.main.bb_safeSync { [weak self] in
                 if self != nil { setImage(placeholder) }
             }
         }

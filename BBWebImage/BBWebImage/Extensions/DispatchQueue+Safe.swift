@@ -9,7 +9,7 @@
 import UIKit
 
 extension DispatchQueue {
-    func safeAsync(_ work: @escaping () -> Void) {
+    func bb_safeAsync(_ work: @escaping () -> Void) {
         if label == String(cString: __dispatch_queue_get_label(nil), encoding: .utf8) {
             work()
         } else {
@@ -17,7 +17,7 @@ extension DispatchQueue {
         }
     }
     
-    func safeSync(_ work: @escaping () -> Void) {
+    func bb_safeSync(_ work: @escaping () -> Void) {
         if label == String(cString: __dispatch_queue_get_label(nil), encoding: .utf8) {
             work()
         } else {
