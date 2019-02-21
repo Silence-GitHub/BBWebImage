@@ -34,7 +34,7 @@ open class BBCILookupFilter: CIFilter {
         }, arguments: [inputImage, lookupTable, intensity])
     }
     
-    public var inputImage: CIImage?
+    @objc public var inputImage: CIImage? // Add `@objc` to make it key-value coding compliant. Or it will crash in iOS 8
     
     public var lookupTable: CIImage?
     

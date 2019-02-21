@@ -17,7 +17,12 @@ private var shareCIContext: CIContext?
 public var bb_shareCIContext: CIContext {
     var localContext = shareCIContext
     if localContext == nil {
-        localContext = CIContext(options: [CIContextOption.workingColorSpace : bb_shareColorSpace])
+        if #available(iOS 9.0, *) {
+            localContext = CIContext(options: [CIContextOption.workingColorSpace : bb_shareColorSpace])
+        } else {
+            // CIContext.init(options:) will crash in iOS 8. So use other init
+            localContext = CIContext(eaglContext: EAGLContext(api: .openGLES2)!, options: [CIContextOption.workingColorSpace : bb_shareColorSpace])
+        }
         shareCIContext = localContext
     }
     return localContext!
