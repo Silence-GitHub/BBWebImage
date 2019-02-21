@@ -38,7 +38,7 @@ class TestFilterVC: UIViewController {
         filtered = !filtered
         if filtered {
             let editor = bb_imageEditorCILookupTestFilter()
-            imageView.image = editor.edit(imageView.image, nil)
+            imageView.image = editor.edit(imageView.image!)
         } else {
             imageView.image = UIImage(named: "sunflower.jpg")
         }

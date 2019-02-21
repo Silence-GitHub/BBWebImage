@@ -255,7 +255,7 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                         currentImage.bb_imageEditKey == nil {
                         coderQueue.async { [weak self, weak task] in
                             guard let self = self, let task = task, !task.isCancelled else { return }
-                            if let image = currentEditor.edit(currentImage, nil) {
+                            if let image = currentEditor.edit(currentImage) {
                                 guard !task.isCancelled else { return }
                                 image.bb_imageEditKey = currentEditor.key
                                 image.bb_imageFormat = currentImage.bb_imageFormat
@@ -456,27 +456,8 @@ public class BBWebImageManager: NSObject { // If not subclass NSObject, there is
                                           forKey: resource.cacheKey,
                                           cacheType: storeCacheType,
                                           completion: nil)
-                } else if currentEditor.needData {
-                    if let image = currentEditor.edit(nil, data) {
-                        guard !task.isCancelled else { return }
-                        image.bb_imageEditKey = currentEditor.key
-                        image.bb_imageFormat = data.bb_imageFormat
-                        self.complete(with: task,
-                                      completion: completion,
-                                      image: image,
-                                      data: data,
-                                      cacheType: cacheType)
-                        let storeCacheType: BBImageCacheType = (cacheType == .disk || options.contains(.ignoreDiskCache) ? .memory : .all)
-                        self.imageCache.store(image,
-                                              data: data,
-                                              forKey: resource.cacheKey,
-                                              cacheType: storeCacheType,
-                                              completion: nil)
-                    } else {
-                        self.complete(with: task, completion: completion, error: NSError(domain: BBWebImageErrorDomain, code: 0, userInfo: [NSLocalizedDescriptionKey : "No edited image"]))
-                    }
                 } else if let inputImage = decodedImage {
-                    if let image = currentEditor.edit(inputImage, nil) {
+                    if let image = currentEditor.edit(inputImage) {
                         guard !task.isCancelled else { return }
                         image.bb_imageEditKey = currentEditor.key
                         image.bb_imageFormat = data.bb_imageFormat

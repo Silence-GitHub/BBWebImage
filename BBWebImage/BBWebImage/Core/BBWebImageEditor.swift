@@ -8,7 +8,7 @@
 
 import UIKit
 
-public typealias BBWebImageEditMethod = (UIImage?, Data?) -> UIImage?
+public typealias BBWebImageEditMethod = (UIImage) -> UIImage?
 
 public let bb_shareColorSpace = CGColorSpaceCreateDeviceRGB()
 public let bb_ScreenScale = UIScreen.main.scale
@@ -30,8 +30,8 @@ public func bb_clearCIContext() { _bb_shareCIContext = nil }
 /// - Parameter rect: rect to crop, mesured in points
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorCrop(with rect: CGRect) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_croppedImage(with: rect) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_croppedImage(with: rect) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.crop.rect=\(rect)", needData: false, edit: edit)
@@ -42,8 +42,8 @@ public func bb_imageEditorCrop(with rect: CGRect) -> BBWebImageEditor {
 /// - Parameter size: size to resize
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorResize(with size: CGSize) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_resizedImage(with: size) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_resizedImage(with: size) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(size)", needData: false, edit: edit)
@@ -58,8 +58,8 @@ public func bb_imageEditorResize(with size: CGSize) -> BBWebImageEditor {
 ///   - contentMode: view content mode
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.ContentMode) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_resizedImage(with: displaySize, contentMode: contentMode) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_resizedImage(with: displaySize, contentMode: contentMode) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),contentMode=\(contentMode.rawValue)", needData: false, edit: edit)
@@ -74,8 +74,8 @@ public func bb_imageEditorResize(with displaySize: CGSize, contentMode: UIView.C
 ///   - fillContentMode: fill content mode specifying how content fills its view
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorResize(with displaySize: CGSize, fillContentMode: UIView.BBFillContentMode) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_resizedImage(with: displaySize, fillContentMode: fillContentMode) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_resizedImage(with: displaySize, fillContentMode: fillContentMode) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.resize.size=\(displaySize),fillContentMode=\(fillContentMode)", needData: false, edit: edit)
@@ -88,8 +88,8 @@ public func bb_imageEditorResize(with displaySize: CGSize, fillContentMode: UIVi
 ///   - fitSize: true to change image size to fit rotated image, false to keep image size
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorRotate(withAngle angle: CGFloat, fitSize: Bool) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_rotatedImage(withAngle: angle, fitSize: fitSize) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_rotatedImage(withAngle: angle, fitSize: fitSize) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.rotate.angle=\(angle),fitSize=\(fitSize)", needData: false, edit: edit)
@@ -102,8 +102,8 @@ public func bb_imageEditorRotate(withAngle angle: CGFloat, fitSize: Bool) -> BBW
 ///   - vertical: whether to flip vertically or not
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorFlip(withHorizontal horizontal: Bool, vertical: Bool) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_flippedImage(withHorizontal: horizontal, vertical: vertical) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_flippedImage(withHorizontal: horizontal, vertical: vertical) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.flip.horizontal=\(horizontal),vertical=\(vertical)", needData: false, edit: edit)
@@ -116,8 +116,8 @@ public func bb_imageEditorFlip(withHorizontal horizontal: Bool, vertical: Bool) 
 ///   - blendMode: blend mode to use when compositing the image
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorTint(with color: UIColor, blendMode: CGBlendMode = .normal) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_tintedImage(with: color, blendMode: blendMode) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_tintedImage(with: color, blendMode: blendMode) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.tint.color=\(color),blendMode=\(blendMode.rawValue)", needData: false, edit: edit)
@@ -137,12 +137,12 @@ public func bb_imageEditorGradientlyTint(with colors: [UIColor],
                                          start: CGPoint = CGPoint(x: 0.5, y: 0),
                                          end: CGPoint = CGPoint(x: 0.5, y: 1),
                                          blendMode: CGBlendMode = .normal) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_gradientlyTintedImage(with: colors,
-                                                              locations: locations,
-                                                              start: start,
-                                                              end: end,
-                                                              blendMode: blendMode) {
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_gradientlyTintedImage(with: colors,
+                                                             locations: locations,
+                                                             start: start,
+                                                             end: end,
+                                                             blendMode: blendMode) {
             return currentImage
         }
         return image
@@ -166,8 +166,8 @@ public func bb_imageEditorGradientlyTint(with colors: [UIColor],
 ///   - alpha: opacity of overlay image, specified as a value between 0 (totally transparent) and 1 (fully opaque)
 /// - Returns: a BBWebImageEditor variable
 public func bb_imageEditorOverlay(with overlayImage: UIImage, blendMode: CGBlendMode = .normal, alpha: CGFloat) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_overlaidImage(with: overlayImage, blendMode: blendMode, alpha: alpha) { return currentImage }
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_overlaidImage(with: overlayImage, blendMode: blendMode, alpha: alpha) { return currentImage }
         return image
     }
     return BBWebImageEditor(key: "com.Kaibo.BBWebImage.overlay.image=\(overlayImage),blendMode=\(blendMode.rawValue),alpha=\(alpha)", needData: false, edit: edit)
@@ -193,15 +193,15 @@ public func bb_imageEditorCommon(with displaySize: CGSize,
                                  borderWidth: CGFloat = 0,
                                  borderColor: UIColor? = nil,
                                  backgroundColor: UIColor? = nil) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image, _) in
-        if let currentImage = image?.bb_commonEditedImage(with: displaySize,
-                                                          fillContentMode: fillContentMode,
-                                                          maxResolution: maxResolution,
-                                                          corner: corner,
-                                                          cornerRadius: cornerRadius,
-                                                          borderWidth: borderWidth,
-                                                          borderColor: borderColor,
-                                                          backgroundColor: backgroundColor) {
+    let edit: BBWebImageEditMethod = { (image) in
+        if let currentImage = image.bb_commonEditedImage(with: displaySize,
+                                                         fillContentMode: fillContentMode,
+                                                         maxResolution: maxResolution,
+                                                         corner: corner,
+                                                         cornerRadius: cornerRadius,
+                                                         borderWidth: borderWidth,
+                                                         borderColor: borderColor,
+                                                         backgroundColor: backgroundColor) {
             return currentImage
         }
         return image

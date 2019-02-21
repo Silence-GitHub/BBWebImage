@@ -39,17 +39,15 @@ class BBCILookupTestFilter: BBCILookupFilter {
 
 // The higher maxTileSize, the less memory cost, the longer processing time
 public func bb_imageEditorCILookupTestFilter(maxTileSize: Int = 0) -> BBWebImageEditor {
-    let edit: BBWebImageEditMethod = { (image: UIImage?, data: Data?) in
+    let edit: BBWebImageEditMethod = { (image) in
         autoreleasepool { () -> UIImage? in
             var inputImage: CIImage?
-            if let currentImage = image {
-                if let ciimage = currentImage.ciImage {
-                    inputImage = ciimage
-                } else if let cgimage = currentImage.cgImage {
-                    inputImage = CIImage(cgImage: cgimage)
-                } else {
-                    inputImage = CIImage(image: currentImage)
-                }
+            if let ciimage = image.ciImage {
+                inputImage = ciimage
+            } else if let cgimage = image.cgImage {
+                inputImage = CIImage(cgImage: cgimage)
+            } else {
+                inputImage = CIImage(image: image)
             }
             guard let input = inputImage else { return image }
             let filter = BBCILookupTestFilter()
@@ -58,7 +56,7 @@ public func bb_imageEditorCILookupTestFilter(maxTileSize: Int = 0) -> BBWebImage
                 if let output = filter.outputImage,
                     let sourceImage = bb_shareCIContext.createCGImage(output, from: output.extent),
                     let cgimage = BBWebImageImageIOCoder.decompressedImage(sourceImage) {
-                    // It cost more memory without decompressing
+                    // It costs more memory without decompressing
                     return UIImage(cgImage: cgimage)
                 }
                 return image

@@ -102,7 +102,7 @@ public extension BBWebCache {
                 }
                 var displayImage = partialImage
                 if let currentEditor = editor,
-                    let currentImage = currentEditor.edit(partialImage, partialData) {
+                    let currentImage = currentEditor.edit(partialImage) {
                     currentImage.bb_imageEditKey = currentEditor.key
                     currentImage.bb_imageFormat = partialData.bb_imageFormat
                     displayImage = currentImage

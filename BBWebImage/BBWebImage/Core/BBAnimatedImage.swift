@@ -181,11 +181,11 @@ public class BBAnimatedImage: UIImage {
                     return currentImage
                 } else if decodeIfNeeded {
                     if currentImage.bb_imageEditKey == nil {
-                        let editedImage = editor.edit(currentImage, nil)
+                        let editedImage = editor.edit(currentImage)
                         editedImage?.bb_imageEditKey = editor.key
                         return editedImage
                     } else if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
-                        let editedImage = editor.edit(imageFrame, nil)
+                        let editedImage = editor.edit(imageFrame)
                         editedImage?.bb_imageEditKey = editor.key
                         return editedImage
                     }
@@ -199,7 +199,7 @@ public class BBAnimatedImage: UIImage {
         if !decodeIfNeeded { return nil }
         if let editor = bbEditor {
             if let imageFrame = decoder.imageFrame(at: index, decompress: false) {
-                let editedImage = editor.edit(imageFrame, nil)
+                let editedImage = editor.edit(imageFrame)
                 editedImage?.bb_imageEditKey = editor.key
                 return editedImage
             }
