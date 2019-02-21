@@ -108,6 +108,11 @@ public class BBDiskStorage {
         return data
     }
     
+    /// Checks whether data is in the disk cache.
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    /// - Returns: true if data is in the cache, or false if not
     public func dataExists(forKey key: String) -> Bool {
         if key.isEmpty { return false }
         ioLock.wait()

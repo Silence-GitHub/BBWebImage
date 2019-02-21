@@ -13,17 +13,17 @@ public typealias BBWebImageEditMethod = (UIImage) -> UIImage?
 public let bb_shareColorSpace = CGColorSpaceCreateDeviceRGB()
 public let bb_ScreenScale = UIScreen.main.scale
 
-private var _bb_shareCIContext: CIContext?
+private var shareCIContext: CIContext?
 public var bb_shareCIContext: CIContext {
-    var localContext = _bb_shareCIContext
+    var localContext = shareCIContext
     if localContext == nil {
         localContext = CIContext(options: [CIContextOption.workingColorSpace : bb_shareColorSpace])
-        _bb_shareCIContext = localContext
+        shareCIContext = localContext
     }
     return localContext!
 }
 
-public func bb_clearCIContext() { _bb_shareCIContext = nil }
+public func bb_clearCIContext() { shareCIContext = nil }
 
 /// Creates a BBWebImageEditor to crop image
 ///

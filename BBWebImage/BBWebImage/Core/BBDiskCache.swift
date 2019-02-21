@@ -56,10 +56,22 @@ public class BBDiskCache {
         }
     }
     
+    /// Checks whether data is in the disk cache.
+    /// This method checks cache synchronously.
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    /// - Returns: true if data is in the cache, or false if not
     public func dataExists(forKey key: String) -> Bool {
         return storage.dataExists(forKey: key)
     }
     
+    /// Checks whether data is in the disk cache.
+    /// This method checks cache asynchronously.
+    ///
+    /// - Parameters:
+    ///   - key: cache key
+    ///   - completion: a closure called when checking is finished
     public func dataExists(forKey key: String, completion: @escaping BBImageCacheCheckDiskCompletion) {
         queue.async { [weak self] in
             guard let self = self else { return }

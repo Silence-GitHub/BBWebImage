@@ -57,7 +57,7 @@ public protocol BBImageCache: AnyObject {
     ///   - completion: a closure called when querying is finished
     func image(forKey key: String, cacheType: BBImageCacheType, completion: @escaping BBImageCacheQueryCompletion)
     
-    /// Checks whether image data is in disk cache
+    /// Checks whether image data is in the disk cache
     ///
     /// - Parameters:
     ///   - key: cache key
