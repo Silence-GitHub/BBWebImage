@@ -32,7 +32,7 @@ extension MKAnnotationView: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
-                    taskKey: imageLoadTaskKey,
+                    taskKey: bb_imageLoadTaskKey,
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
@@ -40,8 +40,8 @@ extension MKAnnotationView: BBWebCache {
     
     /// Cancels image loading task
     public func bb_cancelImageLoadTask() {
-        bb_webCacheOperation.task(forKey: imageLoadTaskKey)?.cancel()
+        bb_webCacheOperation.task(forKey: bb_imageLoadTaskKey)?.cancel()
     }
     
-    public var imageLoadTaskKey: String { return classForCoder.description() }
+    public var bb_imageLoadTaskKey: String { return classForCoder.description() }
 }

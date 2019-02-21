@@ -8,8 +8,8 @@
 
 import Foundation
 
-extension String {
-    public var md5: String {
+public extension String {
+    public var bb_md5: String {
         if let data = data(using: .utf8, allowLossyConversion: true) {
             
             let message = data.withUnsafeBytes { bytes -> [UInt8] in
@@ -31,9 +31,8 @@ extension String {
     }
 }
 
-
 /** array of bytes, little-endian representation */
-func arrayOfBytes<T>(_ value: T, length: Int? = nil) -> [UInt8] {
+private func arrayOfBytes<T>(_ value: T, length: Int? = nil) -> [UInt8] {
     let totalBytes = length ?? (MemoryLayout<T>.size * 8)
     
     let valuePointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
@@ -58,7 +57,7 @@ func arrayOfBytes<T>(_ value: T, length: Int? = nil) -> [UInt8] {
     return bytes
 }
 
-extension Int {
+private extension Int {
     /** Array of bytes with optional padding (little-endian) */
     func bytes(_ totalBytes: Int = MemoryLayout<Int>.size) -> [UInt8] {
         return arrayOfBytes(self, length: totalBytes)
@@ -66,8 +65,7 @@ extension Int {
     
 }
 
-extension NSMutableData {
-    
+private extension NSMutableData {
     /** Convenient way to append bytes */
     func appendBytes(_ arrayOfBytes: [UInt8]) {
         append(arrayOfBytes, length: arrayOfBytes.count)
@@ -75,15 +73,14 @@ extension NSMutableData {
     
 }
 
-protocol HashProtocol {
+private protocol HashProtocol {
     var message: Array<UInt8> { get }
     
     /** Common part for hash calculation. Prepare header data. */
     func prepare(_ len: Int) -> Array<UInt8>
 }
 
-extension HashProtocol {
-    
+private extension HashProtocol {
     func prepare(_ len: Int) -> Array<UInt8> {
         var tmpMessage = message
         
@@ -104,7 +101,7 @@ extension HashProtocol {
     }
 }
 
-func toUInt32Array(_ slice: ArraySlice<UInt8>) -> Array<UInt32> {
+private func toUInt32Array(_ slice: ArraySlice<UInt8>) -> Array<UInt32> {
     var result = Array<UInt32>()
     result.reserveCapacity(16)
     
@@ -120,8 +117,7 @@ func toUInt32Array(_ slice: ArraySlice<UInt8>) -> Array<UInt32> {
     return result
 }
 
-struct BytesIterator: IteratorProtocol {
-    
+private struct BytesIterator: IteratorProtocol {
     let chunkSize: Int
     let data: [UInt8]
     
@@ -140,7 +136,7 @@ struct BytesIterator: IteratorProtocol {
     }
 }
 
-struct BytesSequence: Sequence {
+private struct BytesSequence: Sequence {
     let chunkSize: Int
     let data: [UInt8]
     
@@ -149,12 +145,11 @@ struct BytesSequence: Sequence {
     }
 }
 
-func rotateLeft(_ value: UInt32, bits: UInt32) -> UInt32 {
+private func rotateLeft(_ value: UInt32, bits: UInt32) -> UInt32 {
     return ((value << bits) & 0xFFFFFFFF) | (value >> (32 - bits))
 }
 
-class MD5: HashProtocol {
-    
+private class MD5: HashProtocol {
     static let size = 16 // 128 / 8
     let message: [UInt8]
     

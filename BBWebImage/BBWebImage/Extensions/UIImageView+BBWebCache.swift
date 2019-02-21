@@ -31,7 +31,7 @@ extension UIImageView: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
-                    taskKey: imageLoadTaskKey,
+                    taskKey: bb_imageLoadTaskKey,
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
@@ -39,10 +39,10 @@ extension UIImageView: BBWebCache {
     
     /// Cancels image loading task
     public func bb_cancelImageLoadTask() {
-        bb_webCacheOperation.task(forKey: imageLoadTaskKey)?.cancel()
+        bb_webCacheOperation.task(forKey: bb_imageLoadTaskKey)?.cancel()
     }
     
-    public var imageLoadTaskKey: String { return classForCoder.description() }
+    public var bb_imageLoadTaskKey: String { return classForCoder.description() }
     
     /// Sets highlighted image with resource, placeholder, custom opotions
     ///
@@ -66,7 +66,7 @@ extension UIImageView: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
-                    taskKey: highlightedImageLoadTaskKey,
+                    taskKey: bb_highlightedImageLoadTaskKey,
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
@@ -74,8 +74,8 @@ extension UIImageView: BBWebCache {
     
     /// Cancels highlighted image loading task
     public func bb_cancelHighlightedImageLoadTask() {
-        bb_webCacheOperation.task(forKey: highlightedImageLoadTaskKey)?.cancel()
+        bb_webCacheOperation.task(forKey: bb_highlightedImageLoadTaskKey)?.cancel()
     }
     
-    public var highlightedImageLoadTaskKey: String { return classForCoder.description() + "Highlighted" }
+    public var bb_highlightedImageLoadTaskKey: String { return classForCoder.description() + "Highlighted" }
 }

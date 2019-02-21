@@ -146,7 +146,7 @@ public class BBDiskStorage {
             sqlite3_bind_text(stmt, 1, (key as NSString).utf8String, -1, nil)
             let nsdata = data as NSData
             if type == .file {
-                let filename = key.md5
+                let filename = key.bb_md5
                 sqlite3_bind_text(stmt, 2, (filename as NSString).utf8String, -1, nil)
                 sqlite3_bind_blob(stmt, 3, nil, 0, nil)
                 try? data.write(to: URL(fileURLWithPath: "\(baseDataPath)/\(filename)"))

@@ -229,8 +229,8 @@ public class BBAnimatedImage: UIImage {
     }
     
     private func updateCacheSize() {
-        let total = Int64(Double(UIDevice.totalMemory) * 0.2)
-        let free = Int64(Double(UIDevice.freeMemory) * 0.6)
+        let total = Int64(Double(UIDevice.bb_totalMemory) * 0.2)
+        let free = Int64(Double(UIDevice.bb_freeMemory) * 0.6)
         maxCacheSize = min(total, free)
     }
     

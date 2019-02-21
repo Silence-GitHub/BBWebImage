@@ -9,9 +9,9 @@
 import UIKit
 
 extension UIDevice {
-    static var totalMemory: Int64 { return Int64(ProcessInfo().physicalMemory) }
+    static var bb_totalMemory: Int64 { return Int64(ProcessInfo().physicalMemory) }
     
-    static var freeMemory: Int64 {
+    static var bb_freeMemory: Int64 {
         let host_port = mach_host_self()
         var page_size: vm_size_t = 0
         guard host_page_size(host_port, &page_size) == KERN_SUCCESS else { return -1 }

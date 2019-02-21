@@ -33,7 +33,7 @@ extension UIButton: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
-                    taskKey: imageLoadTaskKey(forState: state),
+                    taskKey: bb_imageLoadTaskKey(forState: state),
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
@@ -43,11 +43,11 @@ extension UIButton: BBWebCache {
     ///
     /// - Parameter state: button state to set image
     public func bb_cancelImageLoadTask(forState state: UIControl.State) {
-        let key = imageLoadTaskKey(forState: state)
+        let key = bb_imageLoadTaskKey(forState: state)
         bb_webCacheOperation.task(forKey: key)?.cancel()
     }
     
-    public func imageLoadTaskKey(forState state: UIControl.State) -> String {
+    public func bb_imageLoadTaskKey(forState state: UIControl.State) -> String {
         return classForCoder.description() + "Image\(state.rawValue)"
     }
     
@@ -75,7 +75,7 @@ extension UIButton: BBWebCache {
                     placeholder: placeholder,
                     options: options,
                     editor: editor,
-                    taskKey: backgroundImageLoadTaskKey(forState: state),
+                    taskKey: bb_backgroundImageLoadTaskKey(forState: state),
                     setImage: setImage,
                     progress: progress,
                     completion: completion)
@@ -85,11 +85,11 @@ extension UIButton: BBWebCache {
     ///
     /// - Parameter state: button state to set background image
     public func bb_cancelBackgroundImageLoadTask(forState state: UIControl.State) {
-        let key = backgroundImageLoadTaskKey(forState: state)
+        let key = bb_backgroundImageLoadTaskKey(forState: state)
         bb_webCacheOperation.task(forKey: key)?.cancel()
     }
     
-    public func backgroundImageLoadTaskKey(forState state: UIControl.State) -> String {
+    public func bb_backgroundImageLoadTaskKey(forState state: UIControl.State) -> String {
         return classForCoder.description() + "BackgroundImage\(state.rawValue)"
     }
 }
