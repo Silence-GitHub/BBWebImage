@@ -17,6 +17,7 @@ class TestGIFVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        automaticallyAdjustsScrollViewInsets = false
         view.backgroundColor = .lightGray
         
         let x: CGFloat = 10
