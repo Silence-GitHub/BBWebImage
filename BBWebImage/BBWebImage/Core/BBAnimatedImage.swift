@@ -34,7 +34,10 @@ public class BBAnimatedImage: UIImage {
         }
         set {
             lock.wait()
-            editor = newValue
+            if newValue?.key != editor?.key {
+                editor = newValue
+                cachedFrameCount = 0
+            }
             lock.signal()
         }
     }

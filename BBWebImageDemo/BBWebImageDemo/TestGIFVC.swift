@@ -13,6 +13,8 @@ class TestGIFVC: UIViewController {
     
     private var imageView: BBAnimatedImageView!
     private var scaleLabel: UILabel!
+    
+    private var editor: BBWebImageEditor?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,6 +74,9 @@ class TestGIFVC: UIViewController {
         let runLoopButton = generateButton("Change to default mode", "Change to common mode")
         runLoopButton.addTarget(self, action: #selector(runLoopButtonClicked(_:)), for: .touchUpInside)
         
+        let filterButton = generateButton("Add filter", "Remove filter")
+        filterButton.addTarget(self, action: #selector(filterButtonClicked(_:)), for: .touchUpInside)
+        
         let changeImageSegment = UISegmentedControl(frame: CGRect(x: x, y: y, width: width, height: height))
         changeImageSegment.insertSegment(withTitle: "GIF", at: 0, animated: false)
         changeImageSegment.insertSegment(withTitle: "Static", at: 1, animated: false)
@@ -100,12 +105,28 @@ class TestGIFVC: UIViewController {
         imageView.bb_runLoopMode = (button.isSelected ? .default : .common)
     }
     
+    @objc private func filterButtonClicked(_ button: UIButton) {
+        if editor == nil {
+            let e = bb_imageEditorCILookupTestFilter()
+            editor = e
+            button.isSelected = true
+        } else {
+            editor = nil
+            button.isSelected = false
+        }
+        if let animatedImage = imageView.image as? BBAnimatedImage {
+            animatedImage.bb_editor = editor
+        }
+    }
+    
     @objc private func changeImageSegmentChanged(_ segment: UISegmentedControl) {
         switch segment.selectedSegmentIndex {
         case 0:
             let url = Bundle(for: self.classForCoder).url(forResource: "Rotating_earth", withExtension: "gif")!
             let data = try! Data(contentsOf: url)
-            imageView.image = BBAnimatedImage(bb_data: data)
+            let animatedImage = BBAnimatedImage(bb_data: data)
+            animatedImage?.bb_editor = editor
+            imageView.image = animatedImage
             imageView.animationImages = nil
         case 1:
             imageView.image = UIImage(named: "placeholder")
