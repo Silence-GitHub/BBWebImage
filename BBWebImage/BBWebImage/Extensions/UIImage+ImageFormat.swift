@@ -28,7 +28,7 @@ public extension UIImage {
 
 public extension CGImage {
     public var bb_containsAlpha: Bool { return !(alphaInfo == .none || alphaInfo == .noneSkipFirst || alphaInfo == .noneSkipLast) }
-    public var bb_cost: Int { return max(1, height * bytesPerRow) }
+    public var bb_bytes: Int { return max(1, height * bytesPerRow) }
 }
 
 extension CGImagePropertyOrientation {

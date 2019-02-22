@@ -153,7 +153,7 @@ public class BBLRUImageCache: BBImageCache {
                       completion: BBImageCacheStoreCompletion?) {
         if cacheType.contains(.memory),
             let currentImage = image {
-            memoryCache.store(currentImage, forKey: key, cost: currentImage.cgImage?.bb_cost ?? 1)
+            memoryCache.store(currentImage, forKey: key, cost: currentImage.cgImage?.bb_bytes ?? 1)
         }
         if cacheType.contains(.disk),
             let currentDiskCache = diskCache {
