@@ -2,6 +2,22 @@
 
 BBWebImage is a Swift library for downloading, caching and editing web images asynchronously.
 
+## Examples
+
+Simplely download, display and cache images.
+
+![](README_resources/original_image.gif)
+
+Download images. Decode, edit and display images while downloading. After downloading, cache edited images in memory and cache original image data in disk.
+
+**Add filter**
+
+![](README_resources/edit_filter.gif)
+
+**Draw rounded corner and border**
+
+![](README_resources/edit_common.gif)
+
 ## Features
 
 - [x] View extensions for `UIImageView`, `UIButton`, `MKAnnotationView` and `CALayer` to set image from URL
@@ -73,6 +89,8 @@ imageView.bb_setImage(with: url,
     // Do something when finish loading
 }
 ```
+
+To support GIF, replace `UIImageView` by `BBAnimatedImageView`. BBAnimatedImageView is a subclass of UIImageView. BBAnimatedImageView supports both static image and animated image.
 
 ## License
 
