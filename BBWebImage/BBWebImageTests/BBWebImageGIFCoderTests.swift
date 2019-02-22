@@ -53,11 +53,28 @@ class BBWebImageGIFCoderTests: XCTestCase {
     }
     
     func testEncode() {
+        let test = { (image: UIImage) -> Void in
+            XCTAssertNil(self.coder.encodedData(with: image, format: .unknown))
+            XCTAssertNil(self.coder.encodedData(with: image, format: .PNG))
+            XCTAssertNil(self.coder.encodedData(with: image, format: .JPEG))
+            XCTAssertNotNil(self.coder.encodedData(with: image, format: .GIF))
+        }
+        
         let image = coder.decodedImage(with: gifData) as! BBAnimatedImage
-        XCTAssertNil(coder.encodedData(with: image, format: .unknown))
-        XCTAssertNil(coder.encodedData(with: image, format: .PNG))
-        XCTAssertNil(coder.encodedData(with: image, format: .JPEG))
-        XCTAssertNotNil(coder.encodedData(with: image, format: .GIF))
+        test(image)
+        
+        let jpgUrl = Bundle(for: classForCoder).url(forResource: "mew_baseline", withExtension: "jpg")!
+        let jpgData = try! Data(contentsOf: jpgUrl)
+        let jpgImage = UIImage(data: jpgData)!
+        test(jpgImage)
+        
+        let pngUrl = Bundle(for: classForCoder).url(forResource: "mew_baseline", withExtension: "png")!
+        let pngData = try! Data(contentsOf: pngUrl)
+        let pngImage = UIImage(data: pngData)!
+        test(pngImage)
+        
+        let images = UIImage.animatedImage(with: [jpgImage, pngImage], duration: 2)!
+        test(images)
     }
 
     func testCopy() {
