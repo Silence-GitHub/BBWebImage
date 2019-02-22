@@ -25,10 +25,13 @@ Download images. Decode, edit and display images while downloading. After downlo
 - [x] Asynchronous memory + file + SQLite image cache with least recently used algorithm
 - [x] Asynchronous image decompressing
 - [x] Asynchronous image editing without modifying original image disk data
+- [x] Animated image smart decoding, decompressing, editing and caching
 - [x] Independent image cache, downloader, coder and editor for separate use
 - [x] Customized image cache, downloader and coder
 
 ## Why to use
+
+### Solve the problems of SDWebImage
 
 SDWebImage is a powerful library for downloading and caching web images. When BBWebImage first version (0.1.0) is released, the latest version of SDWebImage is 4.4.3 which dose not contain powerful image editing function. If we download an image with SDWebImage 4.4.3 and edit the image, the problems will happen:
 
@@ -40,6 +43,12 @@ BBWebImage is born to solve the problems.
 
 1. The original image data is cached to disk, and the original or edited image is cached to memory. The `UIImage` is associated with edit key which is a String identifying how the image is edited. Edit key is nil for original image. When we load image from the network or cache, we can pass `BBWebImageEditor` to get edited image. BBWebImageEditor specifies how to edit image, and contains the edit key which will be associated to the edited image. If the edit key of the memory cached image is the same as the edit key of BBWebImageEditor, then the memory cached image is what we need; Or BBWebImage will load and edit the original image and cache the edited image to memory. If we want the original image, do not pass BBWebImageEditor. We will not download an image more than once. We do not need to write more code to cache edited image or check whether the image is edited.
 2. If we load original image, BBWebImage will decompress image by default. If we load image with BBWebImageEditor, BBWebImage will use editor to edit image without decompressing. We do not need to write more code to enable or disable image decompressing.
+
+### Edit animated image and cache smartly
+
+To display animated image, we need to decode image frames, change frame according to frame duration. We use `BBAnimatedImage` to manage animated image data, and use `BBAnimatedImageView` to play the animation. BBAnimatedImageView decides which frame to display or to decode. BBAnimatedImage decodes and caches image frames in the background. The max cache size is calculated dynamically and the cache is cleared automatically.
+
+BBAnimatedImage uses BBWebImageEditor to edit image frames. BBAnimatedImage has a property `bb_editor` which is an optional BBWebImageEditor type. Set an editor to the property to display edited image frames, or set nil to display original image frames.
 
 ## Requirements
 
@@ -56,7 +65,7 @@ Install with CocoaPods:
 
 ## How To Use
 
-Set image for `UIImageView` with `URL`
+The simplest way to use is setting image for `UIImageView` with `URL`
 
 ```swift
 imageView.bb_setImage(with: url)
@@ -66,7 +75,7 @@ The code below:
 
 1. Downloads a high-resolution image
 2. Downsamples and crops it to match an expected maximum resolution and image view size
-3. Draws it with round corner, border and background color
+3. Draws it with rounded corner, border and background color
 4. Displays edited image after downloading and editing
 5. Displays a placeholder image before downloading
 6. Decodes image incrementally and displays it while downloading
@@ -91,6 +100,22 @@ imageView.bb_setImage(with: url,
 ```
 
 To support GIF, replace `UIImageView` by `BBAnimatedImageView`. BBAnimatedImageView is a subclass of UIImageView. BBAnimatedImageView supports both static image and animated image.
+
+## Supported image formats
+
+- [x] JPEG
+- [x] PNG
+- [x] GIF
+
+To support other image format or change default encode/decode behaivor, customize image coder. Implement new coder conforming to `BBImageCoder` protocol. Get old coders and change.
+
+```swift
+if let coderManager = BBWebImageManager.shared.imageCoder as? BBImageCoderManager {
+	let oldCoders = coderManager.coders
+	let newCoders = ...
+	coderManager.coders = newCoders
+}
+```
 
 ## License
 

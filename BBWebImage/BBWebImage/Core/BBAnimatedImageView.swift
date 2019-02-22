@@ -16,6 +16,7 @@ enum BBAnimatedImageViewType {
     case hilightedAnimationImages
 }
 
+/// BBAnimatedImageView displays BBAnimatedImage
 public class BBAnimatedImageView: UIImageView {
     /// If true (default value), animation will be started/stopped automatically when the view becomes visible/invisible
     public var bb_autoStartAnimation: Bool = true

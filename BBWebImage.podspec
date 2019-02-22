@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
                    Asynchronous memory + file + SQLite image cache with least recently used algorithm.
                    Asynchronous image decompressing.
                    Asynchronous image editing without modifying original image disk data.
+                   Animated image smart decoding, decompressing, editing and caching.
                    Independent image cache, downloader, coder and editor for separate use.
                    Customized image cache, downloader and coder.
                    DESC
