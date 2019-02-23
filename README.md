@@ -10,11 +10,11 @@ Simplely download, display and cache images.
 
 Download images. Decode, edit and display images while downloading. After downloading, cache edited images in memory and cache original image data in disk.
 
-**Add filter**
+- Add filter
 
 ![](README_resources/edit_filter.gif)
 
-**Draw rounded corner and border**
+- Draw rounded corner and border
 
 ![](README_resources/edit_common.gif)
 
@@ -29,9 +29,9 @@ Download images. Decode, edit and display images while downloading. After downlo
 - [x] Independent image cache, downloader, coder and editor for separate use
 - [x] Customized image cache, downloader and coder
 
-## Why to use
+## Why to Use
 
-### Solve the problems of SDWebImage
+### Solve the Problems of SDWebImage
 
 SDWebImage is a powerful library for downloading and caching web images. When BBWebImage first version (0.1.0) is released, the latest version of SDWebImage is 4.4.3 which dose not contain powerful image editing function. If we download an image with SDWebImage 4.4.3 and edit the image, the problems will happen:
 
@@ -44,7 +44,7 @@ BBWebImage is born to solve the problems.
 1. The original image data is cached to disk, and the original or edited image is cached to memory. The `UIImage` is associated with edit key which is a String identifying how the image is edited. Edit key is nil for original image. When we load image from the network or cache, we can pass `BBWebImageEditor` to get edited image. BBWebImageEditor specifies how to edit image, and contains the edit key which will be associated to the edited image. If the edit key of the memory cached image is the same as the edit key of BBWebImageEditor, then the memory cached image is what we need; Or BBWebImage will load and edit the original image and cache the edited image to memory. If we want the original image, do not pass BBWebImageEditor. We will not download an image more than once. We do not need to write more code to cache edited image or check whether the image is edited.
 2. If we load original image, BBWebImage will decompress image by default. If we load image with BBWebImageEditor, BBWebImage will use editor to edit image without decompressing. We do not need to write more code to enable or disable image decompressing.
 
-### Edit animated image and cache smartly
+### Edit Animated Amage and Cache Smartly
 
 To display animated image, we need to decode image frames, change frame according to frame duration. We use `BBAnimatedImage` to manage animated image data, and use `BBAnimatedImageView` to play the animation. BBAnimatedImageView decides which frame to display or to decode. BBAnimatedImage decodes and caches image frames in the background. The max cache size is calculated dynamically and the cache is cleared automatically.
 
@@ -63,7 +63,9 @@ Install with CocoaPods:
 2. Run `pod install` or `pod update`.
 3. Add `import BBWebImage` to the Swift source file.
 
-## How To Use
+## How to Use
+
+### View Extensions
 
 The simplest way to use is setting image for `UIImageView` with `URL`
 
@@ -79,8 +81,9 @@ The code below:
 4. Displays edited image after downloading and editing
 5. Displays a placeholder image before downloading
 6. Decodes image incrementally and displays it while downloading
-7. Caches original image data to disk and caches edited image to memory
-8. Do something when loading is finished
+7. Do something while downloading
+8. Caches original image data to disk and caches edited image to memory
+9. Do something when loading is finished
 
 ```swift
 let editor = bb_imageEditorCommon(with: imageView.frame.size,
@@ -90,18 +93,140 @@ let editor = bb_imageEditorCommon(with: imageView.frame.size,
                                   borderWidth: 1,
                                   borderColor: .yellow,
                                   backgroundColor: .gray)
+let progress = { (data: Data?, expectedSize: Int, image: UIImage?) -> Void in
+    // Do something while downloading
+}
 imageView.bb_setImage(with: url,
                       placeholder: UIImage(named: "placeholder"),
                       options: .progressiveDownload,
-                      editor: editor)
+                      editor: editor,
+                      progress: progress)
 { (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
     // Do something when finish loading
 }
 ```
 
+The parameter `options` of `bb_setImage(with:)` method is `BBWebImageOptions`, an option set. Use it to control some behaviors of downloading, caching, decoding and displaying. The value `.progressiveDownload` means displaying image progressly when downloading. The default value is `.none`.
+
+The parameter `editor` of `bb_setImage(with:)` method is an optional struct `BBWebImageEditor`. Pass nil to display original image. There are other built-in editors to choose. See [Built-in Image Editors](#Built-in Image Editors).
+
 To support GIF, replace `UIImageView` by `BBAnimatedImageView`. BBAnimatedImageView is a subclass of UIImageView. BBAnimatedImageView supports both static image and animated image.
 
-## Supported image formats
+To support other image format or change default encode/decode behaivor, see [Supported Image Formats](#Supported Image Formats).
+
+### Image Manager
+
+To get image  from cache or the network without displaying on the view, use `BBWebImageManager` `loadImage(with:)` method. The method returns a `BBWebImageLoadTask` object. To cancel the task, call `cancel()` method of the task.
+
+```swift
+let progress = { (data: Data?, expectedSize: Int, image: UIImage?) -> Void in
+    // Do something while downloading
+}
+BBWebImageManager.shared.loadImage(with: url,
+                                   options: options,
+                                   editor: editor,
+                                   progress: progress)
+{ (image: UIImage?, data: Data?, error: Error?, cacheType: BBImageCacheType) in
+    // Do something when finish loading
+}
+```
+
+### Image Cache
+
+To get image or data from cache, use `BBLRUImageCache` `image(forKey:)` method. To get image/data from memory/disk only, pass `.memory`/`.disk` to `cacheType`.
+
+```swift
+BBWebImageManager.shared.imageCache.image(forKey: key,
+                                          cacheType: .all)
+{ (result: BBImageCacheQueryCompletionResult) in
+	switch result {
+	case let .memory(image: image): // Do something with memory image
+	case let .disk(data: data): // Do something with disk data
+	case let .all(image: image, data: data): // Do something with image and data
+	default: // Do something when no image or data
+	}
+}
+```
+
+To store image or data to cache, use `store(_:)` method. To store image/data to memory/disk only, pass `.memory`/`.disk` to `cacheType`.
+
+```swift
+BBWebImageManager.shared.imageCache.store(image,
+                                          data: data,
+                                          forKey: key,
+                                          cacheType: .all)
+{
+	// Do something after storing
+}
+```
+
+To remove image or data from cache, use `removeImage(forKey:)` method. To remove image/data from memory/disk only, pass `.memory`/`.disk` to `cacheType`.
+
+```swift
+BBWebImageManager.shared.imageCache.removeImage(forKey: key,
+                                                cacheType: .all)
+{
+    // Do something after removing
+}
+```
+
+To remove all images or data from cache, use `clear(_:)` method. To remove all image/data from memory/disk only, pass `.memory`/`.disk` to first parameter.
+
+```swift
+BBWebImageManager.shared.imageCache.clear(.all) {
+    // Do something after clearing
+}
+```
+
+### Image Downloader
+
+To download image data, use `BBMergeRequestImageDownloader` `download(with:)` method. The method returns a task conforming to `BBImageDownloadTask` protocol. To cancel the task, call downloader `cancel(task:)` method and pass the task as parameter. To cancel all download tasks, call downloader `cancelAll()` method.
+
+```swift
+let progress = { (data: Data?, expectedSize: Int, image: UIImage?) -> Void in
+    // Do something while downloading
+}
+BBWebImageManager.shared.imageDownloader.downloadImage(with: url,
+                                                       options: options,
+                                                       progress: progress)
+{ (data: Data?, error: Error?) in
+	// Do something with data or error
+}
+```
+
+### Image Coder
+
+To get decoded image (without decompressing) from data, use `BBImageCoderManager` `decodedImage(with:)` method. The method returns an optional `UIImage` object. If the image is `BBAnimatedImage`, it is an animated image ready for display on `BBAnimatedImageView`. If the image is a static image, it is not decompressed. Use `decompressedImage(with:` method to decompress it for display.
+
+```swift
+let coder = BBWebImageManager.shared.imageCoder
+if let decodedImage = coder.decodedImage(with: data) {
+    // Do something with decoded image
+    if let animatedImage = decodedImage as? BBAnimatedImage {
+        // Do something with animated image
+    } else if let decompressedImage = coder.decompressedImage(with: decodedImage, data: data) {
+        // Do something with decompressed image
+    } else {
+        // Can not decompress image
+    }
+} else {
+    // Can not decode image data
+}
+```
+
+To encode image to specific format, use `encodedData(with:)` method.
+
+```swift
+if let data = coder.encodedData(with: image, format: .PNG) {
+    // Do something with data
+} else {
+    // Can not encode data
+}
+```
+
+To support other image format or change default encode/decode behaivor, see [Supported Image Formats](#Supported Image Formats).
+
+<h2 id="Supported Image Formats">Supported Image Formats</h2>
 
 - [x] JPEG
 - [x] PNG
@@ -116,6 +241,22 @@ if let coderManager = BBWebImageManager.shared.imageCoder as? BBImageCoderManage
 	coderManager.coders = newCoders
 }
 ```
+
+<h2 id="Built-in Image Editors">Built-in Image Editors</h2>
+
+Struct `BBWebImageEditor` defines how to edit and cache image in memory. The built-in image editors are below:
+
+| Editor | Description | Create Method |
+| ------ | ------ | ------ |
+| Common | Crop and resize image with expected maximum resolution, view size and content mode. Draw rounded corner, border and background color. |`bb_commonEditedImage(with:)`|
+| Crop | Crop image to the specific rect. |`bb_croppedImage(with:)`|
+| Resize | Resize image to the specific size, or to fit view size and content mode. |`bb_resizedImage(with:)`|
+| Rotate | Rotate image with given angle. |`bb_rotatedImage(withAngle:)`|
+| Flip | Flip image horizontally and/or vertically. |`bb_flippedImage(withHorizontal:)`|
+| Tint | Tint image with color. |`bb_tintedImage(with:)`|
+| Tint gradiently | Tint image with gradient color. |`bb_gradientlyTintedImage(with:)`|
+| Overlay | Overlay image with another image. |`bb_overlaidImage(with:)`|
+| Color lookup | Remap the image colors with color lookup image. |`bb_imageEditorCILookupTestFilter(maxTileSize:)` in demo|
 
 ## License
 
