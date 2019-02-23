@@ -258,7 +258,10 @@ Struct `BBWebImageEditor` defines how to edit and cache image in memory. The bui
 | Overlay | Overlay image with another image. |`bb_overlaidImage(with:)`|
 | Color lookup | Remap the image colors with color lookup image. |`bb_imageEditorCILookupTestFilter(maxTileSize:)` in demo|
 
+## Architecture
+
+![](README_resources/architecture.png)
+
 ## License
 
-BBWebImage is released under the MIT license. See LICENSE for details.
-
+BBWebImage is released under the MIT license. See [LICENSE](LICENSE) for details.
