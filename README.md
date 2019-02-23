@@ -156,7 +156,7 @@ BBWebImageManager.shared.imageCache.store(image,
                                           forKey: key,
                                           cacheType: .all)
 {
-	// Do something after storing
+    // Do something after storing
 }
 ```
 
@@ -190,7 +190,7 @@ BBWebImageManager.shared.imageDownloader.downloadImage(with: url,
                                                        options: options,
                                                        progress: progress)
 { (data: Data?, error: Error?) in
-	// Do something with data or error
+    // Do something with data or error
 }
 ```
 
