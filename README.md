@@ -8,7 +8,7 @@ Simplely download, display and cache images.
 
 ![](README_resources/original_image.gif)
 
-Download images. Decode, edit and display images while downloading. After downloading, cache edited images in memory and cache original image data in disk.
+Download images. Decode, edit and display images while downloading. After downloading, cache edited images to memory and cache original image data to disk.
 
 - Add filter
 
@@ -108,11 +108,11 @@ imageView.bb_setImage(with: url,
 
 The parameter `options` of `bb_setImage(with:)` method is `BBWebImageOptions`, an option set. Use it to control some behaviors of downloading, caching, decoding and displaying. The value `.progressiveDownload` means displaying image progressly when downloading. The default value is `.none`.
 
-The parameter `editor` of `bb_setImage(with:)` method is an optional struct `BBWebImageEditor`. Pass nil to display original image. There are other built-in editors to choose. See [Built-in Image Editors](#Built-in Image Editors).
+The parameter `editor` of `bb_setImage(with:)` method is an optional struct `BBWebImageEditor`. Pass nil to display original image. There are other built-in editors to choose. See [Built-in Image Editors](#built-in-image-editors).
 
 To support GIF, replace `UIImageView` by `BBAnimatedImageView`. BBAnimatedImageView is a subclass of UIImageView. BBAnimatedImageView supports both static image and animated image.
 
-To support other image format or change default encode/decode behaivor, see [Supported Image Formats](#Supported Image Formats).
+To support other image format or change default encode/decode behaivor, see [Supported Image Formats](#supported-image-formats).
 
 ### Image Manager
 
@@ -224,9 +224,9 @@ if let data = coder.encodedData(with: image, format: .PNG) {
 }
 ```
 
-To support other image format or change default encode/decode behaivor, see [Supported Image Formats](#Supported Image Formats).
+To support other image format or change default encode/decode behaivor, see [Supported Image Formats](#supported-image-formats).
 
-<h2 id="Supported Image Formats">Supported Image Formats</h2>
+<h2 id="supported-image-formats">Supported Image Formats</h2>
 
 - [x] JPEG
 - [x] PNG
@@ -242,7 +242,7 @@ if let coderManager = BBWebImageManager.shared.imageCoder as? BBImageCoderManage
 }
 ```
 
-<h2 id="Built-in Image Editors">Built-in Image Editors</h2>
+<h2 id="built-in-image-editors">Built-in Image Editors</h2>
 
 Struct `BBWebImageEditor` defines how to edit and cache image in memory. The built-in image editors are below:
 
