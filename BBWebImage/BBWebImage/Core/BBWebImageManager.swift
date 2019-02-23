@@ -214,7 +214,7 @@ public class BBWebImageManager {
         var memoryImage: UIImage?
         imageCache.image(forKey: resource.cacheKey, cacheType: .memory) { (result: BBImageCacheQueryCompletionResult) in
             switch result {
-            case .memory(image: let image):
+            case let .memory(image: image):
                 memoryImage = image
             default:
                 break
@@ -317,7 +317,7 @@ public class BBWebImageManager {
             imageCache.image(forKey: resource.cacheKey, cacheType: .disk) { [weak self, weak task] (result: BBImageCacheQueryCompletionResult) in
                 guard let self = self, let task = task, !task.isCancelled else { return }
                 switch result {
-                case .disk(data: let data):
+                case let .disk(data: data):
                     self.handle(imageData: data,
                                 options: options,
                                 cacheType: (memoryImage != nil ? .all : .disk),

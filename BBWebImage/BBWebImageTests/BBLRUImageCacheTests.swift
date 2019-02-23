@@ -71,7 +71,7 @@ class BBLRUImageCacheTests: XCTestCase {
             cache.store(image, data: data, forKey: key, cacheType: .all) {
                 cache.image(forKey: key, cacheType: .all) { (result) in
                     switch result {
-                    case .all(image: let currentImage, data: let currentData):
+                    case let .all(image: currentImage, data: currentData):
                         XCTAssertEqual(image, currentImage)
                         XCTAssertEqual(data, currentData)
                         expectation.fulfill()
@@ -98,7 +98,7 @@ class BBLRUImageCacheTests: XCTestCase {
             cache.store(image, data: nil, forKey: key, cacheType: .memory) {
                 cache.image(forKey: key, cacheType: .memory) { (result) in
                     switch result {
-                    case .memory(image: let currentImage):
+                    case let .memory(image: currentImage):
                         XCTAssertEqual(image, currentImage)
                         expectation.fulfill()
                     default:
@@ -124,7 +124,7 @@ class BBLRUImageCacheTests: XCTestCase {
             cache.store(nil, data: data, forKey: key, cacheType: .disk) {
                 cache.image(forKey: key, cacheType: .disk) { (result) in
                     switch result {
-                    case .disk(data: let currentData):
+                    case let .disk(data: currentData):
                         XCTAssertEqual(data, currentData)
                         expectation.fulfill()
                     default:
@@ -188,7 +188,7 @@ class BBLRUImageCacheTests: XCTestCase {
                     let expectation = expectations[i]
                     cache.image(forKey: key, cacheType: .all) { (result) in
                         switch result {
-                        case .all(image: let currentImage, data: let currentData):
+                        case let .all(image: currentImage, data: currentData):
                             XCTAssertEqual(image, currentImage)
                             XCTAssertEqual(data, currentData)
                             expectation.fulfill()
@@ -232,7 +232,7 @@ class BBLRUImageCacheTests: XCTestCase {
                     let expectation = expectations[i]
                     cache.image(forKey: key, cacheType: .memory) { (result) in
                         switch result {
-                        case .memory(image: let currentImage):
+                        case let .memory(image: currentImage):
                             XCTAssertEqual(image, currentImage)
                             expectation.fulfill()
                         default:
@@ -275,7 +275,7 @@ class BBLRUImageCacheTests: XCTestCase {
                     let expectation = expectations[i]
                     cache.image(forKey: key, cacheType: .disk) { (result) in
                         switch result {
-                        case .disk(data: let currentData):
+                        case let .disk(data: currentData):
                             XCTAssertEqual(data, currentData)
                             expectation.fulfill()
                         default:
@@ -369,7 +369,7 @@ class BBLRUImageCacheTests: XCTestCase {
                 cache.removeImage(forKey: key, cacheType: .memory) {
                     cache.image(forKey: key, cacheType: .all) { (result) in
                         switch result {
-                        case .disk(data: let currentData):
+                        case let .disk(data: currentData):
                             XCTAssertEqual(data, currentData)
                             expectation.fulfill()
                         default:
@@ -398,7 +398,7 @@ class BBLRUImageCacheTests: XCTestCase {
                 cache.removeImage(forKey: key, cacheType: .disk) {
                     cache.image(forKey: key, cacheType: .all) { (result) in
                         switch result {
-                        case .memory(image: let currentImage):
+                        case let .memory(image: currentImage):
                             XCTAssertEqual(image, currentImage)
                             expectation.fulfill()
                         default:
@@ -485,7 +485,7 @@ class BBLRUImageCacheTests: XCTestCase {
                     cache.removeImage(forKey: key, cacheType: .memory) {
                         cache.image(forKey: key, cacheType: .all) { (result) in
                             switch result {
-                            case .disk(data: let currentData):
+                            case let .disk(data: currentData):
                                 XCTAssertEqual(data, currentData)
                                 expectation.fulfill()
                             default:
@@ -530,7 +530,7 @@ class BBLRUImageCacheTests: XCTestCase {
                     cache.removeImage(forKey: key, cacheType: .disk) {
                         cache.image(forKey: key, cacheType: .all) { (result) in
                             switch result {
-                            case .memory(image: let currentImage):
+                            case let .memory(image: currentImage):
                                 XCTAssertEqual(image, currentImage)
                                 expectation.fulfill()
                             default:
@@ -618,7 +618,7 @@ class BBLRUImageCacheTests: XCTestCase {
                         let expectation = expectations[i]
                         cache.image(forKey: key, cacheType: .all) { (result) in
                             switch result {
-                            case .disk(data: let currentData):
+                            case let .disk(data: currentData):
                                 XCTAssertEqual(data, currentData)
                                 expectation.fulfill()
                             default:
@@ -663,7 +663,7 @@ class BBLRUImageCacheTests: XCTestCase {
                         let expectation = expectations[i]
                         cache.image(forKey: key, cacheType: .all) { (result) in
                             switch result {
-                            case .memory(image: let currentImage):
+                            case let .memory(image: currentImage):
                                 XCTAssertEqual(image, currentImage)
                                 expectation.fulfill()
                             default:
