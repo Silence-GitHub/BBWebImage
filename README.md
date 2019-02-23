@@ -139,12 +139,12 @@ To get image or data from cache, use `BBLRUImageCache` `image(forKey:)` method. 
 BBWebImageManager.shared.imageCache.image(forKey: key,
                                           cacheType: .all)
 { (result: BBImageCacheQueryCompletionResult) in
-	switch result {
-	case let .memory(image: image): // Do something with memory image
-	case let .disk(data: data): // Do something with disk data
-	case let .all(image: image, data: data): // Do something with image and data
-	default: // Do something when no image or data
-	}
+    switch result {
+    case let .memory(image: image): // Do something with memory image
+    case let .disk(data: data): // Do something with disk data
+    case let .all(image: image, data: data): // Do something with image and data
+    default: // Do something when no image or data
+    }
 }
 ```
 
@@ -236,9 +236,9 @@ To support other image format or change default encode/decode behaivor, customiz
 
 ```swift
 if let coderManager = BBWebImageManager.shared.imageCoder as? BBImageCoderManager {
-	let oldCoders = coderManager.coders
-	let newCoders = ...
-	coderManager.coders = newCoders
+    let oldCoders = coderManager.coders
+    let newCoders = ...
+    coderManager.coders = newCoders
 }
 ```
 
