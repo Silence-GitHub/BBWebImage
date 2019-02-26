@@ -378,6 +378,7 @@ public class BBAnimatedImage: UIImage {
     }
     
     @objc private func didReceiveMemoryWarning() {
+        bb_cancelPreloadTask()
         bb_clearAsynchronously { [weak self] in
             guard let self = self else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
@@ -388,6 +389,7 @@ public class BBAnimatedImage: UIImage {
     }
     
     @objc private func didEnterBackground() {
+        bb_cancelPreloadTask()
         bb_clear()
     }
     
