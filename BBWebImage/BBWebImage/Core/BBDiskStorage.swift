@@ -56,7 +56,7 @@ public class BBDiskStorage {
             try? FileManager.default.removeItem(atPath: databasePath)
             return nil
         }
-        let sql = "CREATE TABLE IF NOT EXISTS Storage_item (key text PRIMARY KEY, filename text, data blob, size integer, last_access_time real); CREATE INDEX IF NOT EXISTS last_access_time_index ON Storage_item(last_access_time)"
+        let sql = "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; CREATE TABLE IF NOT EXISTS Storage_item (key text PRIMARY KEY, filename text, data blob, size integer, last_access_time real); CREATE INDEX IF NOT EXISTS last_access_time_index ON Storage_item(last_access_time);"
         if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
             print("Fail to create BBCache sqlite Storage_item table")
             try? FileManager.default.removeItem(atPath: databasePath)
@@ -80,7 +80,7 @@ public class BBDiskStorage {
         var data: Data?
         let sql = "SELECT filename, data, size FROM Storage_item WHERE key = '\(key)';"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 let filenamePointer = sqlite3_column_text(stmt, 0)
                 let dataPointer = sqlite3_column_blob(stmt, 1)
@@ -97,7 +97,9 @@ public class BBDiskStorage {
                 if data != nil {
                     // Update last access time
                     let sql = "UPDATE Storage_item SET last_access_time = \(CACurrentMediaTime()) WHERE key = '\(key)';"
-                    sqlite3_exec(database, sql, nil, nil, nil)
+                    if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+                        print("Fail to set last_access_time for key \(key)")
+                    }
                 }
             }
             sqlite3_finalize(stmt)
@@ -119,7 +121,7 @@ public class BBDiskStorage {
         var exists = false
         let sql = "SELECT count(*) FROM Storage_item WHERE key = '\(key)';"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 if sqlite3_column_int(stmt, 0) >= 1 { exists = true }
             }
@@ -142,12 +144,12 @@ public class BBDiskStorage {
         ioLock.wait()
         let sql = "INSERT OR REPLACE INTO Storage_item (key, filename, data, size, last_access_time) VALUES (?1, ?2, ?3, ?4, ?5);"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
-            sqlite3_bind_text(stmt, 1, (key as NSString).utf8String, -1, nil)
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, key.bb_utf8, -1, nil)
             let nsdata = data as NSData
             if type == .file {
                 let filename = key.bb_md5
-                sqlite3_bind_text(stmt, 2, (filename as NSString).utf8String, -1, nil)
+                sqlite3_bind_text(stmt, 2, filename.bb_utf8, -1, nil)
                 sqlite3_bind_blob(stmt, 3, nil, 0, nil)
                 try? data.write(to: URL(fileURLWithPath: "\(baseDataPath)/\(filename)"))
             } else {
@@ -253,7 +255,7 @@ public class BBDiskStorage {
         // Get filename and delete file data
         let selectSql = "SELECT filename FROM Storage_item WHERE key = '\(key)';"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, selectSql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, selectSql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 if let filenamePointer = sqlite3_column_text(stmt, 0) {
                     let filename = String(cString: filenamePointer)
@@ -273,7 +275,7 @@ public class BBDiskStorage {
         var items: [BBDiskStorageItem]?
         let sql = "SELECT key, size FROM Storage_item ORDER BY last_access_time LIMIT \(limit);"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             items = []
             while sqlite3_step(stmt) == SQLITE_ROW {
                 var key: String = ""
@@ -293,7 +295,7 @@ public class BBDiskStorage {
         var size: Int = 0
         let sql = "SELECT sum(size) FROM Storage_item;"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 size = Int(sqlite3_column_int(stmt, 0))
             }
@@ -306,7 +308,7 @@ public class BBDiskStorage {
         var count: Int = 0
         let sql = "SELECT count(*) FROM Storage_item;"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             if sqlite3_step(stmt) == SQLITE_ROW {
                 count = Int(sqlite3_column_int(stmt, 0))
             }
@@ -319,7 +321,7 @@ public class BBDiskStorage {
         var filenames: [String]?
         let sql = "SELECT filename FROM Storage_item WHERE last_access_time < \(time) AND filename IS NOT NULL;"
         var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(database, sql, -1, &stmt, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(database, sql.bb_utf8, -1, &stmt, nil) == SQLITE_OK {
             filenames = []
             while sqlite3_step(stmt) == SQLITE_ROW {
                 if let filenamePointer = sqlite3_column_text(stmt, 0) {
@@ -338,4 +340,8 @@ public class BBDiskStorage {
             print("Fail to remove data earlier than \(time)")
         }
     }
+}
+
+fileprivate extension String {
+    fileprivate var bb_utf8: UnsafePointer<Int8>? { return (self as NSString).utf8String }
 }
