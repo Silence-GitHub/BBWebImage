@@ -25,7 +25,6 @@ private struct TestItem {
 }
 
 class TestCacheVC: UIViewController {
-
     private var list: [(String, NoParamterBlock)]!
     
     private var testItems: [TestItem] {

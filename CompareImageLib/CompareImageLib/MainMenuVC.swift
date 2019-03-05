@@ -24,7 +24,7 @@ class MainMenuVC: UIViewController {
         super.viewDidLoad()
         
         let testDiskImage = { [weak self] in
-            if let self = self { self.navigationController?.pushViewController(TestDiskImageVC(), animated: true) }
+            if let self = self { self.navigationController?.pushViewController(TestCacheVC(), animated: true) }
         }
         let clear = { [weak self] in
             guard self != nil else { return }
