@@ -59,7 +59,7 @@ public class BBDiskStorage {
         let sql = "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; CREATE TABLE IF NOT EXISTS Storage_item (key text PRIMARY KEY, filename text, data blob, size integer, last_access_time real); CREATE INDEX IF NOT EXISTS last_access_time_index ON Storage_item(last_access_time);"
         if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
             print("Fail to create BBCache sqlite Storage_item table")
-            try? FileManager.default.removeItem(atPath: databasePath)
+            try? FileManager.default.removeItem(atPath: path)
             return nil
         }
     }
