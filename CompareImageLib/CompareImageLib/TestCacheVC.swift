@@ -20,40 +20,45 @@ private struct TestItem {
     init(key: String, data: Data) {
         self.key = key
         self.data = data
-        self.image = UIImage(data: data)!
+        let cgimage = BBWebImageImageIOCoder.decompressedImage(UIImage(data: data)!.cgImage!)!
+        self.image = UIImage(cgImage: cgimage)
     }
 }
 
 class TestCacheVC: UIViewController {
     private var list: [(String, NoParamterBlock)]!
-    
-    private var testItems: [TestItem] {
-        var list: [TestItem] = []
-        for i in 1...100 {
-            let key = "test_\(i)"
-            let url = Bundle.main.url(forResource: key, withExtension: "jpg", subdirectory: "TestImages")!
-            let data = try! Data(contentsOf: url)
-            list.append(TestItem(key: key, data: data))
-        }
-        return list
-    }
-    
     private let testLoopCount = 1000
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let items = testItems
-        list = [("Memory BBWebImage", testMemoryCacheBB(with: items)),
-                ("Memory SDWebImage", testMemoryCacheSD(with: items)),
-                ("Memory YYWebImage", testMemoryCacheYY(with: items)),
-                ("Memory Kingfisher", testMemoryCacheKi(with: items))]
+        let thumbnailItems = testItems(thumbnail: true)
+        let items = testItems(thumbnail: false)
+        list = [("Memory thumbnail BBWebImage", testMemoryCacheBB(with: thumbnailItems)),
+                ("Memory thumbnail SDWebImage", testMemoryCacheSD(with: thumbnailItems)),
+                ("Memory thumbnail YYWebImage", testMemoryCacheYY(with: thumbnailItems)),
+                ("Memory thumbnail Kingfisher", testMemoryCacheKi(with: thumbnailItems)),
+                ("Memory origin BBWebImage", testMemoryCacheBB(with: items)),
+                ("Memory origin SDWebImage", testMemoryCacheSD(with: items)),
+                ("Memory origin YYWebImage", testMemoryCacheYY(with: items)),
+                ("Memory origin Kingfisher", testMemoryCacheKi(with: items))]
         
         let tableView = UITableView(frame: view.bounds)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: UITableViewCell.description())
         tableView.dataSource = self
         tableView.delegate = self
         view.addSubview(tableView)
+    }
+    
+    private func testItems(thumbnail: Bool) -> [TestItem] {
+        var list: [TestItem] = []
+        for i in 1...100 {
+            let key = thumbnail ? "test_\(i)_size_64" : "test_\(i)"
+            let url = Bundle.main.url(forResource: key, withExtension: "jpg", subdirectory: "TestImages")!
+            let data = try! Data(contentsOf: url)
+            list.append(TestItem(key: key, data: data))
+        }
+        return list
     }
     
     private func testMemoryCacheBB(with testItems: [TestItem]) -> NoParamterBlock {
@@ -85,7 +90,7 @@ class TestCacheVC: UIViewController {
                 }
                 removeTime += CACurrentMediaTime() - startTime
             }
-            print(String(format: "BBWebImage time consume: store %0.7f, get %0.7f, remove %0.7f", storeTime, getTime, removeTime))
+            print(String(format: "BBWebImage time consume: store %0.4f, get %0.4f, remove %0.4f", storeTime, getTime, removeTime))
         }
     }
     
@@ -114,7 +119,7 @@ class TestCacheVC: UIViewController {
                 }
                 removeTime += CACurrentMediaTime() - startTime
             }
-            print(String(format: "SDWebImage time consume: store %0.7f, get %0.7f, remove %0.7f", storeTime, getTime, removeTime))
+            print(String(format: "SDWebImage time consume: store %0.4f, get %0.4f, remove %0.4f", storeTime, getTime, removeTime))
         }
     }
     
@@ -147,7 +152,7 @@ class TestCacheVC: UIViewController {
                 }
                 removeTime += CACurrentMediaTime() - startTime
             }
-            print(String(format: "YYWebImage time consume: store %0.7f, get %0.7f, remove %0.7f", storeTime, getTime, removeTime))
+            print(String(format: "YYWebImage time consume: store %0.4f, get %0.4f, remove %0.4f", storeTime, getTime, removeTime))
         }
     }
     
@@ -176,7 +181,7 @@ class TestCacheVC: UIViewController {
                 }
                 removeTime += CACurrentMediaTime() - startTime
             }
-            print(String(format: "Kingfisher time consume: store %0.7f, get %0.7f, remove %0.7f", storeTime, getTime, removeTime))
+            print(String(format: "Kingfisher time consume: store %0.4f, get %0.4f, remove %0.4f", storeTime, getTime, removeTime))
         }
     }
 }
