@@ -9,8 +9,10 @@
 import UIKit
 
 private class BBMemoryCacheLinkedMapNode {
-    fileprivate weak var prev: BBMemoryCacheLinkedMapNode?
-    fileprivate weak var next: BBMemoryCacheLinkedMapNode?
+    // Weak var will slow down speed. So use strong var. Set all notes prev/next to nil when removing all nodes
+    fileprivate var prev: BBMemoryCacheLinkedMapNode?
+    fileprivate var next: BBMemoryCacheLinkedMapNode?
+    
     fileprivate var key: String
     fileprivate var value: Any
     fileprivate var cost: Int
@@ -78,6 +80,12 @@ private class BBMemoryCacheLinkedMap {
     
     fileprivate func removeAll() {
         dic.removeAll()
+        // Prevent retain cycle
+        var node = head
+        while let next = node?.next {
+            next.prev = nil
+            node = next
+        }
         head = nil
         tail = nil
         totalCost = 0
