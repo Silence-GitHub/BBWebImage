@@ -33,6 +33,8 @@ private class BBMemoryCacheLinkedMap {
     fileprivate var totalCost: Int
     fileprivate var totalCount: Int
     
+    deinit { breakRetainCycle() }
+    
     init() {
         dic = [:]
         totalCost = 0
@@ -80,16 +82,19 @@ private class BBMemoryCacheLinkedMap {
     
     fileprivate func removeAll() {
         dic.removeAll()
-        // Prevent retain cycle
+        breakRetainCycle()
+        head = nil
+        tail = nil
+        totalCost = 0
+        totalCount = 0
+    }
+    
+    private func breakRetainCycle() {
         var node = head
         while let next = node?.next {
             next.prev = nil
             node = next
         }
-        head = nil
-        tail = nil
-        totalCost = 0
-        totalCount = 0
     }
 }
 
