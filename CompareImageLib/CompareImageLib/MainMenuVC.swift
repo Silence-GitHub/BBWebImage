@@ -35,6 +35,15 @@ class MainMenuVC: UIViewController {
         let testKi = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(ImageWallVC(type: .Kingfisher), animated: true) }
         }
+        let testGifBB = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(BBAnimatedImageWallVC(), animated: true) }
+        }
+        let testGifYY = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(YYAnimatedImageWallVC(), animated: true) }
+        }
+        let testGifKi = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(KiAnimatedImageWallVC(), animated: true) }
+        }
         let testCache = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(TestCacheVC(), animated: true) }
         }
@@ -51,10 +60,13 @@ class MainMenuVC: UIViewController {
             KingfisherManager.shared.cache.clearMemoryCache()
             KingfisherManager.shared.cache.clearDiskCache()
         }
-        list = [("BBWebImage", testBB),
-                ("SDWebImage", testSD),
-                ("YYWebImage", testYY),
-                ("Kingfisher", testKi),
+        list = [("BBWebImage image wall", testBB),
+                ("SDWebImage image wall", testSD),
+                ("YYWebImage image wall", testYY),
+                ("Kingfisher image wall", testKi),
+                ("BBWebImage GIF wall", testGifBB),
+                ("YYWebImage GIF wall", testGifYY),
+                ("Kingfisher GIF wall", testGifKi),
                 ("Test cache", testCache),
                 ("Clear", clear)]
         
