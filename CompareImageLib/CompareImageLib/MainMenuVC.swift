@@ -23,7 +23,19 @@ class MainMenuVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let testDiskImage = { [weak self] in
+        let testBB = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(ImageWallVC(type: .BBWebImage), animated: true) }
+        }
+        let testSD = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(ImageWallVC(type: .SDWebImage), animated: true) }
+        }
+        let testYY = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(ImageWallVC(type: .YYWebImage), animated: true) }
+        }
+        let testKi = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(ImageWallVC(type: .Kingfisher), animated: true) }
+        }
+        let testCache = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(TestCacheVC(), animated: true) }
         }
         let clear = { [weak self] in
@@ -39,7 +51,11 @@ class MainMenuVC: UIViewController {
             KingfisherManager.shared.cache.clearMemoryCache()
             KingfisherManager.shared.cache.clearDiskCache()
         }
-        list = [("Test disk image", testDiskImage),
+        list = [("BBWebImage", testBB),
+                ("SDWebImage", testSD),
+                ("YYWebImage", testYY),
+                ("Kingfisher", testKi),
+                ("Test cache", testCache),
                 ("Clear", clear)]
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: UITableViewCell.description())
