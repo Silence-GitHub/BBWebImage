@@ -17,6 +17,8 @@
 		4A01BD27223C669B00D0A0DE /* BBAnimatedImageWallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A01BD26223C669B00D0A0DE /* BBAnimatedImageWallVC.swift */; };
 		4A01BD29223C696300D0A0DE /* KiAnimatedImageWallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A01BD28223C696300D0A0DE /* KiAnimatedImageWallVC.swift */; };
 		4A01BD2B223C697600D0A0DE /* KiAnimatedImageWallCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A01BD2A223C697600D0A0DE /* KiAnimatedImageWallCell.swift */; };
+		4A01BD2F223C77C400D0A0DE /* SDAnimatedImageWallCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A01BD2E223C77C400D0A0DE /* SDAnimatedImageWallCell.swift */; };
+		4A01BD31223C77DF00D0A0DE /* SDAnimatedImageWallVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A01BD30223C77DF00D0A0DE /* SDAnimatedImageWallVC.swift */; };
 		4A465379222DE7BC00C67629 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A465378222DE7BC00C67629 /* AppDelegate.swift */; };
 		4A46537B222DE7BC00C67629 /* MainMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A46537A222DE7BC00C67629 /* MainMenuVC.swift */; };
 		4A46537E222DE7BC00C67629 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A46537C222DE7BC00C67629 /* Main.storyboard */; };
@@ -54,6 +56,8 @@
 		4A01BD26223C669B00D0A0DE /* BBAnimatedImageWallVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BBAnimatedImageWallVC.swift; sourceTree = "<group>"; };
 		4A01BD28223C696300D0A0DE /* KiAnimatedImageWallVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiAnimatedImageWallVC.swift; sourceTree = "<group>"; };
 		4A01BD2A223C697600D0A0DE /* KiAnimatedImageWallCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiAnimatedImageWallCell.swift; sourceTree = "<group>"; };
+		4A01BD2E223C77C400D0A0DE /* SDAnimatedImageWallCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDAnimatedImageWallCell.swift; sourceTree = "<group>"; };
+		4A01BD30223C77DF00D0A0DE /* SDAnimatedImageWallVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDAnimatedImageWallVC.swift; sourceTree = "<group>"; };
 		4A465375222DE7BC00C67629 /* CompareImageLib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CompareImageLib.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A465378222DE7BC00C67629 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A46537A222DE7BC00C67629 /* MainMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuVC.swift; sourceTree = "<group>"; };
@@ -121,6 +125,8 @@
 				4A01BD1B223C61E900D0A0DE /* ImageWallCell.swift */,
 				4A01BD26223C669B00D0A0DE /* BBAnimatedImageWallVC.swift */,
 				4A01BD24223C668400D0A0DE /* BBAnimatedImageWallCell.swift */,
+				4A01BD30223C77DF00D0A0DE /* SDAnimatedImageWallVC.swift */,
+				4A01BD2E223C77C400D0A0DE /* SDAnimatedImageWallCell.swift */,
 				4A01BD20223C657900D0A0DE /* YYAnimatedImageWallVC.swift */,
 				4A01BD22223C65E000D0A0DE /* YYAnimatedImageWallCell.swift */,
 				4A01BD28223C696300D0A0DE /* KiAnimatedImageWallVC.swift */,
@@ -248,6 +254,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-CompareImageLib/Pods-CompareImageLib-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
@@ -258,6 +265,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FLAnimatedImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYCache.framework",
@@ -283,10 +291,12 @@
 				4A01BD1C223C61E900D0A0DE /* ImageWallVC.swift in Sources */,
 				4A01BD25223C668400D0A0DE /* BBAnimatedImageWallCell.swift in Sources */,
 				4A01BD29223C696300D0A0DE /* KiAnimatedImageWallVC.swift in Sources */,
+				4A01BD2F223C77C400D0A0DE /* SDAnimatedImageWallCell.swift in Sources */,
 				4A01BD27223C669B00D0A0DE /* BBAnimatedImageWallVC.swift in Sources */,
 				4A465390222DEEC200C67629 /* ImageURLProvider.swift in Sources */,
 				4A465379222DE7BC00C67629 /* AppDelegate.swift in Sources */,
 				4A01BD1D223C61E900D0A0DE /* ImageWallCell.swift in Sources */,
+				4A01BD31223C77DF00D0A0DE /* SDAnimatedImageWallVC.swift in Sources */,
 				4A01BD21223C657900D0A0DE /* YYAnimatedImageWallVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

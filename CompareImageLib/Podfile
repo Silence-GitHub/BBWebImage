@@ -5,7 +5,7 @@ target 'CompareImageLib' do
   use_frameworks!
 
   pod 'Kingfisher'
-  pod 'SDWebImage'
+  pod 'SDWebImage/GIF'
   pod 'YYWebImage'
 
 end

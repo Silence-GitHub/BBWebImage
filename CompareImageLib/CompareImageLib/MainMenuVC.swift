@@ -38,6 +38,9 @@ class MainMenuVC: UIViewController {
         let testGifBB = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(BBAnimatedImageWallVC(), animated: true) }
         }
+        let testGifSD = { [weak self] in
+            if let self = self { self.navigationController?.pushViewController(SDAnimatedImageWallVC(), animated: true) }
+        }
         let testGifYY = { [weak self] in
             if let self = self { self.navigationController?.pushViewController(YYAnimatedImageWallVC(), animated: true) }
         }
@@ -65,6 +68,7 @@ class MainMenuVC: UIViewController {
                 ("YYWebImage image wall", testYY),
                 ("Kingfisher image wall", testKi),
                 ("BBWebImage GIF wall", testGifBB),
+                ("SDWebImage GIF wall", testGifSD),
                 ("YYWebImage GIF wall", testGifYY),
                 ("Kingfisher GIF wall", testGifKi),
                 ("Test cache", testCache),
