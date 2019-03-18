@@ -1,6 +1,6 @@
 # BBWebImage
 
-BBWebImage is a Swift library for downloading, caching and editing web images asynchronously.
+A high performance Swift library for downloading, caching and editing web images asynchronously.
 
 [中文介绍](https://www.cnblogs.com/silence-cnblogs/p/10442984.html)
 
@@ -30,6 +30,7 @@ Download images. Decode, edit and display images while downloading. After downlo
 - [x] Animated image smart decoding, decompressing, editing and caching
 - [x] Independent image cache, downloader, coder and editor for separate use
 - [x] Customized image cache, downloader and coder
+- [x] High performance
 
 ## Why to Use
 

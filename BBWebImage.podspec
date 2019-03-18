@@ -1,7 +1,7 @@
 Pod::Spec.new do |s| 
   s.name         = "BBWebImage"
-  s.version      = "1.0.0"
-  s.summary      = "BBWebImage is a Swift library for downloading, caching and editing web images asynchronously."
+  s.version      = "1.1.0"
+  s.summary      = "A high performance Swift library for downloading, caching and editing web images asynchronously."
 
   s.description  = <<-DESC
                    View extensions for `UIImageView`, `UIButton`, `MKAnnotationView` and `CALayer` to set image from URL.
@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
                    Animated image smart decoding, decompressing, editing and caching.
                    Independent image cache, downloader, coder and editor for separate use.
                    Customized image cache, downloader and coder.
+                   High performance.
                    DESC
 
   s.homepage     = "https://github.com/Silence-GitHub/BBWebImage"
