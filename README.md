@@ -20,6 +20,20 @@ Download images. Decode, edit and display images while downloading. After downlo
 
 ![](README_resources/edit_common.gif)
 
+## Performance
+
+Test libraries are BBWebImage (1.1.0), SDWebImage (4.4.6 and FLAnimatedImage 1.0.12 for GIF), YYWebImage (1.0.5) and Kingfisher (4.10.1). Test device is iPhone 7 with iOS 12.1.
+
+- BBWebImage has high speed memory and disk cache, especially for thumbnail image.
+
+![](README_resources/compare_memoryCache.png)
+
+![](README_resources/compare_diskCache.png)
+
+- BBWebImage consumes low CPU and memory when loading and displaying GIF.
+
+![](README_resources/compare_gif_CPU_memory.png)
+
 ## Features
 
 - [x] View extensions for `UIImageView`, `UIButton`, `MKAnnotationView` and `CALayer` to set image from URL
