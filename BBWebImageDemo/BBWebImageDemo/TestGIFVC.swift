@@ -77,6 +77,9 @@ class TestGIFVC: UIViewController {
         let filterButton = generateButton("Add filter", "Remove filter")
         filterButton.addTarget(self, action: #selector(filterButtonClicked(_:)), for: .touchUpInside)
         
+        let frameIndexButton = generateButton("Set current frame index 0", nil)
+        frameIndexButton.addTarget(self, action: #selector(frameIndexButtonClicked(_:)), for: .touchUpInside)
+        
         let changeImageSegment = UISegmentedControl(frame: CGRect(x: x, y: y, width: width, height: height))
         changeImageSegment.insertSegment(withTitle: "GIF", at: 0, animated: false)
         changeImageSegment.insertSegment(withTitle: "Static", at: 1, animated: false)
@@ -117,6 +120,10 @@ class TestGIFVC: UIViewController {
         if let animatedImage = imageView.image as? BBAnimatedImage {
             animatedImage.bb_editor = editor
         }
+    }
+    
+    @objc private func frameIndexButtonClicked(_ button: UIButton) {
+        imageView.bb_setCurrentFrameIndex(0, decodeIfNeeded: true)
     }
     
     @objc private func changeImageSegmentChanged(_ segment: UISegmentedControl) {
