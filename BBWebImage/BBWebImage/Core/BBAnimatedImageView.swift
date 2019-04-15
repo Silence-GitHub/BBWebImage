@@ -191,6 +191,23 @@ public class BBAnimatedImageView: UIImageView {
         }
     }
     
+    /// Sets the current animated image frame index
+    ///
+    /// - Parameters:
+    ///   - index: frame index
+    ///   - decodeIfNeeded: whether to decode or edit image synchronously if no cached image found
+    /// - Returns: true if succeed, or false if fail
+    public func bb_setCurrentFrameIndex(_ index: Int, decodeIfNeeded: Bool) -> Bool {
+        guard let currentImage = imageForCurrentType as? BBAnimatedImage,
+         let cgimage = currentImage.bb_imageFrame(at: index, decodeIfNeeded: decodeIfNeeded)?.cgImage else { return false }
+        currentLayerContent = cgimage
+        layer.setNeedsDisplay()
+        bb_currentFrameIndex = index
+        accumulatedTime = 0
+        shouldUpdateLayer = false
+        return true
+    }
+    
     public override func startAnimating() {
         switch currentType {
         case .image, .hilightedImage:
