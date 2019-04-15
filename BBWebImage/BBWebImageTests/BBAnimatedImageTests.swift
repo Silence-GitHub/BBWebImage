@@ -154,4 +154,30 @@ class BBAnimatedImageTests: XCTestCase {
             XCTAssertEqual(size, CGSize(width: 200, height: 200))
         }
     }
+    
+    func testSetCurrentFrameIndex() {
+        let imageView = BBAnimatedImageView()
+        imageView.bb_autoStartAnimation = false
+        imageView.image = image
+        XCTAssertEqual(imageView.bb_currentFrameIndex, 0)
+        for i in 0..<image.bb_frameCount * 2 {
+            let result = imageView.bb_setCurrentFrameIndex(i, decodeIfNeeded: false)
+            if i == 0 {
+                XCTAssertTrue(result)
+            } else {
+                XCTAssertFalse(result)
+            }
+            XCTAssertEqual(imageView.bb_currentFrameIndex, 0)
+        }
+        for i in 0..<image.bb_frameCount * 2 {
+            let result = imageView.bb_setCurrentFrameIndex(i, decodeIfNeeded: true)
+            if i < image.bb_frameCount {
+                XCTAssertTrue(result)
+                XCTAssertEqual(imageView.bb_currentFrameIndex, i)
+            } else {
+                XCTAssertFalse(result)
+                XCTAssertEqual(imageView.bb_currentFrameIndex, image.bb_frameCount - 1)
+            }
+        }
+    }
 }
