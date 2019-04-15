@@ -48,6 +48,9 @@ public class BBAnimatedImageView: UIImageView {
         }
     }
     
+    /// Index of current image frame
+    public private(set) var bb_currentFrameIndex: Int = 0
+    
     /// Set a BBAnimatedImage object to play animation
     public override var image: UIImage? {
         get { return super.image }
@@ -112,7 +115,6 @@ public class BBAnimatedImageView: UIImageView {
     private var runLoopMode: RunLoop.Mode = .common
     private var shouldUpdateLayer: Bool = true
     private var loopCount: Int = 0
-    private var currentFrameIndex: Int = 0
     private var accumulatedTime: TimeInterval = 0
     private var currentLayerContent: CGImage?
     
@@ -144,7 +146,7 @@ public class BBAnimatedImageView: UIImageView {
     
     private func resetAnimation() {
         loopCount = 0
-        currentFrameIndex = 0
+        bb_currentFrameIndex = 0
         accumulatedTime = 0
         currentLayerContent = nil
         shouldUpdateLayer = true
@@ -153,21 +155,21 @@ public class BBAnimatedImageView: UIImageView {
     @objc private func displayLinkRefreshed(_ link: CADisplayLink) {
         guard let currentImage = imageForCurrentType as? BBAnimatedImage else { return }
         if shouldUpdateLayer,
-            let cgimage = currentImage.bb_imageFrame(at: currentFrameIndex, decodeIfNeeded: (currentFrameIndex == 0))?.cgImage {
+            let cgimage = currentImage.bb_imageFrame(at: bb_currentFrameIndex, decodeIfNeeded: (bb_currentFrameIndex == 0))?.cgImage {
             currentLayerContent = cgimage
             layer.setNeedsDisplay()
             shouldUpdateLayer = false
         }
-        let nextIndex = (currentFrameIndex + 1) % currentImage.bb_frameCount
+        let nextIndex = (bb_currentFrameIndex + 1) % currentImage.bb_frameCount
         currentImage.bb_preloadImageFrame(fromIndex: nextIndex)
         accumulatedTime += link.duration // multiply frameInterval if frameInterval is not 1
-        if var duration = currentImage.bb_duration(at: currentFrameIndex) {
+        if var duration = currentImage.bb_duration(at: bb_currentFrameIndex) {
             duration *= animationDurationScale
             if accumulatedTime >= duration {
-                currentFrameIndex = nextIndex
+                bb_currentFrameIndex = nextIndex
                 accumulatedTime -= duration
                 shouldUpdateLayer = true
-                if (animationRepeatCount > 0 || currentImage.bb_loopCount > 0) && currentFrameIndex == 0 {
+                if (animationRepeatCount > 0 || currentImage.bb_loopCount > 0) && bb_currentFrameIndex == 0 {
                     loopCount += 1
                     if (animationRepeatCount > 0 && loopCount >= animationRepeatCount) ||
                         (currentImage.bb_loopCount > 0 && loopCount >= currentImage.bb_loopCount) {
