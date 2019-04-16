@@ -1,6 +1,6 @@
-Pod::Spec.new do |s| 
+Pod::Spec.new do |s|
   s.name         = "BBWebImage"
-  s.version      = "1.1.0"
+  s.version      = "1.1.1"
   s.summary      = "A high performance Swift library for downloading, caching and editing web images asynchronously."
 
   s.description  = <<-DESC
