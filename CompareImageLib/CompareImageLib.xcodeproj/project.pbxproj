@@ -27,7 +27,6 @@
 		4A46538C222DECB400C67629 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A46538B222DECB400C67629 /* BBWebImage.framework */; };
 		4A46538E222DEE6C00C67629 /* TestCacheVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A46538D222DEE6C00C67629 /* TestCacheVC.swift */; };
 		4A465390222DEEC200C67629 /* ImageURLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A46538F222DEEC200C67629 /* ImageURLProvider.swift */; };
-		4A465391222DF12600C67629 /* BBWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A46538B222DECB400C67629 /* BBWebImage.framework */; };
 		4A465392222DF12600C67629 /* BBWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4A46538B222DECB400C67629 /* BBWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4A465395222E071F00C67629 /* TestImages in Resources */ = {isa = PBXBuildFile; fileRef = 4A465394222E071F00C67629 /* TestImages */; };
 /* End PBXBuildFile section */
@@ -81,7 +80,6 @@
 			files = (
 				4A46538C222DECB400C67629 /* BBWebImage.framework in Frameworks */,
 				39898CA25A530D26829441DC /* Pods_CompareImageLib.framework in Frameworks */,
-				4A465391222DF12600C67629 /* BBWebImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
