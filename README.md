@@ -22,7 +22,7 @@ Download images. Decode, edit and display images while downloading. After downlo
 
 ## Performance
 
-Test libraries are BBWebImage (1.1.0), SDWebImage (4.4.6 and FLAnimatedImage 1.0.12 for GIF), YYWebImage (1.0.5) and Kingfisher (4.10.1). Test device is iPhone 7 with iOS 12.1. The code can be found in [CompareImageLib](CompareImageLib) project.
+Test libraries are BBWebImage (1.1.0), SDWebImage (4.4.6 and FLAnimatedImage 1.0.12 for GIF), YYWebImage (1.0.5) and Kingfisher (4.10.1). Test device is iPhone 7 with iOS 12.1. The code can be found in [CompareImageLib](CompareImageLib) project and the test result data can be found in [CompareImageLib.numbers](README_resources/CompareImageLib.numbers).
 
 - BBWebImage has high speed memory and disk cache, especially for thumbnail image.
 
