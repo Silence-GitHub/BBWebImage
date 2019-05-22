@@ -588,7 +588,6 @@ public extension UIImage {
             }
             return context.makeImage().flatMap { UIImage(cgImage: $0) }
         }
-        
     }
     
     /// Calculates image rect to display with view size and content mode.
