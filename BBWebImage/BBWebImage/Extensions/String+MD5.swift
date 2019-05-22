@@ -9,7 +9,7 @@
 import Foundation
 
 public extension String {
-    public var bb_md5: String {
+    var bb_md5: String {
         if let data = data(using: .utf8, allowLossyConversion: true) {
             
             let message = data.withUnsafeBytes { bytes -> [UInt8] in

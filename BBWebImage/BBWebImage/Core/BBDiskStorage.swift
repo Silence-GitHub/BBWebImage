@@ -343,5 +343,5 @@ public class BBDiskStorage {
 }
 
 fileprivate extension String {
-    fileprivate var bb_utf8: UnsafePointer<Int8>? { return (self as NSString).utf8String }
+    var bb_utf8: UnsafePointer<Int8>? { return (self as NSString).utf8String }
 }

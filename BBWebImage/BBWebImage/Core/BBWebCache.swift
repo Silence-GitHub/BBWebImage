@@ -66,7 +66,7 @@ public class BBWebCacheOperation {
 
 /// Default behaivor of BBWebCache
 public extension BBWebCache {
-    public var bb_webCacheOperation: BBWebCacheOperation {
+    var bb_webCacheOperation: BBWebCacheOperation {
         if let operation = objc_getAssociatedObject(self, &webCacheOperationKey) as? BBWebCacheOperation { return operation }
         let operation = BBWebCacheOperation()
         objc_setAssociatedObject(self, &webCacheOperationKey, operation, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
