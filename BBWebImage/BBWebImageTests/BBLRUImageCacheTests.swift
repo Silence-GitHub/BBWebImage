@@ -53,6 +53,11 @@ class BBLRUImageCacheTests: XCTestCase {
         }
     }
     
+    func testStringMD5() {
+        let str = "hello"
+        XCTAssertEqual(str.bb_md5, "5d41402abc4b2a76b9719d911017c592")
+    }
+    
     func testDiskCacheNotNil() {
         XCTAssertNotNil(cache.diskCache)
         XCTAssertNotNil(fileCache.diskCache)
