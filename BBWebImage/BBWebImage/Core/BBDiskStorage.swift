@@ -57,7 +57,7 @@ public class BBDiskStorage {
             return nil
         }
         let sql = "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; CREATE TABLE IF NOT EXISTS Storage_item (key text PRIMARY KEY, filename text, data blob, size integer, last_access_time real); CREATE INDEX IF NOT EXISTS last_access_time_index ON Storage_item(last_access_time);"
-        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+        if sqlite3_exec(database, sql.bb_utf8, nil, nil, nil) != SQLITE_OK {
             print("Fail to create BBCache sqlite Storage_item table")
             try? FileManager.default.removeItem(atPath: path)
             return nil
@@ -97,7 +97,7 @@ public class BBDiskStorage {
                 if data != nil {
                     // Update last access time
                     let sql = "UPDATE Storage_item SET last_access_time = \(CACurrentMediaTime()) WHERE key = '\(key)';"
-                    if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+                    if sqlite3_exec(database, sql.bb_utf8, nil, nil, nil) != SQLITE_OK {
                         print("Fail to set last_access_time for key \(key)")
                     }
                 }
@@ -180,7 +180,7 @@ public class BBDiskStorage {
     public func clear() {
         ioLock.wait()
         let sql = "DELETE FROM Storage_item;"
-        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+        if sqlite3_exec(database, sql.bb_utf8, nil, nil, nil) != SQLITE_OK {
             print("Fail to delete data")
         }
         if let enumerator = FileManager.default.enumerator(atPath: baseDataPath) {
@@ -266,7 +266,7 @@ public class BBDiskStorage {
         }
         // Delete from database
         let sql = "DELETE FROM Storage_item WHERE key = '\(key)';"
-        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+        if sqlite3_exec(database, sql.bb_utf8, nil, nil, nil) != SQLITE_OK {
             print("Fail to remove data for key \(key)")
         }
     }
@@ -336,7 +336,7 @@ public class BBDiskStorage {
     
     private func removeDataEarlierThan(_ time: TimeInterval) {
         let sql = "DELETE FROM Storage_item WHERE last_access_time < \(time);"
-        if sqlite3_exec(database, sql, nil, nil, nil) != SQLITE_OK {
+        if sqlite3_exec(database, sql.bb_utf8, nil, nil, nil) != SQLITE_OK {
             print("Fail to remove data earlier than \(time)")
         }
     }

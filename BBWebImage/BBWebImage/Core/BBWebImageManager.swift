@@ -286,9 +286,9 @@ public class BBWebImageManager {
         }
         if finished { return task }
         
-        if options.contains(.ignoreDiskCache) {
+        if options.contains(.ignoreDiskCache) || resource.downloadUrl.isFileURL {
             downloadImage(with: resource,
-                          options: options,
+                          options: options.union(.ignoreDiskCache),
                           task: task,
                           editor: editor,
                           progress: progress,
